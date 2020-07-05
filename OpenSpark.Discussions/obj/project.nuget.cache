@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "dgSpecHash": "riDjw8klB2JlqG5vWdzKVYS0zSrlX+co85i6mdFcM04YpoiAN5AOVnVNJf28rwL/jFwx7OwvDKhpnetJoEvNwQ==",
+  "success": true,
+  "projectFilePath": "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Discussions\\OpenSpark.Discussions.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\MJR_4\\.nuget\\packages\\akka\\1.4.8\\akka.1.4.8.nupkg.sha512",
+    "C:\\Users\\MJR_4\\.nuget\\packages\\microsoft.netcore.platforms\\3.1.0\\microsoft.netcore.platforms.3.1.0.nupkg.sha512",
+    "C:\\Users\\MJR_4\\.nuget\\packages\\microsoft.win32.systemevents\\4.7.0\\microsoft.win32.systemevents.4.7.0.nupkg.sha512",
+    "C:\\Users\\MJR_4\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512",
+    "C:\\Users\\MJR_4\\.nuget\\packages\\system.collections.immutable\\1.7.1\\system.collections.immutable.1.7.1.nupkg.sha512",
+    "C:\\Users\\MJR_4\\.nuget\\packages\\system.configuration.configurationmanager\\4.7.0\\system.configuration.configurationmanager.4.7.0.nupkg.sha512",
+    "C:\\Users\\MJR_4\\.nuget\\packages\\system.drawing.common\\4.7.0\\system.drawing.common.4.7.0.nupkg.sha512",
+    "C:\\Users\\MJR_4\\.nuget\\packages\\system.security.accesscontrol\\4.7.0\\system.security.accesscontrol.4.7.0.nupkg.sha512",
+    "C:\\Users\\MJR_4\\.nuget\\packages\\system.security.cryptography.protecteddata\\4.7.0\\system.security.cryptography.protecteddata.4.7.0.nupkg.sha512",
+    "C:\\Users\\MJR_4\\.nuget\\packages\\system.security.permissions\\4.7.0\\system.security.permissions.4.7.0.nupkg.sha512",
+    "C:\\Users\\MJR_4\\.nuget\\packages\\system.security.principal.windows\\4.7.0\\system.security.principal.windows.4.7.0.nupkg.sha512",
+    "C:\\Users\\MJR_4\\.nuget\\packages\\system.windows.extensions\\4.7.0\\system.windows.extensions.4.7.0.nupkg.sha512"
+  ],
+  "logs": []
+}
