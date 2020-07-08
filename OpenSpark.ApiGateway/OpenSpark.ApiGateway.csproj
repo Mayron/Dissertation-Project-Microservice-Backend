@@ -5,18 +5,36 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="actor-system.conf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="actor-system.conf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Akka" Version="1.4.8" />
     <PackageReference Include="Akka.Remote" Version="1.4.8" />
+    <PackageReference Include="Google.Cloud.Firestore" Version="2.1.0" />
     <PackageReference Include="MediatR" Version="8.0.2" />
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="8.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.5" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
+    <PackageReference Include="RavenDB.Client" Version="4.2.103" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\OpenSpark.ActorModel\OpenSpark.ActorModel.csproj" />
-    <ProjectReference Include="..\OpenSpark.Discussions\OpenSpark.ActorModel.csproj" />
+    <ProjectReference Include="..\OpenSpark.Discussions\OpenSpark.Discussions.csproj" />
     <ProjectReference Include="..\OpenSpark.Domain\OpenSpark.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="openspark-1e4bc-firebase-adminsdk-as86c-e46fdfc058.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 

@@ -1,12 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>OpenSpark.Discussions</AssemblyName>
+    <RootNamespace>OpenSpark.Discussions</RootNamespace>
+    <LangVersion>8</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Akka" Version="1.4.8" />
+    <PackageReference Include="RavenDB.Client" Version="4.2.103" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OpenSpark.Domain\OpenSpark.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Indexes\" />
   </ItemGroup>
 
 </Project>

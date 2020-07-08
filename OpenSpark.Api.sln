@@ -5,13 +5,11 @@ VisualStudioVersion = 16.0.30223.230
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenSpark.ApiGateway", "OpenSpark.ApiGateway\OpenSpark.ApiGateway.csproj", "{700E5602-7022-4121-803D-6B9FABA84A2F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenSpark.Projects", "OpenSpark.Projects\OpenSpark.Projects.csproj", "{8CFBD03B-407F-4131-8805-241D71EBD0E9}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenSpark.Domain", "OpenSpark.Domain\OpenSpark.Domain.csproj", "{D875A2B2-4CEF-437E-AA04-571D5639D418}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenSpark.ActorModel", "OpenSpark.ActorModel\OpenSpark.ActorModel.csproj", "{D533FC58-4F20-42DD-B7BF-31D5A885D728}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenSpark.Discussions", "OpenSpark.Discussions\OpenSpark.Discussions.csproj", "{1D0CA8A4-D9AC-4777-B952-389C7B472CEB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenSpark.Discussions", "OpenSpark.Discussions\OpenSpark.Discussions.csproj", "{C80330B2-E27A-4BB4-AA14-5712ECD7AFBC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenSpark.Discussions.Deployment", "OpenSpark.Discussions.Deployment\OpenSpark.Discussions.Deployment.csproj", "{DFD8B416-A22D-4DD7-85E0-FF0BFC44BE43}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,22 +21,18 @@ Global
 		{700E5602-7022-4121-803D-6B9FABA84A2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{700E5602-7022-4121-803D-6B9FABA84A2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{700E5602-7022-4121-803D-6B9FABA84A2F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8CFBD03B-407F-4131-8805-241D71EBD0E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8CFBD03B-407F-4131-8805-241D71EBD0E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8CFBD03B-407F-4131-8805-241D71EBD0E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8CFBD03B-407F-4131-8805-241D71EBD0E9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D875A2B2-4CEF-437E-AA04-571D5639D418}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D875A2B2-4CEF-437E-AA04-571D5639D418}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D875A2B2-4CEF-437E-AA04-571D5639D418}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D875A2B2-4CEF-437E-AA04-571D5639D418}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D533FC58-4F20-42DD-B7BF-31D5A885D728}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D533FC58-4F20-42DD-B7BF-31D5A885D728}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D533FC58-4F20-42DD-B7BF-31D5A885D728}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D533FC58-4F20-42DD-B7BF-31D5A885D728}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C80330B2-E27A-4BB4-AA14-5712ECD7AFBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C80330B2-E27A-4BB4-AA14-5712ECD7AFBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C80330B2-E27A-4BB4-AA14-5712ECD7AFBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C80330B2-E27A-4BB4-AA14-5712ECD7AFBC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D0CA8A4-D9AC-4777-B952-389C7B472CEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D0CA8A4-D9AC-4777-B952-389C7B472CEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D0CA8A4-D9AC-4777-B952-389C7B472CEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D0CA8A4-D9AC-4777-B952-389C7B472CEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DFD8B416-A22D-4DD7-85E0-FF0BFC44BE43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFD8B416-A22D-4DD7-85E0-FF0BFC44BE43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFD8B416-A22D-4DD7-85E0-FF0BFC44BE43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFD8B416-A22D-4DD7-85E0-FF0BFC44BE43}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

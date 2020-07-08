@@ -23,11 +23,11 @@ namespace OpenSpark.ApiGateway.Controllers
         }
 
         // GET api/posts
-        [HttpGet]
-        public async Task<ActionResult<List<PostViewModel>>> Get()
-        {
-            return await _mediator.Send(new NewsFeedPosts.Query());
-        }
+//        [HttpGet]
+//        public async Task<ActionResult<List<PostViewModel>>> Get()
+//        {
+//            return await _mediator.Send(new FetchNewsFeed.Query());
+//        }
 
         [Authorize]
         [HttpPost]

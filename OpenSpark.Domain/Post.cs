@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace OpenSpark.Domain
 {
@@ -11,5 +12,6 @@ namespace OpenSpark.Domain
         public string When { get; set; }
         public int Votes { get; set; }
         public List<Comment> Comments { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }

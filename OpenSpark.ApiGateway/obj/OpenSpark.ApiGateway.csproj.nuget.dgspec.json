@@ -98,8 +98,8 @@
               "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.ActorModel\\OpenSpark.ActorModel.csproj": {
                 "projectPath": "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.ActorModel\\OpenSpark.ActorModel.csproj"
               },
-              "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Discussions\\OpenSpark.ActorModel.csproj": {
-                "projectPath": "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Discussions\\OpenSpark.ActorModel.csproj"
+              "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Discussions\\OpenSpark.Discussions.csproj": {
+                "projectPath": "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Discussions\\OpenSpark.Discussions.csproj"
               },
               "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Domain\\OpenSpark.Domain.csproj": {
                 "projectPath": "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Domain\\OpenSpark.Domain.csproj"
@@ -124,6 +124,10 @@
               "target": "Package",
               "version": "[1.4.8, )"
             },
+            "Google.Cloud.Firestore": {
+              "target": "Package",
+              "version": "[2.1.0, )"
+            },
             "MediatR": {
               "target": "Package",
               "version": "[8.0.2, )"
@@ -139,6 +143,10 @@
             "Microsoft.AspNetCore.SignalR": {
               "target": "Package",
               "version": "[1.1.0, )"
+            },
+            "RavenDB.Client": {
+              "target": "Package",
+              "version": "[4.2.103, )"
             }
           },
           "imports": [
@@ -163,12 +171,12 @@
         }
       }
     },
-    "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Discussions\\OpenSpark.ActorModel.csproj": {
+    "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Discussions\\OpenSpark.Discussions.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Discussions\\OpenSpark.ActorModel.csproj",
-        "projectName": "OpenSpark.ActorModel",
-        "projectPath": "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Discussions\\OpenSpark.ActorModel.csproj",
+        "projectUniqueName": "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Discussions\\OpenSpark.Discussions.csproj",
+        "projectName": "OpenSpark.Discussions",
+        "projectPath": "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Discussions\\OpenSpark.Discussions.csproj",
         "packagesPath": "C:\\Users\\MJR_4\\.nuget\\packages\\",
         "outputPath": "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Discussions\\obj\\",
         "projectStyle": "PackageReference",
@@ -207,6 +215,10 @@
             "Akka": {
               "target": "Package",
               "version": "[1.4.8, )"
+            },
+            "RavenDB.Client": {
+              "target": "Package",
+              "version": "[4.2.103, )"
             }
           },
           "imports": [

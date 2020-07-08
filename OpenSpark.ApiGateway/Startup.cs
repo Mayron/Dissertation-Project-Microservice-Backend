@@ -1,6 +1,3 @@
-using System.Text.Json;
-using System.Threading.Tasks;
-using Akka.Actor;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -9,11 +6,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using OpenSpark.ActorModel.Services;
+using OpenSpark.ApiGateway.Extensions;
 using OpenSpark.ApiGateway.Handlers;
-using OpenSpark.ApiGateway.Models;
-using OpenSpark.ApiGateway.Services;
-using OpenSpark.ApiGateway.Services.SDK;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace OpenSpark.ApiGateway
 {
@@ -75,13 +71,12 @@ namespace OpenSpark.ApiGateway
                     };
                 });
 
-            services.AddScoped<INewsFeedService, NewsFeedService>();
-
-            services.AddSingleton<IEventEmitter, EventEmitter>();
-            services.AddSingleton(serviceProvider => ActorSystem.Create("OpenSpark"));
-
-            services.AddMediatR(typeof(NewsFeedPosts.Handler).Assembly);
+            services.AddMediatR(typeof(FetchNewsFeed.Handler).Assembly);
             services.AddSignalR(c => c.EnableDetailedErrors = true);
+
+            // Deprecated for SignalR with observables hopefully?
+            //            services.AddScoped<INewsFeedService, NewsFeedService>();
+            services.AddApplicationServices();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -102,7 +97,7 @@ namespace OpenSpark.ApiGateway
 
             app.UseAuthentication();
             app.UseAuthorization();
-            
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
