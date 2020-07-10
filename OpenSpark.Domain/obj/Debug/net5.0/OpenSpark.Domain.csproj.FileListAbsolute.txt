@@ -6,3 +6,4 @@ S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Domai
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Domain\obj\Debug\net5.0\OpenSpark.Domain.csproj.CoreCompileInputs.cache
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Domain\obj\Debug\net5.0\OpenSpark.Domain.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Domain\obj\Debug\net5.0\OpenSpark.Domain.pdb
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Domain\obj\Debug\net5.0\OpenSpark.Domain.csprojAssemblyReference.cache

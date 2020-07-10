@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
+using System.Reflection;
+using OpenSpark.Discussions.Indexes;
+using OpenSpark.Domain;
 using Raven.Client.Documents;
+using Raven.Client.Documents.Indexes;
 using Raven.Client.ServerWide;
 using Raven.Client.ServerWide.Operations;
 
@@ -47,13 +52,42 @@ namespace OpenSpark.Discussions
                 {
                     // database exists
                 }
+
+                SeedData(store);
+                IndexCreation.CreateIndexes(Assembly.GetAssembly(typeof(GetPostsFromDiscussionArea)), store);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to initialize RavenDB: {ex}");
+                throw new Exception($"Failed to initialize RavenDB: {ex}");
             }
 
             return store;
+        }
+
+        private static void SeedData(IDocumentStore store)
+        {
+            using var session = store.OpenSession();
+
+            var discussion = new DiscussionArea
+            {
+                AreaId = "mayronui-gen6",
+                IsPublic = true,
+                Posts = new List<Post>
+                {
+                    new Post
+                    {
+                        Body = "Test",
+                        Header = "This is a title of the post",
+                        Author = "Mike",
+                        Votes = 12,
+                        Url = "/u/posts/test",
+                        When = "13 Days ago",
+                    }
+                }
+            };
+
+            session.Store(discussion);
+            session.SaveChanges();
         }
     }
 }

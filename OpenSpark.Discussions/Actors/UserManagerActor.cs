@@ -19,8 +19,7 @@ namespace OpenSpark.Discussions.Actors
 
             Receive<DisconnectUserCommand>(command =>
             {
-                _users[command.ConnectionId].GracefulStop(TimeSpan.FromSeconds(5));
-                _users.Remove(command.ConnectionId);
+                RemoveUser(command.ConnectionId);
             });
 
 //            Receive<AddPostCommand>(command =>
@@ -30,18 +29,32 @@ namespace OpenSpark.Discussions.Actors
 
             Receive<FetchNewsFeedCommand>(command =>
             {
+                if (!_users.ContainsKey(command.ConnectionId))
+                {
+                    Console.WriteLine("Error - Attempted to fetch news feed for non-existent user.");
+                    return;
+                };
+
                 _users[command.ConnectionId].Forward(command);
             });
         }
 
         private void ConnectUser(ConnectUserCommand command)
         {
-            if (_users.ContainsKey(command.ConnectionId)) return;
+            RemoveUser(command.ConnectionId);
 
             var userActor = Context.ActorOf(
                 Props.Create(() => new UserActor(command.ConnectionId, command.User)), command.ConnectionId);
 
             _users.Add(command.ConnectionId, userActor);
+        }
+
+        private void RemoveUser(string connectionId)
+        {
+            if (!_users.ContainsKey(connectionId)) return;
+
+            _users[connectionId].GracefulStop(TimeSpan.FromSeconds(5));
+            _users.Remove(connectionId);
         }
     }
 }

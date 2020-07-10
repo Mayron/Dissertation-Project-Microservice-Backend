@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Akka.Actor;
 using OpenSpark.Discussions.Commands;
+using OpenSpark.Discussions.Indexes;
 using OpenSpark.Discussions.Payloads;
 using OpenSpark.Domain;
 using Raven.Client.Documents;
@@ -42,14 +43,10 @@ namespace OpenSpark.Discussions.Actors
         {
             using var session = DatabaseSingleton.Store.OpenSession();
 
-            return session.Query<DiscussionArea>()
-                .Where(d => d.AreaId.In(_user.Projects) || d.AreaId.In(_user.Groups))
-                .SelectMany(d => d.Posts)
-                .OrderByDescending(p => p.CreatedAt)
-                .ThenByDescending(p => p.Comments.Count)
-                .ThenByDescending(p => p.Votes)
-                .Take(10)
-                .ToList();
+            var query = session.Query<GetPostsFromDiscussionArea.Result, GetPostsFromDiscussionArea>()
+                .Where(d => d.AreaId.In(_user.Projects) || d.AreaId.In(_user.Groups));
+
+            return ApplySorting(query);
         }
 
         /// <summary>
@@ -61,27 +58,10 @@ namespace OpenSpark.Discussions.Actors
             {
                 using var session = DatabaseSingleton.Store.OpenSession();
 
-                // TODO: Implement Skip and Take
-                // TODO: Implement Sorting (by votes, created, comments?)
-                var result = session.Query<DiscussionArea>()
-                    .Where(d => d.IsPublic)
-                    .SelectMany(d => d.Posts)
-                    .OrderByDescending(p => p.CreatedAt)
-                    .ThenByDescending(p => p.Comments.Count)
-                    .ThenByDescending(p => p.Votes)
-                    .Take(10)
-                    .ToList();
+                var query = session.Query<GetPostsFromDiscussionArea.Result, GetPostsFromDiscussionArea>()
+                    .Where(d => d.IsPublic);
 
-                return result;
-
-//                return (from d in session.Query<DiscussionArea>()
-//                        where d.IsPublic
-//                        from post in d.Posts
-//                        orderby post.CreatedAt descending, 
-//                            post.Comments.Count descending, 
-//                            post.Votes descending
-//                        select post
-//                    ).Take(10).ToList();
+                return ApplySorting(query);
             }
             catch (Exception ex)
             {
@@ -90,5 +70,13 @@ namespace OpenSpark.Discussions.Actors
 
             return new List<Post>(0);
         }
+
+        private static List<Post> ApplySorting(IRavenQueryable<GetPostsFromDiscussionArea.Result> query) => query
+            .Select(r => r.Post)
+            .Take(10)
+            .OrderByDescending(p => p.CreatedAt)
+            .ThenByDescending(p => p.Comments.Count)
+            .ThenByDescending(p => p.Votes)
+            .ToList();
     }
 }

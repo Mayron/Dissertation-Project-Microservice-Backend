@@ -36,8 +36,13 @@ namespace OpenSpark.ApiGateway.Services
 
                 if (snapShot.Exists)
                 {
-                    var userRaw = snapShot.ToDictionary();
-                    // TODO: Convert manually!
+                    user = new User
+                    {
+                        CreatedAt = snapShot.GetValue<Timestamp>("createdAt").ToDateTime(),
+                        DisplayName = snapShot.GetValue<string>("displayName"),
+                        Email = snapShot.GetValue<string>("email"),
+                        UserId = authId,
+                    };
                 }
             }
             catch (Exception ex)
