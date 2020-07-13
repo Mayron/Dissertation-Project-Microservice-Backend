@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Akka.Actor;
-using OpenSpark.Discussions.Commands;
+using Akka.Configuration;
 using OpenSpark.Discussions.Indexes;
-using OpenSpark.Discussions.Payloads;
 using OpenSpark.Domain;
-using Raven.Client.Documents;
+using OpenSpark.Shared.Commands;
+using OpenSpark.Shared.Payloads;
+using OpenSpark.Shared.ViewModels;
 using Raven.Client.Documents.Linq;
 
 namespace OpenSpark.Discussions.Actors
@@ -26,11 +28,14 @@ namespace OpenSpark.Discussions.Actors
                 var payload = new NewsFeedPostsPayload
                 {
                     ConnectionId = command.ConnectionId,
-                    Posts = posts
+                    Posts = MapRequests(posts)
                 };
 
                 // This will go to the callback actor
                 Sender.Tell(payload);
+
+//                var webApi = ActorSystem.Create("WebApiSystem", config);
+//                webApi.ActorSelection("akka.tcp://WebApiSystem@localhost:9091/user/Callback").Tell(payload);
 
                 Self.GracefulStop(TimeSpan.FromSeconds(5));
             });
@@ -39,44 +44,88 @@ namespace OpenSpark.Discussions.Actors
         /// <summary>
         /// Gets the relevant posts for the given authenticated user.
         /// </summary>
-        private List<Post> GetUserNewsFeed()
+        private IEnumerable<GetGroupPosts.Result> GetUserNewsFeed()
         {
             using var session = DatabaseSingleton.Store.OpenSession();
 
-            var query = session.Query<GetPostsFromDiscussionArea.Result, GetPostsFromDiscussionArea>()
-                .Where(d => d.AreaId.In(_user.Projects) || d.AreaId.In(_user.Groups));
+            var query = session.Query<GetGroupPosts.Result, GetGroupPosts>()
+                .Where(d => d.GroupId.In(_user.Groups));
 
-            return ApplySorting(query);
+            return SortResults(query);
         }
 
         /// <summary>
         /// Gets the most popular posts for the connected, unauthenticated user.
         /// </summary>
-        private static List<Post> GetMostPopularPosts()
+        private static IEnumerable<GetGroupPosts.Result> GetMostPopularPosts()
         {
-            try
-            {
-                using var session = DatabaseSingleton.Store.OpenSession();
+            using var session = DatabaseSingleton.Store.OpenSession();
 
-                var query = session.Query<GetPostsFromDiscussionArea.Result, GetPostsFromDiscussionArea>()
-                    .Where(d => d.IsPublic);
+            var query = session.Query<GetGroupPosts.Result, GetGroupPosts>()
+                .Where(d => d.IsPublic);
 
-                return ApplySorting(query);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Exception occured when retrieving from RavenDB: {ex}");
-            }
-
-            return new List<Post>(0);
+            return SortResults(query);
         }
 
-        private static List<Post> ApplySorting(IRavenQueryable<GetPostsFromDiscussionArea.Result> query) => query
-            .Select(r => r.Post)
+        private static IList<PostViewModel> MapRequests(IEnumerable<GetGroupPosts.Result> results) =>
+            results.Select(r => new PostViewModel
+            {
+                AuthorUserId = r.AuthorUserId,
+                TotalComments = r.TotalComments,
+                Votes = r.Votes,
+                Body = r.Body,
+                When = ConvertDateTimeToPostFriendlyFormat(r.CreatedAt),
+                Title = r.Title,
+                Id = r.PostId
+            }).ToList();
+        
+
+        private static IEnumerable<GetGroupPosts.Result> SortResults(IRavenQueryable<GetGroupPosts.Result> query) => query
             .Take(10)
             .OrderByDescending(p => p.CreatedAt)
-            .ThenByDescending(p => p.Comments.Count)
+            .ThenByDescending(p => p.TotalComments)
             .ThenByDescending(p => p.Votes)
             .ToList();
+
+        private static string ConvertDateTimeToPostFriendlyFormat(DateTime dateTime)
+        {
+            const int secondsPerMinute = 60;
+            const int secondsPerHour = 60 * secondsPerMinute;
+            const int secondsPerDay = 24 * secondsPerHour;
+            const int secondsPerMonth = 30 * secondsPerDay;
+
+            var ts = new TimeSpan(DateTime.UtcNow.Ticks - dateTime.Ticks);
+            var delta = Math.Abs(ts.TotalSeconds);
+
+            if (delta < secondsPerMinute)
+                return ts.Seconds == 1 ? "one second ago" : ts.Seconds + " seconds ago";
+
+            if (delta < 2 * secondsPerMinute)
+                return "a minute ago";
+
+            if (delta < 60 * secondsPerMinute)
+                return ts.Minutes + " minutes ago";
+
+            if (delta < 120 * secondsPerMinute)
+                return "an hour ago";
+
+            if (delta < 24 * secondsPerHour)
+                return ts.Hours + " hours ago";
+
+            if (delta < 48 * secondsPerHour)
+                return "yesterday";
+
+            if (delta < 30 * secondsPerDay)
+                return ts.Days + " days ago";
+
+            if (delta < 12 * secondsPerMonth)
+            {
+                var months = Convert.ToInt32(Math.Floor((double)ts.Days / 30));
+                return months <= 1 ? "one month ago" : months + " months ago";
+            }
+          
+            var years = Convert.ToInt32(Math.Floor((double)ts.Days / 365));
+            return years <= 1 ? "one year ago" : years + " years ago";
+        }
     }
 }

@@ -1,23 +1,42 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <AssemblyName>OpenSpark.Discussions</AssemblyName>
-    <RootNamespace>OpenSpark.Discussions</RootNamespace>
     <LangVersion>8</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Actors\NewsFeedActor.cs~RFc9e695.TMP" />
+    <None Remove="appsettings.json" />
+    <None Remove="discussions-system.conf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="discussions-system.conf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Akka" Version="1.4.8" />
+    <PackageReference Include="Akka.Remote" Version="1.4.8" />
     <PackageReference Include="RavenDB.Client" Version="4.2.103" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\OpenSpark.Domain\OpenSpark.Domain.csproj" />
+    <ProjectReference Include="..\OpenSpark.Shared\OpenSpark.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.Extensions.Configuration">
+      <HintPath>C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\5.0.0-preview.6.20312.15\ref\net5.0\Microsoft.Extensions.Configuration.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using OpenSpark.ApiGateway.Extensions;
 using OpenSpark.ApiGateway.Services.SDK;
-using OpenSpark.Discussions.Commands;
-using OpenSpark.Domain;
+using OpenSpark.Shared.Commands;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
@@ -36,7 +31,7 @@ namespace OpenSpark.ApiGateway.Handlers
             {
                 var command = new DisconnectUserCommand
                 {
-                    ConnectionId = query.ConnectionId,
+                    ConnectionId = query.ConnectionId
                 };
 
                 _remoteActorSystemService.Send(command);

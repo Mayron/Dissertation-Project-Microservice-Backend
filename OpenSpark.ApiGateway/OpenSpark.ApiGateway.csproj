@@ -5,11 +5,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="actor-system.conf" />
+    <None Remove="webapi-system.conf" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="actor-system.conf">
+    <Content Include="webapi-system.conf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -22,13 +22,11 @@
     <PackageReference Include="MediatR.Extensions.Microsoft.DependencyInjection" Version="8.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.5" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
-    <PackageReference Include="RavenDB.Client" Version="4.2.103" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OpenSpark.ActorModel\OpenSpark.ActorModel.csproj" />
-    <ProjectReference Include="..\OpenSpark.Discussions\OpenSpark.Discussions.csproj" />
     <ProjectReference Include="..\OpenSpark.Domain\OpenSpark.Domain.csproj" />
+    <ProjectReference Include="..\OpenSpark.Shared\OpenSpark.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -10,7 +10,7 @@ namespace OpenSpark.Domain
         public DateTime CreatedAt { get; set; }
         public string DisplayName { get; set; }
         public string Email { get; set; }
-        public List<string> Projects { get; set; }
-        public List<string> Groups { get; set; }
+        public List<string> Projects { get; set; } = new List<string>();
+        public List<string> Groups { get; set; } = new List<string>();
     }
 }

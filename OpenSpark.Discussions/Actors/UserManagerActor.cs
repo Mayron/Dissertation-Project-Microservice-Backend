@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Akka.Actor;
-using OpenSpark.Discussions.Commands;
-using OpenSpark.Domain;
+using OpenSpark.Shared.Commands;
 
 namespace OpenSpark.Discussions.Actors
 {

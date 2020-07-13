@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -10,6 +12,10 @@ using OpenSpark.ApiGateway.Extensions;
 using OpenSpark.ApiGateway.Handlers;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Akka.Actor;
+using Akka.Configuration;
+using OpenSpark.ApiGateway.Actors;
+using OpenSpark.ApiGateway.Services.SDK;
 
 namespace OpenSpark.ApiGateway
 {
@@ -80,7 +86,7 @@ namespace OpenSpark.ApiGateway
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IEventEmitterService eventEmitter)
         {
             if (env.IsDevelopment())
             {

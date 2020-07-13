@@ -1,11 +1,9 @@
-﻿using OpenSpark.Discussions.Commands;
+﻿using OpenSpark.Shared.Commands;
 
 namespace OpenSpark.ApiGateway.Services.SDK
 {
     public interface IRemoteActorSystemService
     {
-        void Send(FetchNewsFeedCommand command);
-        void Send(ConnectUserCommand command);
-        void Send(DisconnectUserCommand command);
+        void Send(ICommand command);
     }
 }

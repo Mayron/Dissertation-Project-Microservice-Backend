@@ -1,12 +1,11 @@
 ﻿using MediatR;
-using System;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using OpenSpark.ApiGateway.Extensions;
 using OpenSpark.ApiGateway.Services.SDK;
-using OpenSpark.Discussions.Commands;
 using OpenSpark.Domain;
+using OpenSpark.Shared.Commands;
 
 namespace OpenSpark.ApiGateway.Handlers
 {

@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
 using System.Reflection;
 using OpenSpark.Discussions.Indexes;
-using OpenSpark.Domain;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Indexes;
 using Raven.Client.ServerWide;
@@ -54,7 +51,7 @@ namespace OpenSpark.Discussions
                 }
 
                 SeedData(store);
-                IndexCreation.CreateIndexes(Assembly.GetAssembly(typeof(GetPostsFromDiscussionArea)), store);
+                IndexCreation.CreateIndexes(Assembly.GetAssembly(typeof(GetGroupPosts)), store);
             }
             catch (Exception ex)
             {
@@ -66,28 +63,28 @@ namespace OpenSpark.Discussions
 
         private static void SeedData(IDocumentStore store)
         {
-            using var session = store.OpenSession();
-
-            var discussion = new DiscussionArea
-            {
-                AreaId = "mayronui-gen6",
-                IsPublic = true,
-                Posts = new List<Post>
-                {
-                    new Post
-                    {
-                        Body = "Test",
-                        Header = "This is a title of the post",
-                        Author = "Mike",
-                        Votes = 12,
-                        Url = "/u/posts/test",
-                        When = "13 Days ago",
-                    }
-                }
-            };
-
-            session.Store(discussion);
-            session.SaveChanges();
+//            using var session = store.OpenSession();
+//
+//            var discussion = new GroupPosts
+//            {
+//                GroupId = "mayronui-gen6",
+//                IsPublic = true,
+//                Posts = new List<Post>
+//                {
+//                    new Post
+//                    {
+//                        Body = "Test",
+//                        Title = "This is a title of the post",
+//                        AuthorUserId = "123",
+//                        Votes = 12,
+//                        When = "13 Days ago",
+//                        CreatedAt = DateTime.Now,
+//                    }
+//                }
+//            };
+//
+//            session.Store(discussion);
+//            session.SaveChanges();
         }
     }
 }

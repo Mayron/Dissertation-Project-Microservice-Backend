@@ -1,0 +1,92 @@
+{
+  "version": 3,
+  "targets": {
+    ".NETCoreApp,Version=v5.0": {
+      "OpenSpark.Domain/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v5.0",
+        "compile": {
+          "bin/placeholder/OpenSpark.Domain.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/OpenSpark.Domain.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "OpenSpark.Domain/1.0.0": {
+      "type": "project",
+      "path": "../OpenSpark.Domain/OpenSpark.Domain.csproj",
+      "msbuildProject": "../OpenSpark.Domain/OpenSpark.Domain.csproj"
+    }
+  },
+  "projectFileDependencyGroups": {
+    ".NETCoreApp,Version=v5.0": [
+      "OpenSpark.Domain >= 1.0.0"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\MJR_4\\.nuget\\packages\\": {},
+    "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Shared\\OpenSpark.Shared.csproj",
+      "projectName": "OpenSpark.Shared",
+      "projectPath": "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Shared\\OpenSpark.Shared.csproj",
+      "packagesPath": "C:\\Users\\MJR_4\\.nuget\\packages\\",
+      "outputPath": "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Shared\\obj\\",
+      "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+      ],
+      "configFilePaths": [
+        "C:\\Users\\MJR_4\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net5.0"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net5.0": {
+          "projectReferences": {
+            "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Domain\\OpenSpark.Domain.csproj": {
+              "projectPath": "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Domain\\OpenSpark.Domain.csproj"
+            }
+          }
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      }
+    },
+    "frameworks": {
+      "net5.0": {
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.100-preview.6.20318.15\\RuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}

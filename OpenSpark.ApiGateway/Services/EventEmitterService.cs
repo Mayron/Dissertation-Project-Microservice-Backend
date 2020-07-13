@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using OpenSpark.ApiGateway.Services.SDK;
-using OpenSpark.Discussions.Payloads;
+using OpenSpark.Shared.Payloads;
 
 namespace OpenSpark.ApiGateway.Services
 {

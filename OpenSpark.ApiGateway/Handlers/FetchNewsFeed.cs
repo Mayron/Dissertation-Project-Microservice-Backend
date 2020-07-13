@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using OpenSpark.ApiGateway.Services.SDK;
-using OpenSpark.Discussions.Commands;
+using OpenSpark.Shared.Commands;
 
 namespace OpenSpark.ApiGateway.Handlers
 {

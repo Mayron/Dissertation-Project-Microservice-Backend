@@ -22,18 +22,11 @@ namespace OpenSpark.ApiGateway.Controllers
             _mediator = mediator;
         }
 
-        // GET api/posts
-//        [HttpGet]
-//        public async Task<ActionResult<List<PostViewModel>>> Get()
-//        {
-//            return await _mediator.Send(new FetchNewsFeed.Query());
-//        }
-
         [Authorize]
         [HttpPost]
         public async Task<ActionResult> Post(NewPostInputModel model)
         {
-            Console.WriteLine(JsonConvert.SerializeObject(model));
+            await _mediator.Send(new NewPost.Query(model));
 
             return Ok("fine");
         }

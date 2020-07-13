@@ -1,4 +1,4 @@
-﻿using OpenSpark.Discussions.Payloads;
+﻿using OpenSpark.Shared.Payloads;
 
 namespace OpenSpark.ApiGateway.Services.SDK
 {

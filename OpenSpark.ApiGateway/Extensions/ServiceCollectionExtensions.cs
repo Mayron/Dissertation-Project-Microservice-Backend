@@ -11,6 +11,7 @@ namespace OpenSpark.ApiGateway.Extensions
             // Singletons
             services.AddSingleton<IFirestoreService, FirestoreService>();
             services.AddSingleton<IEventEmitterService, EventEmitterService>();
+            services.AddSingleton<ILocalActorSystemService, LocalActorSystemService>();
             services.AddSingleton<IRemoteActorSystemService, RemoteActorSystemService>();
         }
     }
