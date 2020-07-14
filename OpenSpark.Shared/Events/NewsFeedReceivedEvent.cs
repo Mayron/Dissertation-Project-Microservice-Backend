@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using OpenSpark.Shared.ViewModels;
 
-namespace OpenSpark.Shared.Payloads
+namespace OpenSpark.Shared.Events
 {
-    public class NewsFeedPostsPayload
+    public class NewsFeedReceivedEvent
     {
         public string ConnectionId { get; set; }
 

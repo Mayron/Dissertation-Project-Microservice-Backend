@@ -7,7 +7,7 @@ using Akka.Configuration;
 using OpenSpark.Discussions.Indexes;
 using OpenSpark.Domain;
 using OpenSpark.Shared.Commands;
-using OpenSpark.Shared.Payloads;
+using OpenSpark.Shared.Events;
 using OpenSpark.Shared.ViewModels;
 using Raven.Client.Documents.Linq;
 
@@ -25,7 +25,7 @@ namespace OpenSpark.Discussions.Actors
             {
                 var posts = _user == null ? GetMostPopularPosts() : GetUserNewsFeed();
 
-                var payload = new NewsFeedPostsPayload
+                var payload = new NewsFeedReceivedEvent
                 {
                     ConnectionId = command.ConnectionId,
                     Posts = MapRequests(posts)

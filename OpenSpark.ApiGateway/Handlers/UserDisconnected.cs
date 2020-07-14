@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
-using OpenSpark.ApiGateway.Services.SDK;
+using OpenSpark.ApiGateway.Services;
 using OpenSpark.Shared.Commands;
 
 namespace OpenSpark.ApiGateway.Handlers
@@ -20,11 +20,11 @@ namespace OpenSpark.ApiGateway.Handlers
 
         public class Handler : IRequestHandler<Query>
         {
-            private readonly IRemoteActorSystemService _remoteActorSystemService;
+            private readonly IActorSystemService _actorSystemService;
 
-            public Handler(IRemoteActorSystemService remoteActorSystemService)
+            public Handler(IActorSystemService actorSystemService)
             {
-                _remoteActorSystemService = remoteActorSystemService;
+                _actorSystemService = actorSystemService;
             }
 
             public async Task<Unit> Handle(Query query, CancellationToken cancellationToken)
@@ -34,7 +34,8 @@ namespace OpenSpark.ApiGateway.Handlers
                     ConnectionId = query.ConnectionId
                 };
 
-                _remoteActorSystemService.Send(command);
+                // TODO: Should I tell other contexts I have connected?
+                _actorSystemService.SendDiscussionsCommand(command);
 
                 return await Unit.Task;
             }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -26,9 +27,15 @@ namespace OpenSpark.ApiGateway.Controllers
         [HttpPost]
         public async Task<ActionResult> Post(NewPostInputModel model)
         {
-            await _mediator.Send(new NewPost.Query(model));
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState.Values.SelectMany(v => v.Errors));
 
-            return Ok("fine");
+            var result = await _mediator.Send(new AddPost.Query(model, User));
+
+            if (result.IsValid)
+                return Accepted(result.Message);
+
+            return Forbid(result.Message);
         }
     }
 }

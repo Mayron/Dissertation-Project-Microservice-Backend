@@ -1,6 +1,6 @@
 ﻿using Akka.Actor;
-using OpenSpark.ApiGateway.Services.SDK;
-using OpenSpark.Shared.Payloads;
+using OpenSpark.ApiGateway.Services;
+using OpenSpark.Shared.Events;
 
 namespace OpenSpark.ApiGateway.Actors
 {
@@ -11,7 +11,7 @@ namespace OpenSpark.ApiGateway.Actors
     {
         public CallbackActor(IEventEmitterService eventEmitter)
         {
-            Receive<NewsFeedPostsPayload>(eventEmitter.ReceivedPayload);
+            Receive<NewsFeedReceivedEvent>(eventEmitter.ReceivedPayload);
         }
     }
 }

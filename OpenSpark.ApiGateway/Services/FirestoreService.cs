@@ -1,14 +1,20 @@
 ﻿using System;
+using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Cloud.Firestore;
-using Google.Cloud.Firestore.V1;
 using Microsoft.Extensions.Configuration;
-using OpenSpark.ApiGateway.Services.SDK;
+using OpenSpark.ApiGateway.Extensions;
 using OpenSpark.Domain;
 
 namespace OpenSpark.ApiGateway.Services
 {
+    public interface IFirestoreService
+    {
+        Task<User> GetUserAsync(string authId, CancellationToken cancellationToken);
+        Task<User> GetUserAsync(ClaimsPrincipal user, CancellationToken cancellationToken);
+    }
+
     public class FirestoreService : IFirestoreService
     {
         private static readonly Lazy<FirestoreDb> _store = new Lazy<FirestoreDb>(
@@ -51,6 +57,12 @@ namespace OpenSpark.ApiGateway.Services
             }
 
             return user;
+        }
+
+        public Task<User> GetUserAsync(ClaimsPrincipal userPrincipal, CancellationToken cancellationToken)
+        {
+            var authId = userPrincipal.GetFirebaseAuth();
+            return string.IsNullOrWhiteSpace(authId) ? null : GetUserAsync(authId, cancellationToken);
         }
     }
 }

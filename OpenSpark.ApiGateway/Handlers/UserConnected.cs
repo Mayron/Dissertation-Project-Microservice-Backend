@@ -2,9 +2,7 @@
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using OpenSpark.ApiGateway.Extensions;
-using OpenSpark.ApiGateway.Services.SDK;
-using OpenSpark.Domain;
+using OpenSpark.ApiGateway.Services;
 using OpenSpark.Shared.Commands;
 
 namespace OpenSpark.ApiGateway.Handlers
@@ -25,22 +23,18 @@ namespace OpenSpark.ApiGateway.Handlers
 
         public class Handler : IRequestHandler<Query>
         {
-            private readonly IRemoteActorSystemService _remoteActorSystemService;
+            private readonly IActorSystemService _actorSystemService;
             private readonly IFirestoreService _firestoreService;
 
-            public Handler(IRemoteActorSystemService remoteActorSystemService, IFirestoreService firestoreService)
+            public Handler(IActorSystemService actorSystemService, IFirestoreService firestoreService)
             {
-                _remoteActorSystemService = remoteActorSystemService;
+                _actorSystemService = actorSystemService;
                 _firestoreService = firestoreService;
             }
 
             public async Task<Unit> Handle(Query query, CancellationToken cancellationToken)
             {
-                var authId = query.User.GetFirebaseAuth();
-                User user = null;
-
-                if (!string.IsNullOrWhiteSpace(authId))
-                    user = await _firestoreService.GetUserAsync(authId, cancellationToken);
+                var user = await _firestoreService.GetUserAsync(query.User, cancellationToken);
 
                 var command = new ConnectUserCommand
                 {
@@ -48,7 +42,8 @@ namespace OpenSpark.ApiGateway.Handlers
                     User = user
                 };
 
-                _remoteActorSystemService.Send(command);
+                // TODO: Should I tell other services I have connected?
+                _actorSystemService.SendDiscussionsCommand(command);
 
                 return await Unit.Task;
             }
