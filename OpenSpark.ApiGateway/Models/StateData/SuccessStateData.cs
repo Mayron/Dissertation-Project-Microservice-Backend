@@ -1,14 +1,17 @@
-﻿using System;
+﻿using OpenSpark.Shared.ViewModels;
+using System;
 
 namespace OpenSpark.ApiGateway.Models.StateData
 {
     public class SuccessStateData : BaseSagaStateData
     {
-        public string Message { get; }
+        public PostViewModel AddedPost { get; }
+        public string GroupId { get; set; }
 
-        public SuccessStateData(Guid transactionId, string message) : base(transactionId)
+        public SuccessStateData(Guid transactionId, PostViewModel addedPost, string groupId) : base(transactionId)
         {
-            Message = message;
+            AddedPost = addedPost;
+            GroupId = groupId;
         }
     }
 }

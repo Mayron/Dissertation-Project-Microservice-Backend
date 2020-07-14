@@ -3,7 +3,7 @@ using OpenSpark.Domain;
 
 namespace OpenSpark.Shared.Commands.Sagas
 {
-    public class CreateUserPostRequestCommand : ISagaCommand
+    public class CreateAddPostRequestCommand : ISagaCommand
     {
         public Guid TransactionId { get; set; }
         public Post Post { get; set; }

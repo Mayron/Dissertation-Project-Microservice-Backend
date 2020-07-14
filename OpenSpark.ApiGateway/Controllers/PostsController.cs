@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 using OpenSpark.ApiGateway.Handlers;
 using OpenSpark.ApiGateway.InputModels;
-using OpenSpark.ApiGateway.ViewModels;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace OpenSpark.ApiGateway.Controllers
 {

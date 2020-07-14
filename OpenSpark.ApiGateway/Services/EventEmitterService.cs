@@ -6,11 +6,10 @@ namespace OpenSpark.ApiGateway.Services
 {
     public interface IEventEmitterService
     {
-        void ReceivedPayload(NewsFeedReceivedEvent payload);
-        void ReceivedEvent(PostAddedEvent ev);
+        void BroadcastToClient(string connectionId, string clientSideMethod, object eventData);
+        void BroadcastToGroup(string groupId, string clientSideMethod, object eventData);
     }
 
-    // This class handles the EVENTS being emitted from ApiHubBridgeActor
     public class EventEmitterService : IEventEmitterService
     {
         private readonly IHubContext<ApiHub> _hubContext;
@@ -20,16 +19,14 @@ namespace OpenSpark.ApiGateway.Services
             _hubContext = liveChatHubContext;
         }
 
-        // TODO: Can this be renamed to Event?
-        public void ReceivedPayload(NewsFeedReceivedEvent payload)
+        public void BroadcastToClient(string connectionId, string clientSideMethod, object eventData)
         {
-            _hubContext.Clients.Client(payload.ConnectionId).SendAsync("NewsFeedUpdate", payload.Posts);
+            _hubContext.Clients.Client(connectionId).SendAsync(clientSideMethod, eventData);
         }
 
-        public void ReceivedEvent(PostAddedEvent ev)
+        public void BroadcastToGroup(string groupId, string clientSideMethod, object eventData)
         {
-            var groupId = ev.GroupId;
-            _hubContext.Clients.Group(groupId).SendAsync("PostAdded", ev.Post);
+            _hubContext.Clients.Group(groupId).SendAsync(clientSideMethod, eventData);
         }
     }
 }

@@ -11,7 +11,10 @@ namespace OpenSpark.ApiGateway.Actors
     {
         public CallbackActor(IEventEmitterService eventEmitter)
         {
-            Receive<NewsFeedReceivedEvent>(eventEmitter.ReceivedPayload);
+            Receive<NewsFeedReceivedEvent>(@event =>
+            {
+                eventEmitter.BroadcastToClient(@event.ConnectionId, "NewsFeedUpdate", @event.Posts);
+            });
         }
     }
 }

@@ -4,10 +4,12 @@ namespace OpenSpark.ApiGateway.Models.StateData
 {
     public class ErrorStateData : BaseSagaStateData
     {
+        public ISagaStateData PreviousStateData { get; }
         public string Message { get; }
 
-        public ErrorStateData(Guid transactionId, string message) : base(transactionId)
+        public ErrorStateData(ISagaStateData previousStateData, string message) : base(previousStateData.TransactionId)
         {
+            PreviousStateData = previousStateData;
             Message = message;
         }
     }

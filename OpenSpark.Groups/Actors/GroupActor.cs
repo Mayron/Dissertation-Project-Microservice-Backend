@@ -76,7 +76,8 @@ namespace OpenSpark.Groups.Actors
 
             if (group == null)
             {
-                throw new Exception($"Failed to retrieve group: {_groupId}");
+                Sender.Tell(new ErrorEven);
+                throw new ActorKilledException($"Failed to retrieve group: {_groupId}");
             }
 
             return group;

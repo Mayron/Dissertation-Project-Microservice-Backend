@@ -1,14 +1,13 @@
-﻿using System;
-using System.Security.Claims;
-using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using MediatR;
 using OpenSpark.ApiGateway.InputModels;
 using OpenSpark.ApiGateway.Models;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Domain;
-using OpenSpark.Shared.Commands;
 using OpenSpark.Shared.Commands.Sagas;
+using System;
+using System.Security.Claims;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
@@ -53,7 +52,7 @@ namespace OpenSpark.ApiGateway.Handlers
                 if (user == null)
                     return new ValidationResult(false, "Failed to validate user request");
 
-                _actorSystemService.StartSaga(new CreateUserPostRequestCommand
+                _actorSystemService.ExecuteSaga(new CreateAddPostRequestCommand
                 {
                     TransactionId = Guid.NewGuid(),
                     GroupId = query.GroupId,

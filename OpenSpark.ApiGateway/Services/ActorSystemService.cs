@@ -11,7 +11,7 @@ namespace OpenSpark.ApiGateway.Services
 {
     public interface IActorSystemService
     {
-        void StartSaga(ISagaCommand command);
+        void ExecuteSaga(ISagaCommand command);
         void SendDiscussionsCommand(ICommand command);
         void SendGroupsCommand(ICommand command);
         ActorSystem LocalSystem { get; set; }
@@ -39,7 +39,7 @@ namespace OpenSpark.ApiGateway.Services
 
         public ActorSystem LocalSystem { get; set; }
 
-        public void StartSaga(ISagaCommand command)
+        public void ExecuteSaga(ISagaCommand command)
         {
             _sagaManagerActorRef.Tell(command);
         }
