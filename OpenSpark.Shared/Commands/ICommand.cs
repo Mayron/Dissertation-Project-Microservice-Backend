@@ -1,6 +1,9 @@
-﻿namespace OpenSpark.Shared.Commands
+﻿using System;
+
+namespace OpenSpark.Shared.Commands
 {
     public interface ICommand
     {
+        
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using OpenSpark.Shared.Events;
+using OpenSpark.Shared.Events.Sagas;
 
 namespace OpenSpark.ApiGateway.Services
 {

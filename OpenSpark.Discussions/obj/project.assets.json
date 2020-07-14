@@ -1841,7 +1841,8 @@
         "type": "project",
         "framework": ".NETCoreApp,Version=v5.0",
         "dependencies": {
-          "OpenSpark.Domain": "1.0.0"
+          "OpenSpark.Domain": "1.0.0",
+          "RavenDB.Client": "4.2.103"
         },
         "compile": {
           "bin/placeholder/OpenSpark.Shared.dll": {}

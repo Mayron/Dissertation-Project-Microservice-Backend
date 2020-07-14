@@ -8,6 +8,7 @@ using OpenSpark.ApiGateway.Models;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Domain;
 using OpenSpark.Shared.Commands;
+using OpenSpark.Shared.Commands.Sagas;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
@@ -52,10 +53,12 @@ namespace OpenSpark.ApiGateway.Handlers
                 if (user == null)
                     return new ValidationResult(false, "Failed to validate user request");
 
-                _actorSystemService.StartAddPostSaga(new CreateUserPostRequestCommand
+                _actorSystemService.StartSaga(new CreateUserPostRequestCommand
                 {
+                    TransactionId = Guid.NewGuid(),
                     GroupId = query.GroupId,
-                    Post = query.Post
+                    Post = query.Post,
+                    User = user
                 });
 
                 return ValidationResult.Success;

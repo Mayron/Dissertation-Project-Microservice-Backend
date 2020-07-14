@@ -3,57 +3,64 @@ using Akka.Actor;
 using Akka.Configuration;
 using Microsoft.Extensions.Configuration;
 using OpenSpark.ApiGateway.Actors;
+using OpenSpark.Shared;
 using OpenSpark.Shared.Commands;
+using OpenSpark.Shared.Commands.Sagas;
 
 namespace OpenSpark.ApiGateway.Services
 {
     public interface IActorSystemService
     {
-        void StartAddPostSaga(CreateUserPostRequestCommand createUserPostRequestCommand);
+        void StartSaga(ISagaCommand command);
         void SendDiscussionsCommand(ICommand command);
         void SendGroupsCommand(ICommand command);
+        ActorSystem LocalSystem { get; set; }
     }
 
     public class ActorSystemService : IActorSystemService
     {
         private readonly IConfiguration _configuration;
-        private readonly ActorSystem _localSystem;
         private readonly IActorRef _callbackActorRef;
+        private readonly IActorRef _sagaManagerActorRef;
 
-        public ActorSystemService(IEventEmitterService eventEmitter, IConfiguration configuration)
+        public ActorSystemService(IActorFactoryService actorFactoryService, IConfiguration configuration)
         {
             _configuration = configuration;
+
             // Create local WebApiSystem
             var configString = File.ReadAllText("webapi-system.conf");
             var config = ConfigurationFactory.ParseString(configString);
-            _localSystem = ActorSystem.Create("WebApiSystem", config);
+            LocalSystem = ActorSystem.Create("WebApiSystem", config);
 
             // Create local actors for the system
-            _callbackActorRef = _localSystem.ActorOf(Props.Create(() => new CallbackActor(eventEmitter)), "Callback");
+            _callbackActorRef = actorFactoryService.CreateCallbackActor();
+            _sagaManagerActorRef = actorFactoryService.CreateSagaManagerActor();
         }
 
-        public void StartAddPostSaga(CreateUserPostRequestCommand createUserPostRequestCommand)
+        public ActorSystem LocalSystem { get; set; }
+
+        public void StartSaga(ISagaCommand command)
         {
-            throw new System.NotImplementedException();
+            _sagaManagerActorRef.Tell(command);
         }
 
         public void SendDiscussionsCommand(ICommand command)
         {
             var discussionsUrl = _configuration["akka:DiscussionsRemoteUrl"];
-            var userManager = _localSystem.ActorSelection($"{discussionsUrl}/UserManager");
+            var userManager = LocalSystem.ActorSelection($"{discussionsUrl}/UserManager");
             userManager.Tell(command, _callbackActorRef);
         }
 
         public void SendGroupsCommand(ICommand command)
         {
             var groupsUrl = _configuration["akka:GroupsRemoteUrl"];
-            var userManager = _localSystem.ActorSelection($"{groupsUrl}/UserManager");
-            userManager.Tell(command, _callbackActorRef);
+            var groupManager = LocalSystem.ActorSelection($"{groupsUrl}/GroupManager");
+            groupManager.Tell(command, _callbackActorRef);
         }
 
         public void Dispose()
         {
-            _localSystem?.Dispose();
+            LocalSystem?.Dispose();
         }
     }
 }

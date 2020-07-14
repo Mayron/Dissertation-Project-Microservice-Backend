@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="RavenDB.Client" Version="4.2.103" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\OpenSpark.Domain\OpenSpark.Domain.csproj" />
   </ItemGroup>
 

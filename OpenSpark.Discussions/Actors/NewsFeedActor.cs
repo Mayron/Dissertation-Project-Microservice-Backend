@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Akka.Actor;
-using Akka.Configuration;
 using OpenSpark.Discussions.Indexes;
 using OpenSpark.Domain;
 using OpenSpark.Shared.Commands;
@@ -46,7 +44,7 @@ namespace OpenSpark.Discussions.Actors
         /// </summary>
         private IEnumerable<GetGroupPosts.Result> GetUserNewsFeed()
         {
-            using var session = DatabaseSingleton.Store.OpenSession();
+            using var session = DocumentStoreSingleton.Store.OpenSession();
 
             var query = session.Query<GetGroupPosts.Result, GetGroupPosts>()
                 .Where(d => d.GroupId.In(_user.Groups));
@@ -59,7 +57,7 @@ namespace OpenSpark.Discussions.Actors
         /// </summary>
         private static IEnumerable<GetGroupPosts.Result> GetMostPopularPosts()
         {
-            using var session = DatabaseSingleton.Store.OpenSession();
+            using var session = DocumentStoreSingleton.Store.OpenSession();
 
             var query = session.Query<GetGroupPosts.Result, GetGroupPosts>()
                 .Where(d => d.IsPublic);

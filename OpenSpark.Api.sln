@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenSpark.Domain", "OpenSpa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenSpark.Discussions", "OpenSpark.Discussions\OpenSpark.Discussions.csproj", "{1D21B913-6393-488B-A154-FBFEA375041D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenSpark.Shared", "OpenSpark.Shared\OpenSpark.Shared.csproj", "{661331F8-F236-4720-BA8F-B62CF6E4F70B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenSpark.Shared", "OpenSpark.Shared\OpenSpark.Shared.csproj", "{661331F8-F236-4720-BA8F-B62CF6E4F70B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenSpark.Groups", "OpenSpark.Groups\OpenSpark.Groups.csproj", "{7B95DC70-BF3F-4DA5-9A4E-3DE268E51FEA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{661331F8-F236-4720-BA8F-B62CF6E4F70B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{661331F8-F236-4720-BA8F-B62CF6E4F70B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{661331F8-F236-4720-BA8F-B62CF6E4F70B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B95DC70-BF3F-4DA5-9A4E-3DE268E51FEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B95DC70-BF3F-4DA5-9A4E-3DE268E51FEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B95DC70-BF3F-4DA5-9A4E-3DE268E51FEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B95DC70-BF3F-4DA5-9A4E-3DE268E51FEA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
