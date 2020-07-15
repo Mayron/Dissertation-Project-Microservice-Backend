@@ -2,6 +2,7 @@
 using OpenSpark.Domain;
 using OpenSpark.Shared.Commands;
 using OpenSpark.Shared.Commands.Sagas;
+using OpenSpark.Shared.Commands.Sagas.CreatePost;
 
 namespace OpenSpark.Discussions.Actors
 {
@@ -15,7 +16,7 @@ namespace OpenSpark.Discussions.Actors
             _connectionId = connectionId;
             _user = user;
 
-            Receive<AddPostCommand>(handler =>
+            Receive<CreatePostCommand>(handler =>
             {
                 // handle this command!
                 // can change state, or something else

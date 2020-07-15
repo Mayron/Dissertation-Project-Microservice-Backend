@@ -2,11 +2,11 @@
 
 namespace OpenSpark.ApiGateway.Models.StateData
 {
-    public class BaseSagaStateData : ISagaStateData
+    public class SagaStateData : ISagaStateData
     {
         public Guid TransactionId { get; set; }
 
-        public BaseSagaStateData(Guid transactionId)
+        public SagaStateData(Guid transactionId)
         {
             TransactionId = transactionId;
         }

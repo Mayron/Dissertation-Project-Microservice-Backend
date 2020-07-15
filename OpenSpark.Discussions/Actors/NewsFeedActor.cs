@@ -32,9 +32,6 @@ namespace OpenSpark.Discussions.Actors
                 // This will go to the callback actor
                 Sender.Tell(payload);
 
-//                var webApi = ActorSystem.Create("WebApiSystem", config);
-//                webApi.ActorSelection("akka.tcp://WebApiSystem@localhost:9091/user/Callback").Tell(payload);
-
                 Self.GracefulStop(TimeSpan.FromSeconds(5));
             });
         }

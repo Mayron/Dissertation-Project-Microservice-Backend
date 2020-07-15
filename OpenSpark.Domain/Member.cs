@@ -9,6 +9,8 @@ namespace OpenSpark.Domain
     public class Member
     {
         public string UserId { get; set; }
+
+        // Should not contain implicit roles!
         public List<Guid> RoleIds { get; set; }
     }
 }

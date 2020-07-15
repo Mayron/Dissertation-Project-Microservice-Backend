@@ -1,7 +1,13 @@
-﻿using System.Collections.Immutable;
-using System.Linq;
+﻿using System;
 using Akka.Actor;
-using OpenSpark.Shared.Commands.Sagas;
+using OpenSpark.Shared.Commands.Sagas.CreatePost;
+using System.Collections.Immutable;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using OpenSpark.Shared.Commands.Sagas.CreateGroup;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using OpenSpark.Shared;
 
 namespace OpenSpark.Groups.Actors
 {
@@ -19,6 +25,13 @@ namespace OpenSpark.Groups.Actors
                 actorRef.Forward(command);
             });
 
+            Receive<CreateGroupCommand>(command =>
+            {
+                var groupId = Utils.GenerateRandomId();
+                //command.Name
+
+            });
+
             Receive<Terminated>(terminated =>
             {
                 Context.Unwatch(terminated.ActorRef);
@@ -27,6 +40,8 @@ namespace OpenSpark.Groups.Actors
                 _children = _children.Where(u => !u.Value.Equals(terminated.ActorRef)).ToImmutableDictionary();
             });
         }
+
+
 
         private IActorRef GetGroupChildActor(string groupId)
         {

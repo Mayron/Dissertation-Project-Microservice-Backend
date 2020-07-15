@@ -1,14 +1,9 @@
 ﻿using System.Collections.Generic;
 
-namespace OpenSpark.Domain
+namespace OpenSpark.ApiGateway.InputModels
 {
-    public class Group
+    public class NewGroupInputModel
     {
-        public string VisibilityStatus { get; set; }
-        public List<Member> Members { get; set; }
-        public List<Member> BannedUsers { get; set; }
-        public List<Role> Roles { get; set; }
-        public string GroupId { get; set; }
         public string Name { get; set; }
         public string About { get; set; }
         public string CategoryId { get; set; }

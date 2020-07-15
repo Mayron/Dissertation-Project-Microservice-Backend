@@ -1,6 +1,5 @@
 ﻿using Akka.Actor;
-using OpenSpark.Shared.Commands;
-using OpenSpark.Shared.Commands.Sagas;
+using OpenSpark.Shared.Commands.Sagas.CreatePost;
 
 namespace OpenSpark.Discussions.Actors
 {
@@ -8,7 +7,7 @@ namespace OpenSpark.Discussions.Actors
     {
         public PostRepositoryActor()
         {
-            Receive<AddPostCommand>(command =>
+            Receive<CreatePostCommand>(command =>
             {
                 using var session = DocumentStoreSingleton.Store.OpenSession();
                 session.Store(command.Post);

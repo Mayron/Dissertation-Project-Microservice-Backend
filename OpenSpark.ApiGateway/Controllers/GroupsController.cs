@@ -9,24 +9,27 @@ using System.Threading.Tasks;
 namespace OpenSpark.ApiGateway.Controllers
 {
     [ApiController]
-    [Route("api/posts")]
-    public class PostsController : ControllerBase
+    [Route("api/groups")]
+    public class GroupsController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public PostsController(IMediator mediator)
+        public GroupsController(IMediator mediator)
         {
             _mediator = mediator;
         }
 
+        /// <summary>
+        /// POST /api/groups/create
+        /// </summary>
         [Authorize]
-        [HttpPost]
-        public async Task<ActionResult<string>> Post(NewPostInputModel model)
+        [HttpPost("create")]
+        public async Task<ActionResult<string>> Create(NewGroupInputModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState.Values.SelectMany(v => v.Errors));
 
-            var result = await _mediator.Send(new CreatePost.Query(model, User));
+            var result = await _mediator.Send(new CreateGroup.Query(model, User));
 
             if (result.IsValid)
                 return Accepted(result);

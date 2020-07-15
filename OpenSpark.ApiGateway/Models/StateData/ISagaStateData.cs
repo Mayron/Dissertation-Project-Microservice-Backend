@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace OpenSpark.ApiGateway.Models
+namespace OpenSpark.ApiGateway.Models.StateData
 {
     public interface ISagaStateData
     {

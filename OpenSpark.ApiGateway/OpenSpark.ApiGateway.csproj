@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <LangVersion>8</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -33,6 +34,10 @@
     <Content Update="openspark-1e4bc-firebase-adminsdk-as86c-e46fdfc058.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\StateData\CreateGroup\" />
   </ItemGroup>
 
 

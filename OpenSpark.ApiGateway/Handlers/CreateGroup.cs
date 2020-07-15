@@ -6,31 +6,28 @@ using OpenSpark.Domain;
 using OpenSpark.Shared.Commands.Sagas;
 using Akka.Actor;
 using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using OpenSpark.Shared;
+using OpenSpark.Shared.Commands.Sagas.ExecutionCommands;
+using Raven.Client;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
-    public class AddPost
+    public class CreateGroup
     {
         public class Query : IRequest<ValidationResult>
         {
-            public Post Post { get; }
-            public string GroupId { get; set; }
+            public NewGroupInputModel Model { get; }
             public ClaimsPrincipal User { get; }
-
-            public Query(NewPostInputModel model, ClaimsPrincipal user)
+            
+            public Query(NewGroupInputModel model, ClaimsPrincipal user)
             {
+                Model = model;
                 User = user;
-                GroupId = model.GroupId;
-                Post = new Post
-                {
-                    AuthorUserId = model.AuthorUserId,
-                    Body = model.Body,
-                    Title = model.Title,
-                    CreatedAt = DateTime.Now
-                };
             }
         }
 
@@ -54,11 +51,19 @@ namespace OpenSpark.ApiGateway.Handlers
                     return new ValidationResult(false, "Failed to validate user request");
 
                 var transactionId = Guid.NewGuid();
-                _actorSystemService.SagaManager.Tell(new CreateAddPostRequestCommand
+                _actorSystemService.SagaManager.Tell(new ExecuteCreateGroupSagaCommand
                 {
                     TransactionId = transactionId,
-                    GroupId = query.GroupId,
-                    Post = query.Post,
+                    Group = new Group
+                    {
+                        Name = query.Model.Name,
+                        About = query.Model.About,
+                        CategoryId = query.Model.CategoryId,
+                        Tags = query.Model.Tags,
+                        Connected = query.Model.Connected,
+                        OwnerUserId = user.UserId,
+                        Members = new List<Member> { new Member {  UserId = user.UserId } }
+                    },
                     User = user
                 });
 

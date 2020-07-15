@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace OpenSpark.Shared.Commands.Sagas
+namespace OpenSpark.Shared.Commands.Sagas.CreatePost
 {
     public class VerifyUserPostRequestCommand : ISagaCommand
     {

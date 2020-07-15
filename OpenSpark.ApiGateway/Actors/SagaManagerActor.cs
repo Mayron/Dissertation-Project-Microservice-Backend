@@ -2,9 +2,9 @@
 using System.Collections.Immutable;
 using System.Linq;
 using Akka.Actor;
-using OpenSpark.ApiGateway.Actors.Sagas;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Shared.Commands.Sagas;
+using OpenSpark.Shared.Commands.Sagas.ExecutionCommands;
 
 namespace OpenSpark.ApiGateway.Actors
 {
@@ -24,7 +24,7 @@ namespace OpenSpark.ApiGateway.Actors
             switch (message)
             {
                 case ISagaCommand command:
-                    var actorRef = GetChildActorRef(command.TransactionId);
+                    var actorRef = GetChildActorRef(command);
                     actorRef?.Tell(command);
                     break;
                 
@@ -35,17 +35,22 @@ namespace OpenSpark.ApiGateway.Actors
             }
         }
 
-        public IActorRef GetChildActorRef(Guid id)
+        public IActorRef GetChildActorRef(ISagaCommand command)
         {
-            if (_children.ContainsKey(id))
-                return _children[id];
+            if (_children.ContainsKey(command.TransactionId))
+                return _children[command.TransactionId];
 
-            var actorRef = _actorSystemService.CreateAddPostSagaActor(id);
+            if (command is ISagaExecutionCommand executionCommand)
+            {
+                var actorRef = _actorSystemService.CreateSagaActor(executionCommand);
+                Context.Watch(actorRef);
 
-            Context.Watch(actorRef);
+                _children = _children.Add(command.TransactionId, actorRef);
+                return actorRef;
+            }
 
-            _children = _children.Add(id, actorRef);
-            return actorRef;
+            Console.WriteLine($"Failed to get child actor for command: {command.GetType()}");
+            return null;
         }
     }
 }

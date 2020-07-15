@@ -6,6 +6,7 @@ using OpenSpark.Shared.Commands;
 using System.IO;
 using OpenSpark.ApiGateway.Actors;
 using OpenSpark.ApiGateway.Actors.Sagas;
+using OpenSpark.Shared.Commands.Sagas.ExecutionCommands;
 
 namespace OpenSpark.ApiGateway.Services
 {
@@ -17,7 +18,7 @@ namespace OpenSpark.ApiGateway.Services
 
         void SendDiscussionsCommand(ICommand command, IActorRef callback = null);
         void SendGroupsCommand(ICommand command, IActorRef callback = null);
-        IActorRef CreateAddPostSagaActor(Guid key);
+        IActorRef CreateSagaActor(ISagaExecutionCommand command);
     }
 
     public class ActorSystemService : IActorSystemService
@@ -58,10 +59,23 @@ namespace OpenSpark.ApiGateway.Services
             groupManager.Tell(command, callback ?? CallbackHandler);
         }
 
-        public IActorRef CreateAddPostSagaActor(Guid key) =>
-            LocalSystem.ActorOf(
-                Props.Create(() => new AddPostSagaActor(this, _eventEmitter)),
-                $"AddPostSagaActor-${key}");
+        public IActorRef CreateSagaActor(ISagaExecutionCommand command)
+        {
+            var actorName = $"{command.SagaName}-{command.TransactionId}";
+
+            return command.SagaName switch
+            {
+                nameof(CreatePostSagaActor) => 
+                    LocalSystem.ActorOf(
+                        Props.Create(() => new CreatePostSagaActor(this, _eventEmitter)), actorName),
+
+                nameof(ExecuteCreateGroupSagaCommand) => 
+                    LocalSystem.ActorOf(
+                        Props.Create(() => new CreateGroupSagaActor(this)), actorName),
+
+                _ => throw new Exception($"Failed to find SagaActor: {command.SagaName}"),
+            };
+        }
 
         public IActorRef CreateCallbackActor() =>
             LocalSystem.ActorOf(
