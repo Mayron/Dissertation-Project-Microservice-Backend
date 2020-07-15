@@ -10,7 +10,7 @@ namespace OpenSpark.Groups
     {
         public static void Main(string[] args)
         {
-            var configString = File.ReadAllText("discussions-system.conf");
+            var configString = File.ReadAllText("groups-system.conf");
             var config = ConfigurationFactory.ParseString(configString);
 
             // Create actor system

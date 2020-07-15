@@ -21,7 +21,7 @@ namespace OpenSpark.ApiGateway.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<ActionResult> Post(NewPostInputModel model)
+        public async Task<ActionResult<string>> Post(NewPostInputModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState.Values.SelectMany(v => v.Errors));
@@ -29,9 +29,9 @@ namespace OpenSpark.ApiGateway.Controllers
             var result = await _mediator.Send(new AddPost.Query(model, User));
 
             if (result.IsValid)
-                return Accepted(result.Message);
+                return Accepted(result);
 
-            return Forbid(result.Message);
+            return BadRequest(result.Message);
         }
     }
 }

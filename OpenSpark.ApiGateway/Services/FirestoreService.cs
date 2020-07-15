@@ -32,8 +32,6 @@ namespace OpenSpark.ApiGateway.Services
 
         public async Task<User> GetUserAsync(string authId, CancellationToken cancellationToken)
         {
-            User user = null;
-
             try
             {
                 var collection = Store.Collection("users");
@@ -42,7 +40,7 @@ namespace OpenSpark.ApiGateway.Services
 
                 if (snapShot.Exists)
                 {
-                    user = new User
+                    return new User
                     {
                         CreatedAt = snapShot.GetValue<Timestamp>("createdAt").ToDateTime(),
                         DisplayName = snapShot.GetValue<string>("displayName"),
@@ -56,13 +54,16 @@ namespace OpenSpark.ApiGateway.Services
                 Console.WriteLine("Exception getting user: ", ex);
             }
 
-            return user;
+            return null;
         }
 
-        public Task<User> GetUserAsync(ClaimsPrincipal userPrincipal, CancellationToken cancellationToken)
+        public async Task<User> GetUserAsync(ClaimsPrincipal userPrincipal, CancellationToken cancellationToken)
         {
             var authId = userPrincipal.GetFirebaseAuth();
-            return string.IsNullOrWhiteSpace(authId) ? null : GetUserAsync(authId, cancellationToken);
+
+            if (string.IsNullOrWhiteSpace(authId)) return null;
+
+            return await GetUserAsync(authId, cancellationToken);
         }
     }
 }

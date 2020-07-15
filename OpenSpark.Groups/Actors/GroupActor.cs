@@ -4,6 +4,7 @@ using Akka.Actor;
 using OpenSpark.Domain;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Commands.Sagas;
+using OpenSpark.Shared.Events;
 using OpenSpark.Shared.Events.Sagas;
 
 namespace OpenSpark.Groups.Actors
@@ -76,8 +77,9 @@ namespace OpenSpark.Groups.Actors
 
             if (group == null)
             {
-                Sender.Tell(new ErrorEven);
-                throw new ActorKilledException($"Failed to retrieve group: {_groupId}");
+                var message = $"Failed to retrieve group: {_groupId}";
+                Sender.Tell(new ErrorEvent { Message = message });
+                throw new ActorKilledException(message);
             }
 
             return group;

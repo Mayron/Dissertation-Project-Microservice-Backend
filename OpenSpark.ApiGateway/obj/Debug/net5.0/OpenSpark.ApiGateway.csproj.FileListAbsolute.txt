@@ -98,3 +98,6 @@ S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGa
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\OpenSpark.Shared.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\OpenSpark.Shared.pdb
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\webapi-system.conf
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\Lambda2Js.Signed.dll
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\Raven.Client.dll
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\Sparrow.dll

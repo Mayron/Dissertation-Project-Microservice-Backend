@@ -4,12 +4,11 @@ using OpenSpark.ApiGateway.Models;
 using OpenSpark.ApiGateway.Models.StateData;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Shared.Commands.Sagas;
+using OpenSpark.Shared.Events;
 using OpenSpark.Shared.Events.Sagas;
 
 namespace OpenSpark.ApiGateway.Actors.Sagas
 {
-    // TODO: This can benefit from Akka.Persistence to recover from errors
-
     public class AddPostSagaActor : FSM<AddPostSagaActor.SagaState, ISagaStateData>
     {
         private readonly IActorSystemService _actorSystemService;
@@ -20,8 +19,6 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             Idle,
             VerifyingUser,
             AddingPost,
-            Success,
-            Error
         }
 
         public AddPostSagaActor(IActorSystemService actorSystemService, IEventEmitterService eventEmitter)
@@ -32,46 +29,17 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             StartWith(SagaState.Idle, Uninitialized.Instance);
 
             When(SagaState.Idle, HandleIdleEvents);
-            When(SagaState.VerifyingUser, HandleVerifyingUserEvents, TimeSpan.FromSeconds(5));
-            When(SagaState.AddingPost, HandleAddingPostEvents, TimeSpan.FromSeconds(5));
+            When(SagaState.VerifyingUser, HandleVerifyingUserEvents); // TimeSpan.FromSeconds(5)
+            When(SagaState.AddingPost, HandleAddingPostEvents); // TimeSpan.FromSeconds(5)
 
-            // unhandled messages - Not sure this will ever be hit!
-            WhenUnhandled(ev => GoTo(SagaState.Error));
-
-            When(SagaState.Success, ev =>
+            WhenUnhandled(ev =>
             {
-                if (ev.StateData is SuccessStateData data)
-                {
-                    _eventEmitter.BroadcastToGroup(data.GroupId, "PostAdded", data.AddedPost);
-                }
+                Console.WriteLine($"Unexpected message received: {ev.FsmEvent}. Current State: {StateName}");
 
-                return Stop();
-            });
+                if (!(ev.FsmEvent is ErrorEvent error)) return Stay();
 
-            When(SagaState.Error, ev =>
-            {
-                // TODO: Remove the Success and Error sage states and only check for WhenUnhandled
-                // TODO: Then, check if we receive an ErroSagaEvent (new object) for a custom message
-                // TODO: Do not update the state - we need the current one. Then analyse if we need to rollback anything!
-
-
-
-                // TODO: Need to use compensating transaction
-                //                var error = ev.StateData as ErrorStateData;
-                //                Console.WriteLine($"Failed: {error?.Message}");
-                //StateData.TransactionId, "Received unknown message for event: " + ev.FsmEvent
-                if (ev.StateData is ErrorStateData data)
-                {
-                    var previousWorkingStateData = data.PreviousStateData;
-                    Console.WriteLine(previousWorkingStateData);
-                    // In case we want a custom error message we can wrap the old state data in the ErrorStateData
-                }
-                else
-                {
-                    // We didn't receive a new message...
-                }
-
-                return Stop();
+                Console.WriteLine(error.Message);
+                return StopAndSendError("Oops! Something unexpected happened.");
             });
         }
 
@@ -84,7 +52,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                     TransactionId = command.TransactionId,
                     UserId = command.User.UserId,
                     GroupId = command.GroupId,
-                });
+                }, Self);
 
                 return GoTo(SagaState.VerifyingUser).Using(new VerifyingUserStateData(command.TransactionId));
             }
@@ -103,10 +71,11 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                         return Stay();
                     }
 
+                    // User verified successfully. Begin adding post.
                     _actorSystemService.SendDiscussionsCommand(new AddPostCommand
                     {
                         TransactionId = data.TransactionId,
-                    });
+                    }, Self);
 
                     return GoTo(SagaState.AddingPost).Using(new AddingPostStateData(data.TransactionId));
 
@@ -117,12 +86,10 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                         return Stay();
                     }
 
-                    return GoTo(SagaState.Error).Using(
-                        new ErrorStateData(StateData, "User does not have permission to post to group"));
+                    return StopAndSendError("You do not have permission to post to this group.");
 
                 case StateTimeout _:
-                    return GoTo(SagaState.Error).Using(
-                        new ErrorStateData(StateData, "Request timed out while verifying user."));
+                    return StopAndSendError("Oops! Request timed out while verifying request.");
             }
 
             return null;
@@ -139,14 +106,34 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                         return Stay();
                     }
                     
-                    return GoTo(SagaState.Success).Using(new SuccessStateData(data.TransactionId, @event.Post, @event.GroupId));
+                    _eventEmitter.BroadcastToGroup(@event.GroupId, "PostAdded", @event.Post);
+
+                    _actorSystemService.CallbackHandler.Tell(new SagaFinishedEvent
+                    {
+                        TransactionId = StateData.TransactionId,
+                        Message = "New post created successfully.",
+                        Success = true
+                    });
+
+                    return Stop();
 
                 case StateTimeout _:
-                    return GoTo(SagaState.Error).Using(
-                        new ErrorStateData(StateData, "Request timed out while adding post."));
+                    return StopAndSendError("Oops! Request timed out while created post.");
             }
 
             return null;
+        }
+
+        private State<SagaState, ISagaStateData> StopAndSendError(string errorMessage)
+        {
+            _actorSystemService.CallbackHandler.Tell(new SagaFinishedEvent
+            {
+                TransactionId = StateData.TransactionId,
+                Message = errorMessage,
+                Success = false
+            });
+
+            return Stop();
         }
     }
 }

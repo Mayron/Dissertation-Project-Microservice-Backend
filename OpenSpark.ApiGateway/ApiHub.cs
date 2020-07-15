@@ -47,5 +47,13 @@ namespace OpenSpark.ApiGateway
         {
             _mediator.Send(new FetchNewsFeed.Query(Context.ConnectionId));
         }
+
+        public void Subscribe(string token, string callback)
+        {
+            if (Guid.TryParse(token, out var transactionId))
+            {
+                _mediator.Send(new SubscribeToTransaction.Query(Context.ConnectionId, transactionId, callback));
+            }
+        }
     }
 }

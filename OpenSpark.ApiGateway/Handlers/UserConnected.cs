@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using OpenSpark.ApiGateway.Services;
+using OpenSpark.Domain;
 using OpenSpark.Shared.Commands;
 
 namespace OpenSpark.ApiGateway.Handlers
@@ -42,7 +43,6 @@ namespace OpenSpark.ApiGateway.Handlers
                     User = user
                 };
 
-                // TODO: Should I tell other services I have connected?
                 _actorSystemService.SendDiscussionsCommand(command);
 
                 return await Unit.Task;

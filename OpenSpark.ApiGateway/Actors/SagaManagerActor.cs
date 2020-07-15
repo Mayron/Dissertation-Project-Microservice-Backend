@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using System.Linq;
 using Akka.Actor;
+using OpenSpark.ApiGateway.Actors.Sagas;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Shared.Commands.Sagas;
 
@@ -9,12 +10,12 @@ namespace OpenSpark.ApiGateway.Actors
 {
     public class SagaManagerActor : UntypedActor
     {
-        private readonly IActorFactoryService _actorFactoryService;
+        private readonly IActorSystemService _actorSystemService;
         private IImmutableDictionary<Guid, IActorRef> _children;
 
-        public SagaManagerActor(IActorFactoryService actorFactoryService)
+        public SagaManagerActor(IActorSystemService actorSystemService)
         {
-            _actorFactoryService = actorFactoryService;
+            _actorSystemService = actorSystemService;
             _children = ImmutableDictionary<Guid, IActorRef>.Empty;
         }
 
@@ -39,7 +40,8 @@ namespace OpenSpark.ApiGateway.Actors
             if (_children.ContainsKey(id))
                 return _children[id];
 
-            var actorRef = _actorFactoryService.CreateAddPostSagaActor(id);
+            var actorRef = _actorSystemService.CreateAddPostSagaActor(id);
+
             Context.Watch(actorRef);
 
             _children = _children.Add(id, actorRef);

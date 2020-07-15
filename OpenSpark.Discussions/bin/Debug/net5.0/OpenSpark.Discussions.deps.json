@@ -1133,7 +1133,8 @@
       },
       "OpenSpark.Shared/1.0.0": {
         "dependencies": {
-          "OpenSpark.Domain": "1.0.0"
+          "OpenSpark.Domain": "1.0.0",
+          "RavenDB.Client": "4.2.103"
         },
         "runtime": {
           "OpenSpark.Shared.dll": {}
