@@ -7,6 +7,7 @@ using OpenSpark.Shared.Commands.Sagas.ExecutionCommands;
 using OpenSpark.Shared.Events.Sagas;
 using OpenSpark.Shared.Events.Sagas.CreateGroup;
 using System;
+using System.Collections.Generic;
 
 namespace OpenSpark.ApiGateway.Actors.Sagas
 {
@@ -74,7 +75,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
 
             if (success)
             {
-                if (data.Connecting.Count <= 0) return FinishSuccessfully();
+                if (data.Connecting.Count <= 0) return FinishSuccessfully(@event.Group.GroupId);
 
                 _actorSystemService.SendProjectsCommand(new ConnectAllProjectsCommand
                 {
@@ -86,7 +87,8 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                 return GoTo(SagaState.UpdateConnectedProjects).Using(new ProcessingStateData
                 {
                     TransactionId = StateData.TransactionId,
-                    Connecting = data.Connecting
+                    Connecting = data.Connecting,
+                    GroupId = @event.Group.GroupId
                 });
             }
 
@@ -115,13 +117,13 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                 case ProjectConnectedEvent @event when StateData is ProcessingStateData data:
                     data.Connecting.Remove(@event.ProjectId);
                     data.SuccessfulConnections += 1;
-                    if (data.Connecting.Count == 0) return FinishSuccessfully();
+                    if (data.Connecting.Count == 0) return FinishSuccessfully(data.GroupId);
                     break;
 
                 case ProjectFailedToConnectEvent @event when StateData is ProcessingStateData data:
                     data.Connecting.Remove(@event.ProjectId);
                     data.FailedConnections += 1;
-                    if (data.Connecting.Count == 0) return FinishSuccessfully();
+                    if (data.Connecting.Count == 0) return FinishSuccessfully(data.GroupId);
                     break;
             }
 
@@ -136,7 +138,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             return Stop();
         }
 
-        private State<SagaState, ISagaStateData> FinishSuccessfully()
+        private State<SagaState, ISagaStateData> FinishSuccessfully(string groupId)
         {
             if (StateData is ProcessingStateData data)
             {
@@ -165,7 +167,11 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             {
                 TransactionId = StateData.TransactionId,
                 Message = "Your group is ready to use!",
-                Success = true
+                Success = true,
+                Args = new Dictionary<string, string>
+                {
+                    ["groupId"] = groupId
+                }
             });
 
             return Stop();

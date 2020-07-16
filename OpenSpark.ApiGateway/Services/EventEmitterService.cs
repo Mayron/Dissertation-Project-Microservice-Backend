@@ -1,12 +1,11 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using OpenSpark.Shared.Events;
-using OpenSpark.Shared.Events.Sagas;
 
 namespace OpenSpark.ApiGateway.Services
 {
     public interface IEventEmitterService
     {
         void BroadcastToClient(string connectionId, string clientSideMethod, object eventData);
+
         void BroadcastToGroup(string groupId, string clientSideMethod, object eventData);
     }
 

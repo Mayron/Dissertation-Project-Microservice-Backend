@@ -11,5 +11,6 @@ namespace OpenSpark.ApiGateway.Models.StateData.CreateGroup
         public List<string> Connecting { get; set; }
         public int SuccessfulConnections { get; set; }
         public int FailedConnections { get; set; }
+        public string GroupId { get; set; }
     }
 }
