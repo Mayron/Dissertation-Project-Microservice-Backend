@@ -18,6 +18,7 @@ namespace OpenSpark.ApiGateway.Services
 
         void SendDiscussionsCommand(ICommand command, IActorRef callback = null);
         void SendGroupsCommand(ICommand command, IActorRef callback = null);
+        void SendProjectsCommand(ICommand command, IActorRef callback = null);
         IActorRef CreateSagaActor(ISagaExecutionCommand command);
     }
 
@@ -25,15 +26,17 @@ namespace OpenSpark.ApiGateway.Services
     {
         private readonly IConfiguration _configuration;
         private readonly IEventEmitterService _eventEmitter;
+        private readonly IFirestoreService _firestoreService;
 
         public ActorSystem LocalSystem { get; }
         public IActorRef SagaManager { get; }
         public IActorRef CallbackHandler { get; }
 
-        public ActorSystemService(IConfiguration configuration, IEventEmitterService eventEmitter)
+        public ActorSystemService(IConfiguration configuration, IEventEmitterService eventEmitter, IFirestoreService firestoreService)
         {
             _configuration = configuration;
             _eventEmitter = eventEmitter;
+            _firestoreService = firestoreService;
 
             // Create local WebApiSystem
             var configString = File.ReadAllText("webapi-system.conf");
@@ -59,6 +62,13 @@ namespace OpenSpark.ApiGateway.Services
             groupManager.Tell(command, callback ?? CallbackHandler);
         }
 
+        public void SendProjectsCommand(ICommand command, IActorRef callback = null)
+        {
+            var projectsUrl = _configuration["akka:ProjectsRemoteUrl"];
+            var projectsManager = LocalSystem.ActorSelection($"{projectsUrl}/ProjectManager");
+            projectsManager.Tell(command, callback ?? CallbackHandler);
+        }
+
         public IActorRef CreateSagaActor(ISagaExecutionCommand command)
         {
             var actorName = $"{command.SagaName}-{command.TransactionId}";
@@ -69,9 +79,9 @@ namespace OpenSpark.ApiGateway.Services
                     LocalSystem.ActorOf(
                         Props.Create(() => new CreatePostSagaActor(this, _eventEmitter)), actorName),
 
-                nameof(ExecuteCreateGroupSagaCommand) => 
+                nameof(CreateGroupSagaActor) => 
                     LocalSystem.ActorOf(
-                        Props.Create(() => new CreateGroupSagaActor(this)), actorName),
+                        Props.Create(() => new CreateGroupSagaActor(this, _firestoreService)), actorName),
 
                 _ => throw new Exception($"Failed to find SagaActor: {command.SagaName}"),
             };

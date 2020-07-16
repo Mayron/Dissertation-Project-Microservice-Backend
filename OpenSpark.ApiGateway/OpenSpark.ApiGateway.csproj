@@ -36,9 +36,5 @@
     </Content>
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Models\StateData\CreateGroup\" />
-  </ItemGroup>
-
 
 </Project>

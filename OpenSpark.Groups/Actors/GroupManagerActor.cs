@@ -1,13 +1,8 @@
-﻿using System;
-using Akka.Actor;
+﻿using Akka.Actor;
+using OpenSpark.Shared.Commands.Sagas.CreateGroup;
 using OpenSpark.Shared.Commands.Sagas.CreatePost;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using OpenSpark.Shared.Commands.Sagas.CreateGroup;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
-using OpenSpark.Shared;
 
 namespace OpenSpark.Groups.Actors
 {
@@ -27,9 +22,8 @@ namespace OpenSpark.Groups.Actors
 
             Receive<CreateGroupCommand>(command =>
             {
-                var groupId = Utils.GenerateRandomId();
-                //command.Name
-
+                var actorRef = GetGroupChildActor(command.TransactionId.ToString());
+                actorRef.Forward(command);
             });
 
             Receive<Terminated>(terminated =>
@@ -41,18 +35,16 @@ namespace OpenSpark.Groups.Actors
             });
         }
 
-
-
-        private IActorRef GetGroupChildActor(string groupId)
+        private IActorRef GetGroupChildActor(string id)
         {
-            if (_children.ContainsKey(groupId))
-                return _children[groupId];
+            if (_children.ContainsKey(id))
+                return _children[id];
 
             var groupActor = Context.ActorOf(
-                Props.Create(() => new GroupActor(groupId)), $"Group-{groupId}");
+                Props.Create(() => new GroupActor(id)), $"Group-{id}");
 
             Context.Watch(groupActor);
-            _children = _children.Add(groupId, groupActor);
+            _children = _children.Add(id, groupActor);
 
             return groupActor;
         }

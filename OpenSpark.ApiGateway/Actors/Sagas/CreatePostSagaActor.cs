@@ -3,8 +3,8 @@ using OpenSpark.ApiGateway.Models.StateData;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Shared.Commands.Sagas.CreatePost;
 using OpenSpark.Shared.Commands.Sagas.ExecutionCommands;
-using OpenSpark.Shared.Events;
 using OpenSpark.Shared.Events.Sagas;
+using OpenSpark.Shared.Events.Sagas.CreatePost;
 using System;
 
 namespace OpenSpark.ApiGateway.Actors.Sagas
@@ -34,9 +34,17 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
 
             WhenUnhandled(ev =>
             {
-                Console.WriteLine($"Unexpected message received: {ev.FsmEvent}. Current State: {StateName}");
+                if (!(ev.FsmEvent is SagaErrorEvent error))
+                {
+                    Console.WriteLine($"Unexpected message received: {ev.FsmEvent}. Current State: {StateName}");
+                    return Stay();
+                };
 
-                if (!(ev.FsmEvent is ErrorEvent error)) return Stay();
+                if (error.TransactionId != StateData.TransactionId)
+                {
+                    Console.WriteLine($"Expected SagaErrorEvent to have transaction Id {StateData.TransactionId} but received {error.TransactionId}. Error message: {error.Message}");
+                    return Stay();
+                }
 
                 Console.WriteLine(error.Message);
                 return StopAndSendError("Oops! Something unexpected happened.");
@@ -50,7 +58,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             _actorSystemService.SendGroupsCommand(new VerifyUserPostRequestCommand
             {
                 TransactionId = command.TransactionId,
-                UserId = command.User.UserId,
+                UserId = command.User.AuthUserId,
                 GroupId = command.GroupId,
             }, Self);
 
@@ -103,7 +111,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
 
                     _eventEmitter.BroadcastToGroup(@event.GroupId, "PostAdded", @event.Post);
 
-                    _actorSystemService.CallbackHandler.Tell(new SagaFinishedEvent
+                    _actorSystemService.CallbackHandler.Tell(new SagaMessageEmittedEvent
                     {
                         TransactionId = StateData.TransactionId,
                         Message = "New post created successfully.",
@@ -121,7 +129,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
 
         private State<SagaState, ISagaStateData> StopAndSendError(string errorMessage)
         {
-            _actorSystemService.CallbackHandler.Tell(new SagaFinishedEvent
+            _actorSystemService.CallbackHandler.Tell(new SagaMessageEmittedEvent
             {
                 TransactionId = StateData.TransactionId,
                 Message = errorMessage,

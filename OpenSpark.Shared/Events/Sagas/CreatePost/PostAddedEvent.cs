@@ -1,7 +1,7 @@
 ﻿using System;
 using OpenSpark.Shared.ViewModels;
 
-namespace OpenSpark.Shared.Events.Sagas
+namespace OpenSpark.Shared.Events.Sagas.CreatePost
 {
     public class PostAddedEvent : ISagaEvent
     {

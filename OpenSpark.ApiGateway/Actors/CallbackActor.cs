@@ -41,7 +41,7 @@ namespace OpenSpark.ApiGateway.Actors
                 _subscriptions = _subscriptions.Add(command.TransactionId, new ClientSubscription(command.Callback, command.ConnectionId));
             });
 
-            Receive<SagaFinishedEvent>(@event =>
+            Receive<SagaMessageEmittedEvent>(@event =>
             {
                 if (_subscriptions.ContainsKey(@event.TransactionId))
                 {

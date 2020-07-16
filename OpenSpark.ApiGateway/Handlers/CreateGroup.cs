@@ -1,19 +1,16 @@
-﻿using MediatR;
+﻿using Akka.Actor;
+using MediatR;
 using OpenSpark.ApiGateway.InputModels;
 using OpenSpark.ApiGateway.Models;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Domain;
-using OpenSpark.Shared.Commands.Sagas;
-using Akka.Actor;
+using OpenSpark.Shared.Commands.Sagas.ExecutionCommands;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using OpenSpark.Shared;
-using OpenSpark.Shared.Commands.Sagas.ExecutionCommands;
-using Raven.Client;
+using OpenSpark.ApiGateway.Actors.Sagas;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
@@ -23,7 +20,7 @@ namespace OpenSpark.ApiGateway.Handlers
         {
             public NewGroupInputModel Model { get; }
             public ClaimsPrincipal User { get; }
-            
+
             public Query(NewGroupInputModel model, ClaimsPrincipal user)
             {
                 Model = model;
@@ -53,17 +50,14 @@ namespace OpenSpark.ApiGateway.Handlers
                 var transactionId = Guid.NewGuid();
                 _actorSystemService.SagaManager.Tell(new ExecuteCreateGroupSagaCommand
                 {
+                    SagaName = nameof(CreateGroupSagaActor),
                     TransactionId = transactionId,
-                    Group = new Group
-                    {
-                        Name = query.Model.Name,
-                        About = query.Model.About,
-                        CategoryId = query.Model.CategoryId,
-                        Tags = query.Model.Tags,
-                        Connected = query.Model.Connected,
-                        OwnerUserId = user.UserId,
-                        Members = new List<Member> { new Member {  UserId = user.UserId } }
-                    },
+                    Name = query.Model.Name,
+                    About = query.Model.About,
+                    CategoryId = query.Model.CategoryId,
+                    Tags = query.Model.Tags,
+                    Connecting = query.Model.Connected,
+                    OwnerUserId = user.AuthUserId,
                     User = user
                 });
 

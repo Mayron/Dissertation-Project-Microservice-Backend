@@ -2,10 +2,10 @@
 
 namespace OpenSpark.Shared.Events.Sagas
 {
-    public class SagaFinishedEvent : ISagaEvent
+    public class ProjectFailedToConnectEvent
     {
         public Guid TransactionId { get; set; }
-        public bool Success { get; set; }
+        public string ProjectId { get; set; }
         public string Message { get; set; }
     }
 }

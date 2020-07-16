@@ -1,47 +1,47 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Akka.Actor;
-using Akka.Dispatch.SysMsg;
+﻿using Akka.Actor;
 using OpenSpark.Domain;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Commands.Sagas.CreatePost;
 using OpenSpark.Shared.Events.Sagas;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using OpenSpark.Shared.Events.Sagas.CreatePost;
 
 namespace OpenSpark.Groups.Actors
 {
     public class VerifyUserPostActor : ReceiveActor
     {
-        private readonly Group _group;
+        private readonly string _groupId;
 
-        public VerifyUserPostActor(Group group)
+        public VerifyUserPostActor(string groupId)
         {
-            _group = group;
+            _groupId = groupId;
 
             Receive<VerifyUserPostRequestCommand>(command =>
             {
                 var verified = false;
-                var bannedUser = _group.BannedUsers.FirstOrDefault(m => m.UserId == command.UserId);
+                var group = FetchGroupDocument(command.TransactionId);
+
+                var bannedUser = group.BannedUsers.FirstOrDefault(m => m.UserId == command.UserId);
 
                 if (bannedUser != null)
                 {
-                    var member = _group.Members.FirstOrDefault(m => m.UserId == command.UserId);
+                    var member = group.Members.FirstOrDefault(m => m.UserId == command.UserId);
                     var userIsGroupMember = member != null;
 
                     // Check if member has required CanPost permission
                     if (userIsGroupMember)
                     {
-                        if (MemberHasRequiredPermission(member, AppConstants.Permissions.CanPost))
+                        if (MemberHasRequiredPermission(group.Roles, member, AppConstants.Permissions.CanPost))
                         {
                             verified = true;
                         }
                     }
-                    else if (_group.VisibilityStatus != VisibilityStatus.Private)
+                    else if (group.VisibilityStatus != VisibilityStatus.Private)
                     {
                         // user is treated as "Non-Members" Role
-                        var nonMemberRole = _group.Roles.Single(r => r.Id == AppConstants.ImplicitRoles.NonMembersRole);
+                        var nonMemberRole = group.Roles.Single(r => r.Id == AppConstants.ImplicitRoles.NonMembersRole);
 
                         // Check if user can post to this public/unlisted group
                         if (nonMemberRole.PermissionIds.Any(pid => pid == AppConstants.Permissions.CanPost))
@@ -64,10 +64,28 @@ namespace OpenSpark.Groups.Actors
             });
         }
 
-        public bool MemberHasRequiredPermission(Member member, Guid permissionId)
+        public bool MemberHasRequiredPermission(List<Role> roles, Member member, Guid permissionId)
         {
-            return member.RoleIds.Any(roleId => _group.Roles.Single(r => r.Id == roleId)
+            return member.RoleIds.Any(roleId => roles.Single(r => r.Id == roleId)
                     .PermissionIds.Any(pid => pid == permissionId));
+        }
+
+        private Group FetchGroupDocument(Guid transactionId)
+        {
+            using var session = DocumentStoreSingleton.Store.OpenSession();
+
+            var group = session.Query<Group>().SingleOrDefault(g => g.GroupId == _groupId);
+
+            if (group != null) return group;
+
+            var message = $"Failed to retrieve group: {_groupId}";
+
+            Sender.Tell(new SagaErrorEvent { 
+                Message = message, 
+                TransactionId = transactionId
+            });
+
+            throw new ActorKilledException(message);
         }
     }
 }

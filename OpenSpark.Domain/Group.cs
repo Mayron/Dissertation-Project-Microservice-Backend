@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace OpenSpark.Domain
 {
@@ -15,5 +16,6 @@ namespace OpenSpark.Domain
         public List<string> Tags { get; set; }
         public List<string> Connected { get; set; }
         public string OwnerUserId { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace OpenSpark.Shared.Events.Sagas
+namespace OpenSpark.Shared.Events.Sagas.CreatePost
 {
     public class UserVerificationFailedEvent : ISagaEvent
     {
