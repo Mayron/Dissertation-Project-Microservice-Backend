@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Akka.Actor;
 using MediatR;
 using OpenSpark.ApiGateway.Services;
-using OpenSpark.Shared.Commands.Sagas;
+using OpenSpark.Shared.Commands;
 
 namespace OpenSpark.ApiGateway.Handlers
 {

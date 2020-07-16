@@ -1,11 +1,11 @@
 ﻿using Akka.Actor;
 using OpenSpark.Domain;
 using OpenSpark.Shared;
-using OpenSpark.Shared.Commands.Sagas.CreatePost;
 using OpenSpark.Shared.Events.Sagas;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenSpark.Shared.Commands.Posts;
 using OpenSpark.Shared.Events.Sagas.CreatePost;
 
 namespace OpenSpark.Groups.Actors
@@ -38,7 +38,7 @@ namespace OpenSpark.Groups.Actors
                             verified = true;
                         }
                     }
-                    else if (group.VisibilityStatus != VisibilityStatus.Private)
+                    else if (group.Visibility != VisibilityStatus.Private)
                     {
                         // user is treated as "Non-Members" Role
                         var nonMemberRole = group.Roles.Single(r => r.Id == AppConstants.ImplicitRoles.NonMembersRole);

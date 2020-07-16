@@ -1,11 +1,11 @@
 ﻿using Akka.Actor;
 using OpenSpark.ApiGateway.Models.StateData;
 using OpenSpark.ApiGateway.Services;
-using OpenSpark.Shared.Commands.Sagas.CreatePost;
-using OpenSpark.Shared.Commands.Sagas.ExecutionCommands;
 using OpenSpark.Shared.Events.Sagas;
 using OpenSpark.Shared.Events.Sagas.CreatePost;
 using System;
+using OpenSpark.Shared.Commands.Posts;
+using OpenSpark.Shared.Commands.SagaExecutionCommands;
 
 namespace OpenSpark.ApiGateway.Actors.Sagas
 {
@@ -55,7 +55,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
         {
             if (!(fsmEvent.FsmEvent is ExecuteAddPostSagaCommand command)) return null;
 
-            _actorSystemService.SendGroupsCommand(new VerifyUserPostRequestCommand
+            _actorSystemService.SendGroupsMessage(new VerifyUserPostRequestCommand
             {
                 TransactionId = command.TransactionId,
                 UserId = command.User.AuthUserId,
@@ -77,7 +77,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                     }
 
                     // User verified successfully. Begin adding post.
-                    _actorSystemService.SendDiscussionsCommand(new CreatePostCommand
+                    _actorSystemService.SendDiscussionsMessage(new CreatePostCommand
                     {
                         TransactionId = StateData.TransactionId,
                     }, Self);

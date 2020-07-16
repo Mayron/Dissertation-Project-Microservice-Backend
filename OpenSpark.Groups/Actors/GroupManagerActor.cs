@@ -1,8 +1,8 @@
 ﻿using Akka.Actor;
-using OpenSpark.Shared.Commands.Sagas.CreateGroup;
-using OpenSpark.Shared.Commands.Sagas.CreatePost;
 using System.Collections.Immutable;
 using System.Linq;
+using OpenSpark.Shared.Commands.Groups;
+using OpenSpark.Shared.Commands.Posts;
 
 namespace OpenSpark.Groups.Actors
 {
@@ -16,13 +16,13 @@ namespace OpenSpark.Groups.Actors
 
             Receive<VerifyUserPostRequestCommand>(command =>
             {
-                var actorRef = GetGroupChildActor(command.GroupId);
+                var actorRef = GetChildActor(command.GroupId);
                 actorRef.Forward(command);
             });
 
             Receive<CreateGroupCommand>(command =>
             {
-                var actorRef = GetGroupChildActor(command.TransactionId.ToString());
+                var actorRef = GetChildActor(command.TransactionId.ToString());
                 actorRef.Forward(command);
             });
 
@@ -35,18 +35,18 @@ namespace OpenSpark.Groups.Actors
             });
         }
 
-        private IActorRef GetGroupChildActor(string id)
+        private IActorRef GetChildActor(string id)
         {
             if (_children.ContainsKey(id))
                 return _children[id];
 
-            var groupActor = Context.ActorOf(
+            var childActor = Context.ActorOf(
                 Props.Create(() => new GroupActor(id)), $"Group-{id}");
 
-            Context.Watch(groupActor);
-            _children = _children.Add(id, groupActor);
+            Context.Watch(childActor);
+            _children = _children.Add(id, childActor);
 
-            return groupActor;
+            return childActor;
         }
     }
 }

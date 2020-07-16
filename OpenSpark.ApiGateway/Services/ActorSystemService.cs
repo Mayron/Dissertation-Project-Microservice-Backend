@@ -6,7 +6,7 @@ using OpenSpark.Shared.Commands;
 using System.IO;
 using OpenSpark.ApiGateway.Actors;
 using OpenSpark.ApiGateway.Actors.Sagas;
-using OpenSpark.Shared.Commands.Sagas.ExecutionCommands;
+using OpenSpark.Shared.Commands.SagaExecutionCommands;
 
 namespace OpenSpark.ApiGateway.Services
 {
@@ -16,9 +16,9 @@ namespace OpenSpark.ApiGateway.Services
         IActorRef SagaManager { get; }
         IActorRef CallbackHandler { get; }
 
-        void SendDiscussionsCommand(ICommand command, IActorRef callback = null);
-        void SendGroupsCommand(ICommand command, IActorRef callback = null);
-        void SendProjectsCommand(ICommand command, IActorRef callback = null);
+        void SendDiscussionsMessage(object message, IActorRef callback = null);
+        void SendGroupsMessage(object message, IActorRef callback = null);
+        void SendProjectsMessage(object message, IActorRef callback = null);
         IActorRef CreateSagaActor(ISagaExecutionCommand command);
     }
 
@@ -48,25 +48,25 @@ namespace OpenSpark.ApiGateway.Services
             SagaManager = CreateSagaManagerActor();
         }
 
-        public void SendDiscussionsCommand(ICommand command, IActorRef callback = null)
+        public void SendDiscussionsMessage(object message, IActorRef callback = null)
         {
             var discussionsUrl = _configuration["akka:DiscussionsRemoteUrl"];
             var userManager = LocalSystem.ActorSelection($"{discussionsUrl}/UserManager");
-            userManager.Tell(command, callback ?? CallbackHandler);
+            userManager.Tell(message, callback ?? CallbackHandler);
         }
 
-        public void SendGroupsCommand(ICommand command, IActorRef callback = null)
+        public void SendGroupsMessage(object message, IActorRef callback = null)
         {
             var groupsUrl = _configuration["akka:GroupsRemoteUrl"];
             var groupManager = LocalSystem.ActorSelection($"{groupsUrl}/GroupManager");
-            groupManager.Tell(command, callback ?? CallbackHandler);
+            groupManager.Tell(message, callback ?? CallbackHandler);
         }
 
-        public void SendProjectsCommand(ICommand command, IActorRef callback = null)
+        public void SendProjectsMessage(object message, IActorRef callback = null)
         {
             var projectsUrl = _configuration["akka:ProjectsRemoteUrl"];
             var projectsManager = LocalSystem.ActorSelection($"{projectsUrl}/ProjectManager");
-            projectsManager.Tell(command, callback ?? CallbackHandler);
+            projectsManager.Tell(message, callback ?? CallbackHandler);
         }
 
         public IActorRef CreateSagaActor(ISagaExecutionCommand command)

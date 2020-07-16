@@ -1,16 +1,13 @@
 ﻿using System;
 using OpenSpark.Domain;
 
-namespace OpenSpark.Shared.Commands.Sagas.CreatePost
+namespace OpenSpark.Shared.Commands.Posts
 {
-    public class CreatePostCommand : ISagaCommand
+    public class CreatePostCommand : ICommand
     {
         public Post Post { get; set; }
         public string GroupId { get; set; }
         public Guid TransactionId { get; set; }
-
-        public CreatePostCommand()
-        {
-        }
+        public User User { get; set; }
     }
 }

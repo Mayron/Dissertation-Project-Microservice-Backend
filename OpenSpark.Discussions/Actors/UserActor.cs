@@ -1,8 +1,8 @@
-﻿using Akka.Actor;
+﻿using System;
+using Akka.Actor;
 using OpenSpark.Domain;
-using OpenSpark.Shared.Commands;
-using OpenSpark.Shared.Commands.Sagas;
-using OpenSpark.Shared.Commands.Sagas.CreatePost;
+using OpenSpark.Shared.Commands.Posts;
+using OpenSpark.Shared.Queries;
 
 namespace OpenSpark.Discussions.Actors
 {
@@ -16,6 +16,8 @@ namespace OpenSpark.Discussions.Actors
             _connectionId = connectionId;
             _user = user;
 
+            SetReceiveTimeout(TimeSpan.FromMinutes(1));
+
             Receive<CreatePostCommand>(handler =>
             {
                 // handle this command!
@@ -24,12 +26,17 @@ namespace OpenSpark.Discussions.Actors
                 // TODO: Should I Sender.Tell("some event occured!"); ??
             });
 
-            Receive<FetchNewsFeedCommand>(command =>
+            Receive<NewsFeedQuery>(command =>
             {
                 var newsFeedActor = Context.ActorOf(
                     Props.Create(() => new NewsFeedActor(_user)));
 
                 newsFeedActor.Forward(command);
+            });
+
+            Receive<ReceiveTimeout>(_ =>
+            {
+                Self.GracefulStop(TimeSpan.FromSeconds(5));
             });
         }
     }

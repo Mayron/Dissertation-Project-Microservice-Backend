@@ -2,7 +2,7 @@
 using System.Linq;
 using Akka.Actor;
 using OpenSpark.Shared.Commands;
-using OpenSpark.Shared.Commands.Sagas.CreateGroup;
+using OpenSpark.Shared.Commands.Projects;
 
 namespace OpenSpark.Projects.Actors
 {

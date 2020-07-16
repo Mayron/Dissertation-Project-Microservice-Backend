@@ -71,7 +71,7 @@ namespace OpenSpark.ApiGateway
                     };
                 });
 
-            services.AddMediatR(typeof(FetchNewsFeed.Handler).Assembly);
+            services.AddMediatR(typeof(FetchNewsFeed.Handler));
             services.AddSignalR(c => c.EnableDetailedErrors = true);
 
             // Deprecated for SignalR with observables hopefully?
@@ -96,6 +96,8 @@ namespace OpenSpark.ApiGateway
             app.UseRouting();
 
             app.UseAuthentication();
+            app.UseM
+
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

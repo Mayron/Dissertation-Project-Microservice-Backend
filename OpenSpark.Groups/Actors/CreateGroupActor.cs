@@ -1,12 +1,12 @@
 ﻿using Akka.Actor;
 using OpenSpark.Domain;
 using OpenSpark.Shared;
-using OpenSpark.Shared.Commands.Sagas.CreateGroup;
 using OpenSpark.Shared.Events.Sagas;
 using Raven.Client.Documents.Session;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenSpark.Shared.Commands.Groups;
 using OpenSpark.Shared.Events.Sagas.CreateGroup;
 
 namespace OpenSpark.Groups.Actors
@@ -40,7 +40,7 @@ namespace OpenSpark.Groups.Actors
                     Name = command.Name,
                     CategoryId = command.CategoryId,
                     Tags = command.Tags,
-                    VisibilityStatus = VisibilityStatus.Public, // TODO: Needs to be configurable on creation
+                    Visibility = VisibilityStatus.Public, // TODO: Needs to be configurable on creation
                     Connected = command.Connected,
                     Roles = new List<Role>(),
                     BannedUsers = new List<Member>(),

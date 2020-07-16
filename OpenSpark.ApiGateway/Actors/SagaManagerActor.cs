@@ -3,8 +3,8 @@ using System.Collections.Immutable;
 using System.Linq;
 using Akka.Actor;
 using OpenSpark.ApiGateway.Services;
-using OpenSpark.Shared.Commands.Sagas;
-using OpenSpark.Shared.Commands.Sagas.ExecutionCommands;
+using OpenSpark.Shared.Commands;
+using OpenSpark.Shared.Commands.SagaExecutionCommands;
 
 namespace OpenSpark.ApiGateway.Actors
 {
@@ -23,7 +23,7 @@ namespace OpenSpark.ApiGateway.Actors
         {
             switch (message)
             {
-                case ISagaCommand command:
+                case ICommand command:
                     var actorRef = GetChildActorRef(command);
                     actorRef?.Tell(command);
                     break;
@@ -35,7 +35,7 @@ namespace OpenSpark.ApiGateway.Actors
             }
         }
 
-        public IActorRef GetChildActorRef(ISagaCommand command)
+        public IActorRef GetChildActorRef(ICommand command)
         {
             if (_children.ContainsKey(command.TransactionId))
                 return _children[command.TransactionId];

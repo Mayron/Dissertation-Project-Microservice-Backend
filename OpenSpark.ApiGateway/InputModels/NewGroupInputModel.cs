@@ -9,6 +9,5 @@ namespace OpenSpark.ApiGateway.InputModels
         public string CategoryId { get; set; }
         public List<string> Tags { get; set; }
         public List<string> Connected { get; set; }
-        public string OwnerUserId { get; set; }
     }
 }

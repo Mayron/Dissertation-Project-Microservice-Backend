@@ -1,7 +1,7 @@
 ﻿using System;
 using OpenSpark.Domain;
 
-namespace OpenSpark.Shared.Commands.Sagas.ExecutionCommands
+namespace OpenSpark.Shared.Commands.SagaExecutionCommands
 {
     public class ExecuteAddPostSagaCommand : ISagaExecutionCommand
     {

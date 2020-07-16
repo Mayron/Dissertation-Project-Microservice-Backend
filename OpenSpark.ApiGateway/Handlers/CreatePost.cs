@@ -4,12 +4,12 @@ using OpenSpark.ApiGateway.InputModels;
 using OpenSpark.ApiGateway.Models;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Domain;
-using OpenSpark.Shared.Commands.Sagas.ExecutionCommands;
 using System;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 using OpenSpark.ApiGateway.Actors.Sagas;
+using OpenSpark.Shared.Commands.SagaExecutionCommands;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
@@ -27,7 +27,6 @@ namespace OpenSpark.ApiGateway.Handlers
                 GroupId = model.GroupId;
                 Post = new Post
                 {
-                    AuthorUserId = model.AuthorUserId,
                     Body = model.Body,
                     Title = model.Title,
                     CreatedAt = DateTime.Now

@@ -5,6 +5,7 @@ using OpenSpark.ApiGateway.Handlers;
 using OpenSpark.ApiGateway.InputModels;
 using System.Linq;
 using System.Threading.Tasks;
+using OpenSpark.ApiGateway.Models;
 
 namespace OpenSpark.ApiGateway.Controllers
 {
@@ -24,17 +25,17 @@ namespace OpenSpark.ApiGateway.Controllers
         /// </summary>
         [Authorize]
         [HttpPost("create")]
-        public async Task<ActionResult<string>> Create(NewGroupInputModel model)
+        public async Task<ActionResult<ValidationResult>> Create(NewGroupInputModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState.Values.SelectMany(v => v.Errors));
 
-            var result = await _mediator.Send(new CreateGroup.Query(model, User));
+            var result = await _mediator.Send(new CreateGroup.Command(model, User));
 
             if (result.IsValid)
                 return Accepted(result);
 
-            return BadRequest(result.Message);
+            return BadRequest(result);
         }
     }
 }

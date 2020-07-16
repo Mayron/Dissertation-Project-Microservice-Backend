@@ -6,6 +6,7 @@ using OpenSpark.Discussions.Indexes;
 using OpenSpark.Domain;
 using OpenSpark.Shared.Commands;
 using OpenSpark.Shared.Events;
+using OpenSpark.Shared.Queries;
 using OpenSpark.Shared.ViewModels;
 using Raven.Client.Documents.Linq;
 
@@ -19,13 +20,13 @@ namespace OpenSpark.Discussions.Actors
         {
             _user = user;
 
-            Receive<FetchNewsFeedCommand>(command =>
+            Receive<NewsFeedQuery>(query =>
             {
                 var posts = _user == null ? GetMostPopularPosts() : GetUserNewsFeed();
 
                 var payload = new NewsFeedReceivedEvent
                 {
-                    ConnectionId = command.ConnectionId,
+                    ConnectionId = query.ConnectionId,
                     Posts = MapRequests(posts)
                 };
 

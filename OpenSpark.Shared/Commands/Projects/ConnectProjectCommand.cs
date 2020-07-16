@@ -1,9 +1,9 @@
 ﻿using System;
-using OpenSpark.Shared.Commands.Sagas;
+using OpenSpark.Domain;
 
-namespace OpenSpark.Shared.Commands
+namespace OpenSpark.Shared.Commands.Projects
 {
-    public class ConnectProjectCommand : ISagaCommand
+    public class ConnectProjectCommand : ICommand
     {
         public string ProjectId { get; set; }
         public string GroupId { get; set; }
@@ -11,5 +11,6 @@ namespace OpenSpark.Shared.Commands
 
         // Can be Empty if not being used by a saga
         public Guid TransactionId { get; set; }
+        public User User { get; set; }
     }
 }

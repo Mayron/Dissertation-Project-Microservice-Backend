@@ -1,8 +1,8 @@
 ﻿using OpenSpark.Domain;
 
-namespace OpenSpark.Shared.Commands
+namespace OpenSpark.Shared.Queries
 {
-    public class ConnectUserCommand : ICommand
+    public class NewsFeedQuery : IQuery
     {
         public string ConnectionId { get; set; }
         public User User { get; set; }

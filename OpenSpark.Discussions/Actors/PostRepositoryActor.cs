@@ -1,5 +1,5 @@
 ﻿using Akka.Actor;
-using OpenSpark.Shared.Commands.Sagas.CreatePost;
+using OpenSpark.Shared.Commands.Posts;
 
 namespace OpenSpark.Discussions.Actors
 {

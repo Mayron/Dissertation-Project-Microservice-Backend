@@ -2,12 +2,13 @@
 using OpenSpark.ApiGateway.Models.StateData;
 using OpenSpark.ApiGateway.Models.StateData.CreateGroup;
 using OpenSpark.ApiGateway.Services;
-using OpenSpark.Shared.Commands.Sagas.CreateGroup;
-using OpenSpark.Shared.Commands.Sagas.ExecutionCommands;
 using OpenSpark.Shared.Events.Sagas;
 using OpenSpark.Shared.Events.Sagas.CreateGroup;
 using System;
 using System.Collections.Generic;
+using OpenSpark.Shared.Commands.Groups;
+using OpenSpark.Shared.Commands.Projects;
+using OpenSpark.Shared.Commands.SagaExecutionCommands;
 
 namespace OpenSpark.ApiGateway.Actors.Sagas
 {
@@ -42,7 +43,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             if (fsmEvent.FsmEvent is ExecuteCreateGroupSagaCommand command)
             {
                 // Send command to Groups context to create new group
-                _actorSystemService.SendGroupsCommand(new CreateGroupCommand
+                _actorSystemService.SendGroupsMessage(new CreateGroupCommand
                 {
                     TransactionId = command.TransactionId,
                     OwnerUserId = command.OwnerUserId,
@@ -77,7 +78,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             {
                 if (data.Connecting.Count <= 0) return FinishSuccessfully(@event.Group.GroupId);
 
-                _actorSystemService.SendProjectsCommand(new ConnectAllProjectsCommand
+                _actorSystemService.SendProjectsMessage(new ConnectAllProjectsCommand
                 {
                     TransactionId = @event.TransactionId,
                     GroupId = @event.Group.GroupId,
@@ -94,7 +95,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
 
             Console.WriteLine("Rolling back CreateGroupSaga.");
 
-            _actorSystemService.SendGroupsCommand(new DeleteGroupCommand
+            _actorSystemService.SendGroupsMessage(new DeleteGroupCommand
             {
                 TransactionId = @event.TransactionId,
                 GroupId = @event.Group.GroupId

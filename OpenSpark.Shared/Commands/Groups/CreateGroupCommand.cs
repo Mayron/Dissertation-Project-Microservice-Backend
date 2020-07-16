@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using OpenSpark.Domain;
 
-namespace OpenSpark.Shared.Commands.Sagas.CreateGroup
+namespace OpenSpark.Shared.Commands.Groups
 {
-    public class CreateGroupCommand : ISagaCommand
+    public class CreateGroupCommand : ICommand
     {
         public Guid TransactionId { get; set; }
         public string Name { get; set; }
@@ -11,6 +12,6 @@ namespace OpenSpark.Shared.Commands.Sagas.CreateGroup
         public List<string> Tags { get; set; }
         public string CategoryId { get; set; }
         public string About { get; set; }
-        public string OwnerUserId { get; set; }
+        public User User { get; set; }
     }
 }

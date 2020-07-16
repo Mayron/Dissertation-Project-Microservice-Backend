@@ -1,34 +1,32 @@
 ﻿using Akka.Actor;
 using MediatR;
+using OpenSpark.ApiGateway.Actors.Sagas;
 using OpenSpark.ApiGateway.InputModels;
 using OpenSpark.ApiGateway.Models;
 using OpenSpark.ApiGateway.Services;
-using OpenSpark.Domain;
-using OpenSpark.Shared.Commands.Sagas.ExecutionCommands;
 using System;
-using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using OpenSpark.ApiGateway.Actors.Sagas;
+using OpenSpark.Shared.Commands.SagaExecutionCommands;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
     public class CreateGroup
     {
-        public class Query : IRequest<ValidationResult>
+        public class Command : IRequest<ValidationResult>
         {
             public NewGroupInputModel Model { get; }
             public ClaimsPrincipal User { get; }
 
-            public Query(NewGroupInputModel model, ClaimsPrincipal user)
+            public Command(NewGroupInputModel model, ClaimsPrincipal user)
             {
                 Model = model;
                 User = user;
             }
         }
 
-        public class Handler : IRequestHandler<Query, ValidationResult>
+        public class Handler : IRequestHandler<Command, ValidationResult>
         {
             private readonly IActorSystemService _actorSystemService;
             private readonly IFirestoreService _firestoreService;
@@ -39,10 +37,10 @@ namespace OpenSpark.ApiGateway.Handlers
                 _firestoreService = firestoreService;
             }
 
-            public async Task<ValidationResult> Handle(Query query, CancellationToken cancellationToken)
+            public async Task<ValidationResult> Handle(Command command, CancellationToken cancellationToken)
             {
                 // Verify
-                var user = await _firestoreService.GetUserAsync(query.User, cancellationToken);
+                var user = await _firestoreService.GetUserAsync(command.User, cancellationToken);
 
                 if (user == null)
                     return new ValidationResult(false, "Failed to validate user request");
@@ -52,12 +50,11 @@ namespace OpenSpark.ApiGateway.Handlers
                 {
                     SagaName = nameof(CreateGroupSagaActor),
                     TransactionId = transactionId,
-                    Name = query.Model.Name,
-                    About = query.Model.About,
-                    CategoryId = query.Model.CategoryId,
-                    Tags = query.Model.Tags,
-                    Connecting = query.Model.Connected,
-                    OwnerUserId = user.AuthUserId,
+                    Name = command.Model.Name,
+                    About = command.Model.About,
+                    CategoryId = command.Model.CategoryId,
+                    Tags = command.Model.Tags,
+                    Connecting = command.Model.Connected,
                     User = user
                 });
 

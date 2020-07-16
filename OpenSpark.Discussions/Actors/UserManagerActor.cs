@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Akka.Actor;
+using OpenSpark.Domain;
+using OpenSpark.Shared.Queries;
 using System.Collections.Immutable;
 using System.Linq;
-using Akka.Actor;
-using OpenSpark.Shared.Commands;
 
 namespace OpenSpark.Discussions.Actors
 {
@@ -16,56 +15,38 @@ namespace OpenSpark.Discussions.Actors
         {
             _children = ImmutableDictionary<string, IActorRef>.Empty;
 
-            Receive<ConnectUserCommand>(ConnectUser);
+            //            Receive<AddPostCommand>(command =>
+            //            {
+            //                _users[command.ConnectionId].Forward(command);
+            //            });
 
-            Receive<DisconnectUserCommand>(command =>
+            Receive<NewsFeedQuery>(query =>
             {
-                RemoveUser(command.ConnectionId);
+                var actorRef = GetChildActor(query.ConnectionId, query.User);
+                actorRef.Forward(query);
             });
 
             Receive<Terminated>(terminated =>
             {
                 Context.Unwatch(terminated.ActorRef);
+                if (!_children.Any(u => u.Value.Equals(terminated.ActorRef))) return;
+
                 _children = _children.Where(u => !u.Value.Equals(terminated.ActorRef)).ToImmutableDictionary();
             });
-
-//            Receive<AddPostCommand>(command =>
-//            {
-//                _users[command.ConnectionId].Forward(command);
-//            });
-
-            Receive<FetchNewsFeedCommand>(command =>
-            {
-                if (!_children.ContainsKey(command.ConnectionId))
-                {
-                    Console.WriteLine("Error - Attempted to fetch news feed for non-existent user.");
-                    return;
-                };
-
-                _children[command.ConnectionId].Forward(command);
-            });
         }
 
-        private void ConnectUser(ConnectUserCommand command)
+        private IActorRef GetChildActor(string id, User user)
         {
-            RemoveUser(command.ConnectionId);
+            if (_children.ContainsKey(id))
+                return _children[id];
 
-            var userActor = Context.ActorOf(
-                Props.Create(() => new UserActor(command.ConnectionId, command.User)), $"User-{command.ConnectionId}");
+            var childActor = Context.ActorOf(
+                Props.Create(() => new UserActor(id, user)), $"User-{id}");
 
-            Context.Watch(userActor);
-            _children = _children.Add(command.ConnectionId, userActor);
-        }
+            Context.Watch(childActor);
+            _children = _children.Add(id, childActor);
 
-        private void RemoveUser(string connectionId)
-        {
-            if (!_children.ContainsKey(connectionId)) return;
-
-            var userActor = _children[connectionId];
-
-            Context.Unwatch(userActor);
-            userActor.GracefulStop(TimeSpan.FromSeconds(5));
-            _children = _children.Where(u => !u.Value.Equals(userActor)).ToImmutableDictionary();
+            return childActor;
         }
     }
 }

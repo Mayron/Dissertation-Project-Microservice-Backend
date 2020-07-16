@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using OpenSpark.Domain;
 
-namespace OpenSpark.Shared.Commands.Sagas.ExecutionCommands
+namespace OpenSpark.Shared.Commands.SagaExecutionCommands
 {
     public class ExecuteCreateGroupSagaCommand : ISagaExecutionCommand
     {
@@ -14,6 +14,5 @@ namespace OpenSpark.Shared.Commands.Sagas.ExecutionCommands
         public string CategoryId { get; set; }
         public List<string> Tags { get; set; }
         public List<string> Connecting { get; set; }
-        public string OwnerUserId { get; set; }
     }
 }
