@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using OpenSpark.ApiGateway.ApiHubEndpoints;
 
 namespace OpenSpark.ApiGateway.Services
 {

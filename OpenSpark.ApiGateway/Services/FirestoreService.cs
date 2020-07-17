@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using OpenSpark.Domain;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,13 +40,25 @@ namespace OpenSpark.ApiGateway.Services
 
                 if (snapShot != null && snapShot.Exists)
                 {
-                    return new User
+                    var user = new User
                     {
                         CreatedAt = snapShot.GetValue<Timestamp>("createdAt").ToDateTime(),
                         DisplayName = snapShot.GetValue<string>("displayName"),
                         Email = snapShot.GetValue<string>("email"),
                         AuthUserId = authId,
                     };
+
+                    if (snapShot.ContainsField("groups"))
+                        user.Groups = snapShot.GetValue<List<string>>("groups");
+
+                    if (snapShot.ContainsField("projects"))
+                        user.Projects = snapShot.GetValue<List<string>>("projects");
+
+                    if (snapShot.ContainsField("memberships"))
+                        user.Memberships = snapShot.GetValue<List<string>>("memberships");
+
+                    if (snapShot.ContainsField("subscriptions"))
+                        user.Subscriptions = snapShot.GetValue<List<string>>("subscriptions");
                 }
             }
             catch (Exception ex)

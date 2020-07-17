@@ -30,9 +30,20 @@ namespace OpenSpark.Groups.Actors
                 _groupCategoriesActor.Forward(query);
             });
 
+            Receive<UserGroupsQuery>(query =>
+            {
+//                query.
+//                foreach (var groupId in query.User.Groups)
+//                {
+//
+//                }
+                var actorRef = GetChildGroupActor(query.User.AuthUserId);
+                actorRef.Forward(query);
+            });
+
             Receive<CreateGroupCommand>(command =>
             {
-                var actorRef = GetChildActor(command.TransactionId.ToString());
+                var actorRef = GetChildGroupActor(command.TransactionId.ToString());
                 actorRef.Forward(command);
             });
 
@@ -47,11 +58,11 @@ namespace OpenSpark.Groups.Actors
 
         private void ForwardByGroupId(string groupId, IMessage message)
         {
-            var actorRef = GetChildActor(groupId);
+            var actorRef = GetChildGroupActor(groupId);
             actorRef.Forward(message);
         }
 
-        private IActorRef GetChildActor(string id)
+        private IActorRef GetChildGroupActor(string id)
         {
             if (_children.ContainsKey(id))
                 return _children[id];

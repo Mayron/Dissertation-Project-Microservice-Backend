@@ -7,5 +7,6 @@
         public string GroupId { get; set; }
         public string Name { get; set; }
         public string Visibility { get; set; }
+        public int TotalMembers { get; set; }
     }
 }

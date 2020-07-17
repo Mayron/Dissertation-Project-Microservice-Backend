@@ -1,11 +1,11 @@
-﻿using MediatR;
+﻿using System;
+using MediatR;
 using Microsoft.AspNetCore.SignalR;
 using OpenSpark.ApiGateway.Handlers;
-using System;
 
-namespace OpenSpark.ApiGateway
+namespace OpenSpark.ApiGateway.ApiHubEndpoints
 {
-    public class ApiHub : Hub
+    public partial class ApiHub : Hub
     {
         private readonly IMediator _mediator;
 
@@ -21,16 +21,6 @@ namespace OpenSpark.ApiGateway
         public void FetchNewsFeed(string callback)
         {
             _mediator.Send(new FetchNewsFeed.Query(Context.ConnectionId, callback));
-        }
-
-        public void FetchGroup(string groupId, string callback)
-        {
-            _mediator.Send(new FetchBasicGroupDetails.Query(groupId, Context.ConnectionId, callback));
-        }
-
-        public void FetchGroupCategories(string callback)
-        {
-            _mediator.Send(new FetchGroupCategories.Query(Context.ConnectionId, callback));
         }
 
         public void Subscribe(string callback, string token)

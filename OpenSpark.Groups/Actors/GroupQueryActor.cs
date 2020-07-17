@@ -73,7 +73,8 @@ namespace OpenSpark.Groups.Actors
                     CategoryName = category?.Name ?? "Unknown",
                     GroupId = result.GroupId,
                     Name = result.Name,
-                    Visibility = result.Visibility
+                    Visibility = result.Visibility,
+                    TotalMembers = result.TotalMembers
                 }
             });
 
