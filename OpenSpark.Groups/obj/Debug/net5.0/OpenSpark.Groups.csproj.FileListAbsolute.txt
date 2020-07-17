@@ -13,11 +13,14 @@ S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Group
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Groups\bin\Debug\net5.0\DotNetty.Handlers.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Groups\bin\Debug\net5.0\DotNetty.Transport.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Groups\bin\Debug\net5.0\Google.Protobuf.dll
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Groups\bin\Debug\net5.0\Lambda2Js.Signed.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Groups\bin\Debug\net5.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Groups\bin\Debug\net5.0\Microsoft.Extensions.Logging.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Groups\bin\Debug\net5.0\Microsoft.Extensions.Logging.Abstractions.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Groups\bin\Debug\net5.0\Microsoft.Win32.SystemEvents.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Groups\bin\Debug\net5.0\Newtonsoft.Json.dll
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Groups\bin\Debug\net5.0\Raven.Client.dll
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Groups\bin\Debug\net5.0\Sparrow.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Groups\bin\Debug\net5.0\System.Configuration.ConfigurationManager.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Groups\bin\Debug\net5.0\System.Drawing.Common.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Groups\bin\Debug\net5.0\System.Security.Cryptography.ProtectedData.dll
@@ -40,6 +43,3 @@ S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Group
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Groups\obj\Debug\net5.0\OpenSpark.Groups.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Groups\obj\Debug\net5.0\OpenSpark.Groups.pdb
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Groups\obj\Debug\net5.0\OpenSpark.Groups.genruntimeconfig.cache
-S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Groups\bin\Debug\net5.0\Lambda2Js.Signed.dll
-S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Groups\bin\Debug\net5.0\Raven.Client.dll
-S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Groups\bin\Debug\net5.0\Sparrow.dll

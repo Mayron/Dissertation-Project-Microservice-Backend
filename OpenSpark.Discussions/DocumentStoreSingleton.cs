@@ -8,13 +8,13 @@ namespace OpenSpark.Discussions
 {
     public static class DocumentStoreSingleton
     {
-        private static readonly Lazy<IDocumentStore> _store = new Lazy<IDocumentStore>(CreateDocumentStore);
+        private static readonly Lazy<IDocumentStore> LazyStore = new Lazy<IDocumentStore>(CreateDocumentStore);
 
-        public static IDocumentStore Store => _store.Value;
+        public static IDocumentStore Store => LazyStore.Value;
 
         private static IDocumentStore CreateDocumentStore()
         {
-            if (_store.IsValueCreated) return _store.Value;
+            if (LazyStore.IsValueCreated) return LazyStore.Value;
 
             const string databaseName = "OpenSpark.Discussions";
             const string url = "http://127.0.0.1:8080/";

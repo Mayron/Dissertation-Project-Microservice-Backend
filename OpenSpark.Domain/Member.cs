@@ -12,5 +12,6 @@ namespace OpenSpark.Domain
 
         // Should not contain implicit roles!
         public List<Guid> RoleIds { get; set; }
+        public string GroupId { get; set; }
     }
 }

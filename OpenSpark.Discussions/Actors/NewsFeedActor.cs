@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Akka.Actor;
+﻿using Akka.Actor;
 using OpenSpark.Discussions.Indexes;
 using OpenSpark.Domain;
-using OpenSpark.Shared.Commands;
-using OpenSpark.Shared.Events;
+using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.Queries;
 using OpenSpark.Shared.ViewModels;
 using Raven.Client.Documents.Linq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenSpark.Discussions.Actors
 {
@@ -24,10 +23,11 @@ namespace OpenSpark.Discussions.Actors
             {
                 var posts = _user == null ? GetMostPopularPosts() : GetUserNewsFeed();
 
-                var payload = new NewsFeedReceivedEvent
+                var payload = new PayloadEvent
                 {
                     ConnectionId = query.ConnectionId,
-                    Posts = MapRequests(posts)
+                    Callback = query.Callback,
+                    Payload = MapRequests(posts)
                 };
 
                 // This will go to the callback actor
@@ -74,7 +74,6 @@ namespace OpenSpark.Discussions.Actors
                 Title = r.Title,
                 Id = r.PostId
             }).ToList();
-        
 
         private static IEnumerable<GetGroupPosts.Result> SortResults(IRavenQueryable<GetGroupPosts.Result> query) => query
             .Take(10)
@@ -119,7 +118,7 @@ namespace OpenSpark.Discussions.Actors
                 var months = Convert.ToInt32(Math.Floor((double)ts.Days / 30));
                 return months <= 1 ? "one month ago" : months + " months ago";
             }
-          
+
             var years = Convert.ToInt32(Math.Floor((double)ts.Days / 365));
             return years <= 1 ? "one year ago" : years + " years ago";
         }

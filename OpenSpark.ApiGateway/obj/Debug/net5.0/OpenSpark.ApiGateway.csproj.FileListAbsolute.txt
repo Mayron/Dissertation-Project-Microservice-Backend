@@ -32,6 +32,7 @@ S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGa
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\Properties\launchSettings.json
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\OpenSpark.ApiGateway.exe
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\openspark-1e4bc-firebase-adminsdk-as86c-e46fdfc058.json
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\webapi-system.conf
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\OpenSpark.ApiGateway.deps.json
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\OpenSpark.ApiGateway.runtimeconfig.json
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\OpenSpark.ApiGateway.runtimeconfig.dev.json
@@ -59,6 +60,7 @@ S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGa
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\Grpc.Auth.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\Grpc.Core.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\Grpc.Core.Api.dll
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\Lambda2Js.Signed.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\MediatR.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\MediatR.Extensions.Microsoft.DependencyInjection.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
@@ -69,6 +71,8 @@ S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGa
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\Microsoft.IdentityModel.Tokens.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\Newtonsoft.Json.dll
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\Raven.Client.dll
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\Sparrow.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\System.Configuration.ConfigurationManager.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\System.IdentityModel.Tokens.Jwt.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\System.Linq.Async.dll
@@ -82,7 +86,9 @@ S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGa
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\runtimes\win\native\grpc_csharp_ext.x86.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\runtimes\win\lib\netstandard2.0\System.Security.Cryptography.ProtectedData.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\OpenSpark.Domain.dll
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\OpenSpark.Shared.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\OpenSpark.Domain.pdb
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\OpenSpark.Shared.pdb
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\obj\Debug\net5.0\OpenSpark.ApiGateway.csprojAssemblyReference.cache
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\obj\Debug\net5.0\OpenSpark.ApiGateway.AssemblyInfoInputs.cache
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\obj\Debug\net5.0\OpenSpark.ApiGateway.AssemblyInfo.cs
@@ -95,9 +101,3 @@ S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGa
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\obj\Debug\net5.0\OpenSpark.ApiGateway.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\obj\Debug\net5.0\OpenSpark.ApiGateway.pdb
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\obj\Debug\net5.0\OpenSpark.ApiGateway.genruntimeconfig.cache
-S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\OpenSpark.Shared.dll
-S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\OpenSpark.Shared.pdb
-S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\webapi-system.conf
-S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\Lambda2Js.Signed.dll
-S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\Raven.Client.dll
-S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\Sparrow.dll

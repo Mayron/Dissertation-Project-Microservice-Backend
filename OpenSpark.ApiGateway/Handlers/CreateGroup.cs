@@ -1,14 +1,18 @@
 ﻿using Akka.Actor;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using OpenSpark.ApiGateway.Actors.Sagas;
 using OpenSpark.ApiGateway.InputModels;
+using OpenSpark.ApiGateway.Middleware;
 using OpenSpark.ApiGateway.Models;
 using OpenSpark.ApiGateway.Services;
+using OpenSpark.Domain;
+using OpenSpark.Shared.Commands.SagaExecutionCommands;
 using System;
-using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using OpenSpark.Shared.Commands.SagaExecutionCommands;
+using OpenSpark.ApiGateway.Extensions;
+using OpenSpark.Shared.ViewModels;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
@@ -17,32 +21,28 @@ namespace OpenSpark.ApiGateway.Handlers
         public class Command : IRequest<ValidationResult>
         {
             public NewGroupInputModel Model { get; }
-            public ClaimsPrincipal User { get; }
 
-            public Command(NewGroupInputModel model, ClaimsPrincipal user)
+            public Command(NewGroupInputModel model)
             {
                 Model = model;
-                User = user;
             }
         }
 
         public class Handler : IRequestHandler<Command, ValidationResult>
         {
             private readonly IActorSystemService _actorSystemService;
-            private readonly IFirestoreService _firestoreService;
+            private readonly User _user;
 
-            public Handler(IActorSystemService actorSystemService, IFirestoreService firestoreService)
+            public Handler(IActorSystemService actorSystemService, IHttpContextAccessor context)
             {
                 _actorSystemService = actorSystemService;
-                _firestoreService = firestoreService;
+                _user = context.GetFirebaseUser();
             }
 
             public async Task<ValidationResult> Handle(Command command, CancellationToken cancellationToken)
             {
                 // Verify
-                var user = await _firestoreService.GetUserAsync(command.User, cancellationToken);
-
-                if (user == null)
+                if (_user == null)
                     return new ValidationResult(false, "Failed to validate user request");
 
                 var transactionId = Guid.NewGuid();
@@ -55,7 +55,7 @@ namespace OpenSpark.ApiGateway.Handlers
                     CategoryId = command.Model.CategoryId,
                     Tags = command.Model.Tags,
                     Connecting = command.Model.Connected,
-                    User = user
+                    User = _user
                 });
 
                 return new ValidationResult(true, transactionId.ToString());

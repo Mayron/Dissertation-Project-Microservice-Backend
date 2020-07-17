@@ -58,7 +58,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             _actorSystemService.SendGroupsMessage(new VerifyUserPostRequestCommand
             {
                 TransactionId = command.TransactionId,
-                UserId = command.User.AuthUserId,
+                User = command.User,
                 GroupId = command.GroupId,
             }, Self);
 

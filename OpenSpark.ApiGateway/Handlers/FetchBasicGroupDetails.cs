@@ -1,15 +1,11 @@
-﻿using Akka.Actor;
-using MediatR;
-using OpenSpark.ApiGateway.InputModels;
-using OpenSpark.ApiGateway.Models;
+﻿using MediatR;
+using Microsoft.AspNetCore.Http;
+using OpenSpark.ApiGateway.Extensions;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Domain;
-using System;
-using System.Collections.Generic;
-using System.Security.Claims;
+using OpenSpark.Shared.Queries;
 using System.Threading;
 using System.Threading.Tasks;
-using OpenSpark.ApiGateway.Actors.Sagas;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
@@ -18,36 +14,36 @@ namespace OpenSpark.ApiGateway.Handlers
         public class Query : IRequest<Unit>
         {
             public string GroupId { get; }
-            public ClaimsPrincipal User { get; }
             public string ConnectionId { get; }
+            public string Callback { get; }
 
-            public Query(string groupId, ClaimsPrincipal user, string connectionId)
+            public Query(string groupId, string connectionId, string callback)
             {
                 GroupId = groupId;
-                User = user;
                 ConnectionId = connectionId;
+                Callback = callback;
             }
         }
 
         public class Handler : IRequestHandler<Query, Unit>
         {
             private readonly IActorSystemService _actorSystemService;
-            private readonly IFirestoreService _firestoreService;
+            private readonly User _user;
 
-            public Handler(IActorSystemService actorSystemService, IFirestoreService firestoreService)
+            public Handler(IActorSystemService actorSystemService, IHttpContextAccessor context)
             {
                 _actorSystemService = actorSystemService;
-                _firestoreService = firestoreService;
+                _user = context.GetFirebaseUser();
             }
 
             public async Task<Unit> Handle(Query query, CancellationToken cancellationToken)
             {
-                // Verify
-                var user = await _firestoreService.GetUserAsync(query.User, cancellationToken);
-
-                _actorSystemService.SendDiscussionsMessage(new BasicGroupDetailsQuery
+                _actorSystemService.SendGroupsMessage(new BasicGroupDetailsQuery
                 {
-                    ConnectionId = query.ConnectionId
+                    GroupId = query.GroupId,
+                    ConnectionId = query.ConnectionId,
+                    Callback = query.Callback,
+                    User = _user
                 });
 
                 return Unit.Value;

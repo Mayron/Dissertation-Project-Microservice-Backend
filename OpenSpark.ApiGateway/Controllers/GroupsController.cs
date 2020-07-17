@@ -6,6 +6,7 @@ using OpenSpark.ApiGateway.InputModels;
 using System.Linq;
 using System.Threading.Tasks;
 using OpenSpark.ApiGateway.Models;
+using OpenSpark.Shared.ViewModels;
 
 namespace OpenSpark.ApiGateway.Controllers
 {
@@ -30,7 +31,7 @@ namespace OpenSpark.ApiGateway.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState.Values.SelectMany(v => v.Errors));
 
-            var result = await _mediator.Send(new CreateGroup.Command(model, User));
+            var result = await _mediator.Send(new CreateGroup.Command(model));
 
             if (result.IsValid)
                 return Accepted(result);

@@ -1,11 +1,11 @@
-﻿using System.Security.Claims;
-using MediatR;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using MediatR;
+using Microsoft.AspNetCore.Http;
+using OpenSpark.ApiGateway.Extensions;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Domain;
-using OpenSpark.Shared.Commands;
 using OpenSpark.Shared.Queries;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
@@ -14,34 +14,33 @@ namespace OpenSpark.ApiGateway.Handlers
         public class Query : IRequest
         {
             public string ConnectionId { get; }
-            public ClaimsPrincipal AuthUser { get; }
+            public string Callback { get; }
 
-            public Query(string connectionId, ClaimsPrincipal authUser)
+            public Query(string connectionId, string callback)
             {
                 ConnectionId = connectionId;
-                AuthUser = authUser;
+                Callback = callback;
             }
         }
 
         public class Handler : IRequestHandler<Query>
         {
             private readonly IActorSystemService _actorSystemService;
-            private readonly IFirestoreService _firestoreService;
+            private readonly User _user;
 
-            public Handler(IActorSystemService actorSystemService, IFirestoreService firestoreService)
+            public Handler(IActorSystemService actorSystemService, IHttpContextAccessor context)
             {
                 _actorSystemService = actorSystemService;
-                _firestoreService = firestoreService;
+                _user = context.GetFirebaseUser();
             }
 
             public async Task<Unit> Handle(Query query, CancellationToken cancellationToken)
             {
-                var user = await _firestoreService.GetUserAsync(query.AuthUser, cancellationToken);
-
                 _actorSystemService.SendDiscussionsMessage(new NewsFeedQuery
                 {
                     ConnectionId = query.ConnectionId,
-                    User = user
+                    Callback = query.Callback,
+                    User = _user
                 });
 
                 return Unit.Value;

@@ -18,17 +18,22 @@ namespace OpenSpark.ApiGateway
         /// Makes a request to the actor model to send the client with the specified connection ID new news feed posts.
         /// Posts are sent later asynchronously from a message hub event.
         /// </summary>
-        public void FetchNewsFeed()
+        public void FetchNewsFeed(string callback)
         {
-            _mediator.Send(new FetchNewsFeed.Query(Context.ConnectionId, Context.User));
+            _mediator.Send(new FetchNewsFeed.Query(Context.ConnectionId, callback));
         }
 
-        public void FetchGroup(string groupId)
+        public void FetchGroup(string groupId, string callback)
         {
-            _mediator.Send(new FetchBasicGroupDetails.Query(groupId, Context.User, Context.ConnectionId));
+            _mediator.Send(new FetchBasicGroupDetails.Query(groupId, Context.ConnectionId, callback));
         }
 
-        public void Subscribe(string token, string callback)
+        public void FetchGroupCategories(string callback)
+        {
+            _mediator.Send(new FetchGroupCategories.Query(Context.ConnectionId, callback));
+        }
+
+        public void Subscribe(string callback, string token)
         {
             if (Guid.TryParse(token, out var transactionId))
             {

@@ -1,10 +1,8 @@
 ﻿using Google.Cloud.Firestore;
 using Microsoft.Extensions.Configuration;
-using OpenSpark.ApiGateway.Extensions;
 using OpenSpark.Domain;
 using System;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,8 +11,6 @@ namespace OpenSpark.ApiGateway.Services
     public interface IFirestoreService
     {
         Task<User> GetUserAsync(string authId, CancellationToken cancellationToken);
-
-        Task<User> GetUserAsync(ClaimsPrincipal user, CancellationToken cancellationToken);
 
         Task<bool> AddUserToGroupsAsync(User user, params Group[] groups);
 
@@ -58,15 +54,6 @@ namespace OpenSpark.ApiGateway.Services
             }
 
             return null;
-        }
-
-        public async Task<User> GetUserAsync(ClaimsPrincipal userPrincipal, CancellationToken cancellationToken)
-        {
-            var authId = userPrincipal.GetFirebaseAuth();
-
-            if (string.IsNullOrWhiteSpace(authId)) return null;
-
-            return await GetUserAsync(authId, cancellationToken);
         }
 
         public async Task<bool> AddUserToGroupsAsync(User user, params Group[] groups)

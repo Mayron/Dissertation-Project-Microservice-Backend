@@ -1,6 +1,7 @@
 ﻿using Akka.Actor;
 using OpenSpark.Shared.Commands.Groups;
 using OpenSpark.Shared.Commands.Posts;
+using OpenSpark.Shared.Queries;
 
 namespace OpenSpark.Groups.Actors
 {
@@ -11,7 +12,8 @@ namespace OpenSpark.Groups.Actors
             Receive<VerifyUserPostRequestCommand>(command =>
             {
                 var verifyActor = Context.ActorOf(
-                    Props.Create(() => new VerifyUserPostActor(id)), $"VerifyUserPost-{command.TransactionId}");
+                    Props.Create(() => new VerifyUserPostActor(id, new GroupRepository())), 
+                    $"VerifyUserPost-{command.TransactionId}");
 
                 verifyActor.Forward(command);
             });
@@ -22,6 +24,15 @@ namespace OpenSpark.Groups.Actors
                     Props.Create<CreateGroupActor>(), $"CreateGroup-{command.TransactionId}");
 
                 verifyActor.Forward(command);
+            });
+
+            Receive<BasicGroupDetailsQuery>(query =>
+            {
+                var queryActor = Context.ActorOf(
+                    Props.Create(() => new GroupQueryActor(new GroupRepository())), 
+                    $"GroupQuery-{query.ConnectionId}");
+
+                queryActor.Forward(query);
             });
         }
     }

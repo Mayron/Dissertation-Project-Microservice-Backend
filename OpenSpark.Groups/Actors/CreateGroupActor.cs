@@ -1,13 +1,13 @@
 ﻿using Akka.Actor;
 using OpenSpark.Domain;
 using OpenSpark.Shared;
+using OpenSpark.Shared.Commands.Groups;
 using OpenSpark.Shared.Events.Sagas;
+using OpenSpark.Shared.Events.Sagas.CreateGroup;
 using Raven.Client.Documents.Session;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using OpenSpark.Shared.Commands.Groups;
-using OpenSpark.Shared.Events.Sagas.CreateGroup;
 
 namespace OpenSpark.Groups.Actors
 {
@@ -19,7 +19,8 @@ namespace OpenSpark.Groups.Actors
             {
                 using var session = DocumentStoreSingleton.Store.OpenSession();
 
-                if (!IsNewGroupValid(command, session))
+                var isValid = IsNewGroupValid(command, session);
+                if (!isValid)
                 {
                     Sender.Tell(new SagaErrorEvent
                     {
@@ -31,23 +32,31 @@ namespace OpenSpark.Groups.Actors
                     return;
                 }
 
+                var newGroupId = GenerateGroupIdAsync(session);
                 var group = new Group
                 {
-                    GroupId = GenerateGroupId(session),
-                    OwnerUserId = command.OwnerUserId,
-                    Members = new List<Member> { new Member { UserId = command.OwnerUserId } },
+                    GroupId = newGroupId,
+                    OwnerUserId = command.User.AuthUserId,
+                    Members = new List<string> { command.User.AuthUserId },
                     About = command.About,
                     Name = command.Name,
                     CategoryId = command.CategoryId,
                     Tags = command.Tags,
                     Visibility = VisibilityStatus.Public, // TODO: Needs to be configurable on creation
-                    Connected = command.Connected,
+                    ConnectedProjects = command.Connected,
                     Roles = new List<Role>(),
-                    BannedUsers = new List<Member>(),
+                    BannedUsers = new List<string>(),
                     CreatedAt = DateTime.Now,
                 };
 
+                var member = new Member
+                {
+                    GroupId = group.GroupId,
+                    UserId = command.User.AuthUserId,
+                };
+
                 session.Store(group);
+                session.Store(member);
                 session.SaveChanges();
 
                 Sender.Tell(new GroupCreatedEvent
@@ -66,13 +75,12 @@ namespace OpenSpark.Groups.Actors
 
             // Note: RavenDB is case-insensitive while comparing strings
             // https://ravendb.net/docs/article-page/3.0/Csharp/indexes/using-analyzers
-            var existingGroup = session.Query<Group>()
-                .FirstOrDefault(g => g.Name == groupName);
+            var existingGroup = session.Query<Group>().FirstOrDefault(g => g.Name == groupName);
 
             return existingGroup == null;
         }
 
-        private static string GenerateGroupId(IDocumentSession session)
+        private static string GenerateGroupIdAsync(IDocumentSession session)
         {
             while (true)
             {

@@ -10,6 +10,7 @@ using OpenSpark.ApiGateway.Extensions;
 using OpenSpark.ApiGateway.Handlers;
 using System.Text.Json;
 using System.Threading.Tasks;
+using OpenSpark.ApiGateway.Middleware;
 
 namespace OpenSpark.ApiGateway
 {
@@ -71,11 +72,9 @@ namespace OpenSpark.ApiGateway
                     };
                 });
 
+            services.AddHttpContextAccessor();
             services.AddMediatR(typeof(FetchNewsFeed.Handler));
             services.AddSignalR(c => c.EnableDetailedErrors = true);
-
-            // Deprecated for SignalR with observables hopefully?
-            //            services.AddScoped<INewsFeedService, NewsFeedService>();
             services.AddApplicationServices();
         }
 
@@ -96,8 +95,7 @@ namespace OpenSpark.ApiGateway
             app.UseRouting();
 
             app.UseAuthentication();
-            app.UseM
-
+            app.UseMiddleware<FirebaseUserMiddleware>();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

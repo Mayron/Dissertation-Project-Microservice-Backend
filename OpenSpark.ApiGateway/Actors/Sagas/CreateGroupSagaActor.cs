@@ -46,7 +46,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                 _actorSystemService.SendGroupsMessage(new CreateGroupCommand
                 {
                     TransactionId = command.TransactionId,
-                    OwnerUserId = command.OwnerUserId,
+                    User = command.User,
                     Name = command.Name,
                     About = command.About,
                     CategoryId = command.CategoryId,

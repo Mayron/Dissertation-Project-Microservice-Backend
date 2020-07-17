@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using OpenSpark.Domain;
+﻿using OpenSpark.Domain;
 using Raven.Client.Documents.Indexes;
+using System;
+using System.Linq;
 
 namespace OpenSpark.Discussions.Indexes
 {
@@ -23,7 +22,7 @@ namespace OpenSpark.Discussions.Indexes
 
         public GetGroupPosts()
         {
-            Map = groups => 
+            Map = groups =>
                 from g in groups
                 from post in g.Posts
                 select new

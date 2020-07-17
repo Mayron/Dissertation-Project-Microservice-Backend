@@ -1,4 +1,4 @@
-﻿namespace OpenSpark.ApiGateway.Models
+﻿namespace OpenSpark.Shared.ViewModels
 {
     public class ValidationResult
     {

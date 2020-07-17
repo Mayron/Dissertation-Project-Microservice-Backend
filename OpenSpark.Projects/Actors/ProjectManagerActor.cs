@@ -1,8 +1,7 @@
-﻿using System.Collections.Immutable;
-using System.Linq;
-using Akka.Actor;
-using OpenSpark.Shared.Commands;
+﻿using Akka.Actor;
 using OpenSpark.Shared.Commands.Projects;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace OpenSpark.Projects.Actors
 {
@@ -35,7 +34,6 @@ namespace OpenSpark.Projects.Actors
                 _children = _children.Where(u => !u.Value.Equals(terminated.ActorRef)).ToImmutableDictionary();
             });
         }
-
 
         private IActorRef GetProjectChildActor(string id)
         {

@@ -1,11 +1,9 @@
 ﻿using Akka.Actor;
 using OpenSpark.Domain;
-using OpenSpark.Shared.Commands;
-using OpenSpark.Shared.Events.Sagas;
-using Raven.Client.Documents;
-using System;
-using System.Threading.Tasks;
 using OpenSpark.Shared.Commands.Projects;
+using OpenSpark.Shared.Events.Sagas;
+using System;
+using System.Linq;
 
 namespace OpenSpark.Projects.Actors
 {
@@ -17,20 +15,20 @@ namespace OpenSpark.Projects.Actors
         {
             _projectId = projectId;
 
-            ReceiveAsync<ConnectProjectCommand>(async command =>
+            Receive<ConnectProjectCommand>(command =>
             {
-                using var session = DocumentStoreSingleton.Store.OpenAsyncSession();
+                using var session = DocumentStoreSingleton.Store.OpenSession();
 
-                var project = await session.Query<Project>().SingleOrDefaultAsync(p => projectId == _projectId);
+                var project = session.Query<Project>().SingleOrDefault(p => projectId == _projectId);
 
                 if (project == null)
                     throw new ActorKilledException($"Failed to find project with id {command.ProjectId}");
 
-                var isValid = await IsVisibilityStatusValid(project.VisibilityStatus, command.GroupVisibilityStatus, command.TransactionId);
+                var isValid = IsVisibilityStatusValid(project.VisibilityStatus, command.GroupVisibilityStatus, command.TransactionId);
                 if (!isValid) return;
 
                 project.ConnectedGroupId = command.GroupId;
-                await session.SaveChangesAsync();
+                session.SaveChanges();
 
                 Sender.Tell(new ProjectConnectedEvent
                 {
@@ -39,11 +37,11 @@ namespace OpenSpark.Projects.Actors
                     ProjectId = _projectId
                 });
 
-                await Self.GracefulStop(TimeSpan.FromSeconds(5));
+                Self.GracefulStop(TimeSpan.FromSeconds(5));
             });
         }
 
-        private async Task<bool> IsVisibilityStatusValid(string projectVisibilityStatus, string groupVisibilityStatus, Guid transactionId)
+        private bool IsVisibilityStatusValid(string projectVisibilityStatus, string groupVisibilityStatus, Guid transactionId)
         {
             if (projectVisibilityStatus != VisibilityStatus.Private &&
                 groupVisibilityStatus == VisibilityStatus.Private)
@@ -57,7 +55,7 @@ namespace OpenSpark.Projects.Actors
                     ProjectId = _projectId
                 });
 
-                await Self.GracefulStop(TimeSpan.FromSeconds(5));
+                Self.GracefulStop(TimeSpan.FromSeconds(5));
                 return false;
             }
 
@@ -71,7 +69,7 @@ namespace OpenSpark.Projects.Actors
                     ProjectId = _projectId
                 });
 
-                await Self.GracefulStop(TimeSpan.FromSeconds(5));
+                Self.GracefulStop(TimeSpan.FromSeconds(5));
                 return false;
             }
 

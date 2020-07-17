@@ -26,7 +26,7 @@ namespace OpenSpark.ApiGateway.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState.Values.SelectMany(v => v.Errors));
 
-            var result = await _mediator.Send(new CreatePost.Query(model, User));
+            var result = await _mediator.Send(new CreatePost.Query(model));
 
             if (result.IsValid)
                 return Accepted(result);

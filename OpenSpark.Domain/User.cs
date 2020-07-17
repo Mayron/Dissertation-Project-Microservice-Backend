@@ -12,5 +12,6 @@ namespace OpenSpark.Domain
         public string Email { get; set; }
         public List<string> Projects { get; set; } = new List<string>();
         public List<string> Groups { get; set; } = new List<string>();
+        public bool EmailVerified { get; set; }
     }
 }
