@@ -9,7 +9,7 @@ namespace OpenSpark.Domain
         public List<string> Members { get; set; }
         public List<string> BannedUsers { get; set; }
         public List<Role> Roles { get; set; }
-        public string GroupId { get; set; }
+        public string Id { get; set; }
         public string Name { get; set; }
         public string About { get; set; }
         public string CategoryId { get; set; }

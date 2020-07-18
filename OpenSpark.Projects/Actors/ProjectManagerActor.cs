@@ -2,6 +2,7 @@
 using OpenSpark.Shared.Commands.Projects;
 using System.Collections.Immutable;
 using System.Linq;
+using OpenSpark.Shared.Queries;
 
 namespace OpenSpark.Projects.Actors
 {
@@ -24,6 +25,12 @@ namespace OpenSpark.Projects.Actors
                         ProjectId = projectId
                     });
                 }
+            });
+
+            Receive<UserProjectsQuery>(query =>
+            {
+                var actorRef = Context.ActorOf(Props.Create<UserProjectsActor>());
+                actorRef.Forward(query);
             });
 
             Receive<Terminated>(terminated =>

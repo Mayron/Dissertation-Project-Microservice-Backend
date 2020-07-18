@@ -18,10 +18,8 @@ namespace OpenSpark.ApiGateway.ApiHubEndpoints
         /// Makes a request to the actor model to send the client with the specified connection ID new news feed posts.
         /// Posts are sent later asynchronously from a message hub event.
         /// </summary>
-        public void FetchNewsFeed(string callback)
-        {
+        public void FetchNewsFeed(string callback) =>
             _mediator.Send(new FetchNewsFeed.Query(Context.ConnectionId, callback));
-        }
 
         public void Subscribe(string callback, string token)
         {

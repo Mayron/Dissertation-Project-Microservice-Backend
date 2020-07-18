@@ -8,27 +8,27 @@ using OpenSpark.Shared.Queries;
 
 namespace OpenSpark.Groups.Actors
 {
-    public class GroupCategoriesActor : ReceiveActor
+    public class CategoriesActor : ReceiveActor
     {
-        private IImmutableList<GroupCategory> _groupCategories;
+        private IImmutableList<Category> _categories;
 
-        public GroupCategoriesActor()
+        public CategoriesActor()
         {
-            _groupCategories = ImmutableList<GroupCategory>.Empty;
+            _categories = ImmutableList<Category>.Empty;
 
-            Receive<GroupCategoriesQuery>(query =>
+            Receive<CategoriesQuery>(query =>
             {
-                if (_groupCategories.Count == 0)
+                if (_categories.Count == 0)
                 {
                     using var session = DocumentStoreSingleton.Store.OpenSession();
-                    _groupCategories = session.Query<GroupCategory>().ToImmutableList();
+                    _categories = session.Query<Category>().ToImmutableList();
                 }
 
                 Sender.Tell(new PayloadEvent
                 {
                     ConnectionId = query.ConnectionId,
                     Callback = query.Callback,
-                    Payload = _groupCategories
+                    Payload = _categories
                         .Select(c => new KeyValuePair<string, string>(c.Name, c.Id))
                         .ToList()
                 });

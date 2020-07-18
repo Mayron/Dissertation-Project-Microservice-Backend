@@ -54,11 +54,7 @@ namespace OpenSpark.ApiGateway.Services
                     if (snapShot.ContainsField("projects"))
                         user.Projects = snapShot.GetValue<List<string>>("projects");
 
-                    if (snapShot.ContainsField("memberships"))
-                        user.Memberships = snapShot.GetValue<List<string>>("memberships");
-
-                    if (snapShot.ContainsField("subscriptions"))
-                        user.Subscriptions = snapShot.GetValue<List<string>>("subscriptions");
+                    return user;
                 }
             }
             catch (Exception ex)
@@ -77,7 +73,7 @@ namespace OpenSpark.ApiGateway.Services
 
                 if (snapShot != null && snapShot.Exists)
                 {
-                    var groupIds = groups.Select(g => (object)g.GroupId).ToArray();
+                    var groupIds = groups.Select(g => (object)g.Id).ToArray();
                     await userRef.UpdateAsync("groups", FieldValue.ArrayUnion(groupIds));
 
                     return true;

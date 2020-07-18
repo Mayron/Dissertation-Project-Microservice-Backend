@@ -27,6 +27,9 @@ namespace OpenSpark.ApiGateway.Middleware
                     var authId = httpContext.User.Claims.Single(c => c.Type == "user_id").Value;
                     var user = await _firestoreService.GetUserAsync(authId, CancellationToken.None);
 
+                    if (user == null)
+                        throw new Exception("User is authenticated but failed to retrieve user from firestore.");
+
                     if (httpContext.User.HasClaim(c => c.Type == "email_verified"))
                     {
                         var claim = httpContext.User.Claims.Single(c => c.Type == "email_verified").Value;

@@ -6,6 +6,7 @@ using OpenSpark.Shared.Events.Sagas;
 using OpenSpark.Shared.Events.Sagas.CreateGroup;
 using System;
 using System.Collections.Generic;
+using OpenSpark.Shared;
 using OpenSpark.Shared.Commands.Groups;
 using OpenSpark.Shared.Commands.Projects;
 using OpenSpark.Shared.Commands.SagaExecutionCommands;
@@ -76,12 +77,12 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
 
             if (success)
             {
-                if (data.Connecting.Count <= 0) return FinishSuccessfully(@event.Group.GroupId);
+                if (data.Connecting.Count <= 0) return FinishSuccessfully(@event.Group.Id);
 
                 _actorSystemService.SendProjectsMessage(new ConnectAllProjectsCommand
                 {
                     TransactionId = @event.TransactionId,
-                    GroupId = @event.Group.GroupId,
+                    GroupId = @event.Group.Id,
                     ProjectIds = data.Connecting
                 }, Self);
 
@@ -89,7 +90,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                 {
                     TransactionId = StateData.TransactionId,
                     Connecting = data.Connecting,
-                    GroupId = @event.Group.GroupId
+                    GroupId = @event.Group.Id
                 });
             }
 
@@ -98,7 +99,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             _actorSystemService.SendGroupsMessage(new DeleteGroupCommand
             {
                 TransactionId = @event.TransactionId,
-                GroupId = @event.Group.GroupId
+                GroupId = @event.Group.Id
             }, Self);
 
             _actorSystemService.CallbackHandler.Tell(new SagaMessageEmittedEvent
@@ -171,7 +172,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                 Success = true,
                 Args = new Dictionary<string, string>
                 {
-                    ["groupId"] = groupId
+                    ["groupId"] = Utils.GetUrlFriendlyId(groupId)
                 }
             });
 

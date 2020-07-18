@@ -11,20 +11,20 @@ using OpenSpark.Shared.Queries;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
-    public class FetchUserGroups
+    public class FetchUserProjects
     {
         public class Query : IRequest<Unit>
         {
             public string ConnectionId { get; }
             public string Callback { get; }
-            public bool Memberships { get; }
+            public bool Subscriptions { get; }
             public bool Owned { get; }
 
-            public Query(string connectionId, string callback, bool memberships = false, bool owned = false)
+            public Query(string connectionId, string callback, bool subscriptions = false, bool owned = false)
             {
                 ConnectionId = connectionId;
                 Callback = callback;
-                Memberships = memberships;
+                Subscriptions = subscriptions;
                 Owned = owned;
             }
         }
@@ -54,25 +54,25 @@ namespace OpenSpark.ApiGateway.Handlers
                     return Unit.Task;
                 }
 
-                if (_user.Groups.Count == 0)
+                if (_user.Projects.Count == 0)
                 {
                     _actorSystemService.CallbackHandler.Tell(new PayloadEvent
                     {
                         ConnectionId = query.ConnectionId,
                         Callback = query.Callback,
-                        Payload = _user.Groups
+                        Payload = _user.Projects
                     });
 
                     return Unit.Task;
                 }
                 
-                _actorSystemService.SendGroupsMessage(new UserGroupsQuery
+                _actorSystemService.SendProjectsMessage(new UserProjectsQuery
                 {
                     ConnectionId = query.ConnectionId,
                     Callback = query.Callback,
                     User = _user,
-                    OwnedGroups = query.Owned,
-                    Memberships = query.Memberships
+                    OwnedProjects = query.Owned,
+                    Subscriptions = query.Subscriptions
                 });
 
                 return Unit.Task;

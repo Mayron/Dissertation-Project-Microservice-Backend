@@ -24,7 +24,7 @@ namespace OpenSpark.Groups.Indexes
                 {
                     g.About,
                     g.CategoryId,
-                    g.GroupId,
+                    GroupId = g.Id,
                     g.Name,
                     g.Visibility,
                     TotalMembers = 0
@@ -43,7 +43,7 @@ namespace OpenSpark.Groups.Indexes
                 });
 
             Reduce = results => from r in results
-                group r by new {r.GroupId}
+                group r by new { r.GroupId }
                 into g
                 select new
                 {

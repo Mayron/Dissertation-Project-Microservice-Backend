@@ -23,7 +23,7 @@ namespace OpenSpark.Groups.Actors
         {
             using var session = DocumentStoreSingleton.Store.OpenSession();
 
-            var groupId = query.GroupId;
+            var groupId = $"group/{query.GroupId}";
             var result = session.Query<GetBasicGroupDetails.Result, GetBasicGroupDetails>()
                 .SingleOrDefault(g => g.GroupId == groupId);
 
@@ -42,7 +42,7 @@ namespace OpenSpark.Groups.Actors
 
             if (result.Visibility == VisibilityStatus.Private)
             {
-                var member = _groupRepository.GetGroupMember(query.User.AuthUserId, query.GroupId);
+                var member = _groupRepository.GetGroupMemberByAuthUserId(query.User.AuthUserId, query.GroupId);
                 if (member == null)
                 {
                     Sender.Tell(new PayloadEvent
@@ -58,7 +58,7 @@ namespace OpenSpark.Groups.Actors
             }
 
             var categoryId = result.CategoryId;
-            var category = session.Query<GroupCategory>().SingleOrDefault(c => c.Id == categoryId);
+            var category = session.Query<Category>().SingleOrDefault(c => c.Id == categoryId);
 
             if (category == null)
                 Console.WriteLine($"Failed to find group category with id: {categoryId}");

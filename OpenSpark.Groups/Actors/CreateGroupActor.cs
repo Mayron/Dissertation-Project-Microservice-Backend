@@ -35,7 +35,7 @@ namespace OpenSpark.Groups.Actors
                 var newGroupId = GenerateGroupIdAsync(session);
                 var group = new Group
                 {
-                    GroupId = newGroupId,
+                    Id = newGroupId,
                     OwnerUserId = command.User.AuthUserId,
                     Members = new List<string> { command.User.AuthUserId },
                     About = command.About,
@@ -51,8 +51,10 @@ namespace OpenSpark.Groups.Actors
 
                 var member = new Member
                 {
-                    GroupId = group.GroupId,
-                    UserId = command.User.AuthUserId,
+                    GroupId = group.Id,
+                    Id = Utils.GenerateRandomId("member"),
+                    AuthUserId = command.User.AuthUserId,
+                    Joined = DateTime.Now,
                 };
 
                 session.Store(group);
@@ -84,8 +86,8 @@ namespace OpenSpark.Groups.Actors
         {
             while (true)
             {
-                var newGroupId = Utils.GenerateRandomId();
-                var existingGroup = session.Query<Group>().FirstOrDefault(g => g.GroupId == newGroupId);
+                var newGroupId = Utils.GenerateRandomId("group");
+                var existingGroup = session.Query<Group>().FirstOrDefault(g => g.Id == newGroupId);
 
                 if (existingGroup == null)
                 {

@@ -34,7 +34,7 @@ namespace OpenSpark.Groups.Actors
                 // Check if member has required CanPost permission
                 if (group.Members.Contains(userId))
                 {
-                    var member = _groupRepository.GetGroupMember(userId, _groupId);
+                    var member = _groupRepository.GetGroupMemberByAuthUserId(userId, _groupId);
 
                     if (member == null)
                         Console.WriteLine($"Failed to find member {userId} for group {_groupId}");
@@ -70,7 +70,7 @@ namespace OpenSpark.Groups.Actors
         {
             using var session = DocumentStoreSingleton.Store.OpenSession();
 
-            var group = session.Query<Group>().SingleOrDefault(g => g.GroupId == _groupId);
+            var group = session.Query<Group>().SingleOrDefault(g => g.Id == _groupId);
             if (group != null) return group;
 
             var message = $"Failed to retrieve group: {_groupId}";

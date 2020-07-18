@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
-    public class FetchGroupCategories
+    public class FetchCategories
     {
         public class Query : IRequest<Unit>
         {
@@ -34,16 +34,16 @@ namespace OpenSpark.ApiGateway.Handlers
                 _user = context.GetFirebaseUser();
             }
 
-            public async Task<Unit> Handle(Query query, CancellationToken cancellationToken)
+            public Task<Unit> Handle(Query query, CancellationToken cancellationToken)
             {
-                _actorSystemService.SendGroupsMessage(new GroupCategoriesQuery
+                _actorSystemService.SendGroupsMessage(new CategoriesQuery
                 {
                     ConnectionId = query.ConnectionId,
                     Callback = query.Callback,
                     User = _user
                 });
 
-                return Unit.Value;
+                return Unit.Task;
             }
         }
     }

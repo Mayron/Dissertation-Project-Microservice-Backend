@@ -36,7 +36,7 @@ namespace OpenSpark.ApiGateway.Handlers
                 _user = context.GetFirebaseUser();
             }
 
-            public async Task<Unit> Handle(Query query, CancellationToken cancellationToken)
+            public Task<Unit> Handle(Query query, CancellationToken cancellationToken)
             {
                 _actorSystemService.SendGroupsMessage(new BasicGroupDetailsQuery
                 {
@@ -46,7 +46,7 @@ namespace OpenSpark.ApiGateway.Handlers
                     User = _user
                 });
 
-                return Unit.Value;
+                return Unit.Task;
             }
         }
     }

@@ -11,7 +11,7 @@ namespace OpenSpark.Groups.Actors
     public class GroupManagerActor : ReceiveActor
     {
         private IImmutableDictionary<string, IActorRef> _children;
-        private IActorRef _groupCategoriesActor;
+        private IActorRef _categoriesActor;
 
         public GroupManagerActor()
         {
@@ -19,25 +19,20 @@ namespace OpenSpark.Groups.Actors
 
             Receive<VerifyUserPostRequestCommand>(command => ForwardByGroupId(command.GroupId, command));
             Receive<BasicGroupDetailsQuery>(query => ForwardByGroupId(query.GroupId, query));
-            Receive<GroupCategoriesQuery>(query =>
+            Receive<CategoriesQuery>(query =>
             {
-                if (_groupCategoriesActor == null)
+                if (_categoriesActor == null)
                 {
-                    _groupCategoriesActor = Context.ActorOf(Props.Create<GroupCategoriesActor>(), "GroupCategories");
-                    Context.Watch(_groupCategoriesActor);
+                    _categoriesActor = Context.ActorOf(Props.Create<CategoriesActor>(), "Categories");
+                    Context.Watch(_categoriesActor);
                 }
 
-                _groupCategoriesActor.Forward(query);
+                _categoriesActor.Forward(query);
             });
 
             Receive<UserGroupsQuery>(query =>
             {
-//                query.
-//                foreach (var groupId in query.User.Groups)
-//                {
-//
-//                }
-                var actorRef = GetChildGroupActor(query.User.AuthUserId);
+                var actorRef = Context.ActorOf(Props.Create<UserGroupsActor>());
                 actorRef.Forward(query);
             });
 
