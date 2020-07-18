@@ -10,7 +10,6 @@ using OpenSpark.ApiGateway.Extensions;
 using OpenSpark.ApiGateway.Handlers;
 using System.Text.Json;
 using System.Threading.Tasks;
-using OpenSpark.ApiGateway.ApiHubEndpoints;
 using OpenSpark.ApiGateway.Middleware;
 
 namespace OpenSpark.ApiGateway
@@ -102,7 +101,7 @@ namespace OpenSpark.ApiGateway
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<ApiHub>("/hub");
+                endpoints.MapHub<ApiHub.ApiHub>("/hub");
             });
         }
     }

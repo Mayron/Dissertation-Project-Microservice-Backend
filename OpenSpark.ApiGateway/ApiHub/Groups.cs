@@ -1,9 +1,9 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿// ReSharper disable UnusedMember.Global
 using OpenSpark.ApiGateway.Handlers;
 
-namespace OpenSpark.ApiGateway.ApiHubEndpoints
+namespace OpenSpark.ApiGateway.ApiHub
 {
-    public partial class ApiHub : Hub
+    public partial class ApiHub
     {
         public void FetchGroup(string callback, string groupId) =>
             _mediator.Send(new FetchBasicGroupDetails.Query(groupId, Context.ConnectionId, callback));

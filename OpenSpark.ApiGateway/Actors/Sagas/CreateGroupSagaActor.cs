@@ -94,7 +94,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                 });
             }
 
-            Console.WriteLine("Rolling back CreateGroupSaga.");
+            Console.WriteLine($"Rolling back {nameof(CreateGroupSagaActor)}.");
 
             _actorSystemService.SendGroupsMessage(new DeleteGroupCommand
             {
@@ -136,7 +136,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
         {
             if (!(fsmEvent.FsmEvent is GroupDeletedEvent)) return null;
 
-            Console.WriteLine("Successfully rolled back CreateGroupSaga.");
+            Console.WriteLine($"Successfully rolled back {nameof(CreateGroupSagaActor)}.");
             return Stop();
         }
 
@@ -172,7 +172,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                 Success = true,
                 Args = new Dictionary<string, string>
                 {
-                    ["groupId"] = Utils.GetUrlFriendlyId(groupId)
+                    ["groupId"] = groupId.ConvertToEntityId()
                 }
             });
 

@@ -2,9 +2,9 @@
 
 namespace OpenSpark.Domain
 {
-    public class Reply
+    public class Reply : IEntity
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
         public int ParentId { get; set; }
         public int CommentId { get; set; }
         public string Body { get; set; }

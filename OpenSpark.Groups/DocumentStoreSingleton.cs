@@ -4,6 +4,7 @@ using System.Reflection;
 using OpenSpark.Domain;
 using OpenSpark.Groups.Indexes;
 using OpenSpark.Shared;
+using OpenSpark.Shared.RavenDb;
 using Raven.Client.Documents;
 
 namespace OpenSpark.Groups

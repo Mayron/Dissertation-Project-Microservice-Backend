@@ -60,7 +60,7 @@ namespace OpenSpark.Groups.Actors
             Self.GracefulStop(TimeSpan.FromSeconds(5));
         }
 
-        public bool MemberHasRequiredPermission(List<Role> roles, Member member, Guid permissionId)
+        public bool MemberHasRequiredPermission(List<Role> roles, Member member, string permissionId)
         {
             return member.RoleIds.Any(roleId => roles.Single(r => r.Id == roleId)
                     .PermissionIds.Any(pid => pid == permissionId));

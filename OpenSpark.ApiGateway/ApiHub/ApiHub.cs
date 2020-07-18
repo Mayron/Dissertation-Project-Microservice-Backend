@@ -1,9 +1,10 @@
-﻿using System;
+﻿// ReSharper disable UnusedMember.Global
+using System;
 using MediatR;
 using Microsoft.AspNetCore.SignalR;
 using OpenSpark.ApiGateway.Handlers;
 
-namespace OpenSpark.ApiGateway.ApiHubEndpoints
+namespace OpenSpark.ApiGateway.ApiHub
 {
     public partial class ApiHub : Hub
     {

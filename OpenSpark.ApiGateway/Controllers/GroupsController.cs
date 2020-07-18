@@ -3,10 +3,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OpenSpark.ApiGateway.Handlers;
 using OpenSpark.ApiGateway.InputModels;
+using OpenSpark.Shared.ViewModels;
 using System.Linq;
 using System.Threading.Tasks;
-using OpenSpark.ApiGateway.Models;
-using OpenSpark.Shared.ViewModels;
 
 namespace OpenSpark.ApiGateway.Controllers
 {

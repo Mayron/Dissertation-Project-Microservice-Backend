@@ -18,12 +18,12 @@ namespace OpenSpark.Projects.Actors
             {
                 using var session = DocumentStoreSingleton.Store.OpenSession();
 
-                List<Project> groups;
+                List<Project> projects;
                 var userId = query.User.AuthUserId;
 
                 if (query.OwnedProjects)
                 {
-                    groups = session.Query<Project>()
+                    projects = session.Query<Project>()
                         .Where(g => g.OwnerUserId == userId)
                         .OrderByDescending(g => g.Subscribers.Count)
                         .ToList();
@@ -31,8 +31,8 @@ namespace OpenSpark.Projects.Actors
                 else if (query.Subscriptions)
                 {
                     // We do not want projects we own as they go into their own "Projects" section.
-                    groups = session.Query<Project>()
-                        .Where(p => p.OwnerUserId != userId && userId.In(p.Subscribers))
+                    projects = session.Query<Project>()
+                        .Where(p => p.OwnerUserId != userId && p.Subscribers.Contains(userId))
                         .OrderByDescending(g => g.Subscribers.Count)
                         .ToList();
                 }
@@ -45,7 +45,7 @@ namespace OpenSpark.Projects.Actors
                 {
                     ConnectionId = query.ConnectionId,
                     Callback = query.Callback,
-                    Payload = groups
+                    Payload = projects
                 });
 
                 Self.GracefulStop(TimeSpan.FromSeconds(5));

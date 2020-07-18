@@ -2,17 +2,15 @@
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using OpenSpark.ApiGateway.Actors.Sagas;
+using OpenSpark.ApiGateway.Extensions;
 using OpenSpark.ApiGateway.InputModels;
-using OpenSpark.ApiGateway.Middleware;
-using OpenSpark.ApiGateway.Models;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Domain;
 using OpenSpark.Shared.Commands.SagaExecutionCommands;
+using OpenSpark.Shared.ViewModels;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using OpenSpark.ApiGateway.Extensions;
-using OpenSpark.Shared.ViewModels;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
@@ -39,11 +37,10 @@ namespace OpenSpark.ApiGateway.Handlers
                 _user = context.GetFirebaseUser();
             }
 
-            public async Task<ValidationResult> Handle(Command command, CancellationToken cancellationToken)
+            public Task<ValidationResult> Handle(Command command, CancellationToken cancellationToken)
             {
-                // Verify
                 if (_user == null)
-                    return new ValidationResult(false, "Failed to validate user request");
+                    return Task.FromResult(new ValidationResult(false, "Failed to validate user request"));
 
                 var transactionId = Guid.NewGuid();
                 _actorSystemService.SagaManager.Tell(new ExecuteCreateGroupSagaCommand
@@ -58,7 +55,7 @@ namespace OpenSpark.ApiGateway.Handlers
                     User = _user
                 });
 
-                return new ValidationResult(true, transactionId.ToString());
+                return Task.FromResult(new ValidationResult(true, transactionId.ToString()));
             }
         }
     }

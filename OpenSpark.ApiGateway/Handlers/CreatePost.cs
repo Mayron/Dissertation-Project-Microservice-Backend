@@ -44,11 +44,10 @@ namespace OpenSpark.ApiGateway.Handlers
                 _user = context.GetFirebaseUser();
             }
 
-            public async Task<ValidationResult> Handle(Query query, CancellationToken cancellationToken)
+            public Task<ValidationResult> Handle(Query query, CancellationToken cancellationToken)
             {
-                // Verify
                 if (_user == null)
-                    return new ValidationResult(false, "Failed to validate user request");
+                    return Task.FromResult(new ValidationResult(false, "Failed to validate user request"));
 
                 var transactionId = Guid.NewGuid();
                 _actorSystemService.SagaManager.Tell(new ExecuteAddPostSagaCommand
@@ -60,7 +59,7 @@ namespace OpenSpark.ApiGateway.Handlers
                     User = _user
                 });
 
-                return new ValidationResult(true, transactionId.ToString());
+                return Task.FromResult(new ValidationResult(true, transactionId.ToString()));
             }
         }
     }

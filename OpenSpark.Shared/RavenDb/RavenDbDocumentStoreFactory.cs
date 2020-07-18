@@ -5,7 +5,7 @@ using Raven.Client.Documents.Indexes;
 using Raven.Client.ServerWide;
 using Raven.Client.ServerWide.Operations;
 
-namespace OpenSpark.Shared
+namespace OpenSpark.Shared.RavenDb
 {
     public static class RavenDbDocumentStoreFactory
     {

@@ -4,6 +4,7 @@ using System.Linq;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Commands.Groups;
 using OpenSpark.Shared.Commands.Posts;
+using OpenSpark.Shared.Events.Sagas.CreateGroup;
 using OpenSpark.Shared.Queries;
 
 namespace OpenSpark.Groups.Actors
@@ -19,6 +20,7 @@ namespace OpenSpark.Groups.Actors
 
             Receive<VerifyUserPostRequestCommand>(command => ForwardByGroupId(command.GroupId, command));
             Receive<BasicGroupDetailsQuery>(query => ForwardByGroupId(query.GroupId, query));
+            Receive<DeleteGroupCommand>(query => ForwardByGroupId(query.GroupId, query));
             Receive<CategoriesQuery>(query =>
             {
                 if (_categoriesActor == null)
@@ -38,7 +40,9 @@ namespace OpenSpark.Groups.Actors
 
             Receive<CreateGroupCommand>(command =>
             {
-                var actorRef = GetChildGroupActor(command.TransactionId.ToString());
+                var actorRef = Context.ActorOf(
+                    Props.Create<CreateGroupActor>(), $"CreateGroup-{command.TransactionId}");
+
                 actorRef.Forward(command);
             });
 
@@ -53,11 +57,11 @@ namespace OpenSpark.Groups.Actors
 
         private void ForwardByGroupId(string groupId, IMessage message)
         {
-            var actorRef = GetChildGroupActor(groupId);
+            var actorRef = GetChildActor(groupId);
             actorRef.Forward(message);
         }
 
-        private IActorRef GetChildGroupActor(string id)
+        private IActorRef GetChildActor(string id)
         {
             if (_children.ContainsKey(id))
                 return _children[id];

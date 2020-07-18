@@ -9,71 +9,27 @@ namespace OpenSpark.Projects.Actors
 {
     public class ProjectActor : ReceiveActor
     {
-        private readonly string _projectId;
-
-        public ProjectActor(string projectId)
+        public ProjectActor()
         {
-            _projectId = projectId;
+            SetReceiveTimeout(TimeSpan.FromMinutes(30));
 
             Receive<ConnectProjectCommand>(command =>
             {
-                using var session = DocumentStoreSingleton.Store.OpenSession();
+                var actorRef = Context.ActorOf(
+                    Props.Create<ConnectProjectActor>(), $"ConnectProject-{command.ProjectId}");
 
-                var project = session.Query<Project>().SingleOrDefault(p => projectId == _projectId);
+                actorRef.Forward(command);
+            });
 
-                if (project == null)
-                    throw new ActorKilledException($"Failed to find project with id {command.ProjectId}");
+            Receive<DeleteProjectCommand>(command =>
+            {
+                var actorRef = Context.ActorOf(
+                    Props.Create<DeleteProjectActor>(), $"DeleteProject-{command.ProjectId}");
 
-                var isValid = IsVisibilityStatusValid(project.VisibilityStatus, command.GroupVisibilityStatus, command.TransactionId);
-                if (!isValid) return;
-
-                project.ConnectedGroupId = command.GroupId;
-                session.SaveChanges();
-
-                Sender.Tell(new ProjectConnectedEvent
-                {
-                    TransactionId = command.TransactionId,
-                    Message = $"Project {project.Name} connected to group!",
-                    ProjectId = _projectId
-                });
+                actorRef.Forward(command);
 
                 Self.GracefulStop(TimeSpan.FromSeconds(5));
             });
-        }
-
-        private bool IsVisibilityStatusValid(string projectVisibilityStatus, string groupVisibilityStatus, Guid transactionId)
-        {
-            if (projectVisibilityStatus != VisibilityStatus.Private &&
-                groupVisibilityStatus == VisibilityStatus.Private)
-            {
-                var message = projectVisibilityStatus == VisibilityStatus.Unlisted ? "an unlisted" : "a public";
-
-                Sender.Tell(new ProjectFailedToConnectEvent
-                {
-                    TransactionId = transactionId,
-                    Message = $"Cannot connect a private group to {message} project.",
-                    ProjectId = _projectId
-                });
-
-                Self.GracefulStop(TimeSpan.FromSeconds(5));
-                return false;
-            }
-
-            if (projectVisibilityStatus == VisibilityStatus.Public &&
-                groupVisibilityStatus == VisibilityStatus.Unlisted)
-            {
-                Sender.Tell(new ProjectFailedToConnectEvent
-                {
-                    TransactionId = transactionId,
-                    Message = "Cannot connect an unlisted group to a public project.",
-                    ProjectId = _projectId
-                });
-
-                Self.GracefulStop(TimeSpan.FromSeconds(5));
-                return false;
-            }
-
-            return true;
         }
     }
 }

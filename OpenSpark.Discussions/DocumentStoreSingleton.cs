@@ -3,6 +3,7 @@ using OpenSpark.Shared;
 using Raven.Client.Documents;
 using System;
 using System.Reflection;
+using OpenSpark.Shared.RavenDb;
 
 namespace OpenSpark.Discussions
 {

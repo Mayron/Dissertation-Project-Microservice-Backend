@@ -12,10 +12,9 @@ namespace OpenSpark.ApiGateway.Services
     public interface IFirestoreService
     {
         Task<User> GetUserAsync(string authId, CancellationToken cancellationToken);
-
         Task<bool> AddUserToGroupsAsync(User user, params Group[] groups);
-
         Task<bool> RemoveUserFromGroupAsync(User user, string groupId);
+        Task<bool> AddUserToProjectsAsync(User user, params Project[] projects);
     }
 
     public class FirestoreService : IFirestoreService
@@ -67,24 +66,8 @@ namespace OpenSpark.ApiGateway.Services
 
         public async Task<bool> AddUserToGroupsAsync(User user, params Group[] groups)
         {
-            try
-            {
-                var (userRef, snapShot) = await GetUserReference(user.AuthUserId, CancellationToken.None);
-
-                if (snapShot != null && snapShot.Exists)
-                {
-                    var groupIds = groups.Select(g => (object)g.Id).ToArray();
-                    await userRef.UpdateAsync("groups", FieldValue.ArrayUnion(groupIds));
-
-                    return true;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Exception updating user groups: {ex}");
-            }
-
-            return false;
+            var groupIds = groups.Select(g => (object)g.Id).ToArray();
+            return await UpdateUserArrayField(user, "groups", groupIds);
         }
 
         public async Task<bool> RemoveUserFromGroupAsync(User user, string groupId)
@@ -102,6 +85,32 @@ namespace OpenSpark.ApiGateway.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Exception updating user groups: {ex}");
+            }
+
+            return false;
+        }
+
+        public async Task<bool> AddUserToProjectsAsync(User user, params Project[] projects)
+        {
+            var projectIds = projects.Select(g => (object)g.Id).ToArray();
+            return await UpdateUserArrayField(user, "projects", projectIds);
+        }
+
+        private static async Task<bool> UpdateUserArrayField(User user, string fieldName, object[] values)
+        {
+            try
+            {
+                var (userRef, snapShot) = await GetUserReference(user.AuthUserId, CancellationToken.None);
+
+                if (snapShot != null && snapShot.Exists)
+                {
+                    await userRef.UpdateAsync(fieldName, FieldValue.ArrayUnion(values));
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception updating user {fieldName}: {ex}");
             }
 
             return false;

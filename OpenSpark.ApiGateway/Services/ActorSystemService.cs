@@ -82,6 +82,10 @@ namespace OpenSpark.ApiGateway.Services
                 _localSystem.ActorOf(
                         Props.Create(() => new CreateGroupSagaActor(this, _firestoreService)), actorName),
 
+                nameof(CreateProjectSagaActor) =>
+                _localSystem.ActorOf(
+                    Props.Create(() => new CreateProjectSagaActor(this, _firestoreService)), actorName),
+
                 _ => throw new Exception($"Failed to find SagaActor: {command.SagaName}"),
             };
         }

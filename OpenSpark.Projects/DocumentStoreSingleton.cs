@@ -1,5 +1,6 @@
 ﻿using System;
 using OpenSpark.Shared;
+using OpenSpark.Shared.RavenDb;
 using Raven.Client.Documents;
 
 namespace OpenSpark.Projects

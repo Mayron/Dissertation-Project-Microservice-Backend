@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace OpenSpark.Domain
 {
-    public class Group
+    public class Group : INamedEntity
     {
         public string Visibility { get; set; }
         public List<string> Members { get; set; }
