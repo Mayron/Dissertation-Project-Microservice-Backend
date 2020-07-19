@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System.Collections.Immutable;
+using System.Threading;
 using System.Threading.Tasks;
 using Akka.Actor;
 using MediatR;
@@ -44,24 +45,16 @@ namespace OpenSpark.ApiGateway.Handlers
             {
                 if (_user == null)
                 {
-                    _actorSystemService.CallbackHandler.Tell(new PayloadEvent
-                    {
-                        ConnectionId = query.ConnectionId,
-                        Callback = query.Callback,
-                        Error = "Unauthorized"
-                    });
+                    _actorSystemService.SendErrorToClient(
+                        query.ConnectionId, query.Callback, "Unauthorized");
 
                     return Unit.Task;
                 }
 
                 if (_user.Groups.Count == 0)
                 {
-                    _actorSystemService.CallbackHandler.Tell(new PayloadEvent
-                    {
-                        ConnectionId = query.ConnectionId,
-                        Callback = query.Callback,
-                        Payload = _user.Groups
-                    });
+                    _actorSystemService.SendPayloadToClient(
+                        query.ConnectionId, query.Callback, ImmutableList<string>.Empty);
 
                     return Unit.Task;
                 }

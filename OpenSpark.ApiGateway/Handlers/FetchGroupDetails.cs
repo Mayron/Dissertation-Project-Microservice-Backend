@@ -9,21 +9,23 @@ using System.Threading.Tasks;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
-    public class FetchNewsFeed
+    public class FetchGroupDetails
     {
-        public class Query : IRequest
+        public class Query : IRequest<Unit>
         {
+            public string GroupId { get; }
             public string ConnectionId { get; }
             public string Callback { get; }
 
-            public Query(string connectionId, string callback)
+            public Query(string groupId, string connectionId, string callback)
             {
+                GroupId = groupId;
                 ConnectionId = connectionId;
                 Callback = callback;
             }
         }
 
-        public class Handler : IRequestHandler<Query>
+        public class Handler : IRequestHandler<Query, Unit>
         {
             private readonly IActorSystemService _actorSystemService;
             private readonly User _user;
@@ -36,8 +38,9 @@ namespace OpenSpark.ApiGateway.Handlers
 
             public Task<Unit> Handle(Query query, CancellationToken cancellationToken)
             {
-                _actorSystemService.SendDiscussionsMessage(new NewsFeedQuery
+                _actorSystemService.SendGroupsMessage(new GroupDetailsQuery
                 {
+                    GroupId = query.GroupId,
                     ConnectionId = query.ConnectionId,
                     Callback = query.Callback,
                     User = _user

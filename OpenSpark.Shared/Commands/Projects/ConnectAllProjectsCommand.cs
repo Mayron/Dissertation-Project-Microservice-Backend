@@ -10,5 +10,6 @@ namespace OpenSpark.Shared.Commands.Projects
         public string GroupId { get; set; }
         public List<string> ProjectIds { get; set; }
         public User User { get; set; }
+        public string GroupVisibility { get; set; }
     }
 }

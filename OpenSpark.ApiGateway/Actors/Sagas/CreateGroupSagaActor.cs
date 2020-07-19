@@ -83,7 +83,8 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                 {
                     TransactionId = @event.TransactionId,
                     GroupId = @event.Group.Id,
-                    ProjectIds = data.Connecting
+                    ProjectIds = data.Connecting,
+                    GroupVisibility = @event.Group.Visibility
                 }, Self);
 
                 return GoTo(SagaState.UpdateConnectedProjects).Using(new ProcessingStateData
@@ -102,12 +103,8 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                 GroupId = @event.Group.Id
             }, Self);
 
-            _actorSystemService.CallbackHandler.Tell(new SagaMessageEmittedEvent
-            {
-                TransactionId = StateData.TransactionId,
-                Message = "Oops! Something went wrong while trying to create your group.",
-                Success = false
-            });
+            _actorSystemService.SendSagaFailedMessage(StateData.TransactionId,
+                "Oops! Something went wrong while trying to create your group.");
 
             return GoTo(SagaState.RollingBack);
         }
@@ -146,35 +143,24 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             {
                 if (data.SuccessfulConnections > 0)
                 {
-                    _actorSystemService.CallbackHandler.Tell(new SagaMessageEmittedEvent
-                    {
-                        TransactionId = StateData.TransactionId,
-                        Message = $"{data.SuccessfulConnections} projects connected to your group.",
-                        Success = true
-                    });
+                    _actorSystemService.SendSagaSucceededMessage(StateData.TransactionId,
+                        $"{data.SuccessfulConnections} projects connected to your group.");
                 }
 
                 if (data.FailedConnections > 0)
                 {
-                    _actorSystemService.CallbackHandler.Tell(new SagaMessageEmittedEvent
-                    {
-                        TransactionId = StateData.TransactionId,
-                        Message = $"{data.FailedConnections} projects could not be connected to your group, possibly due to their visibility status.",
-                        Success = false
-                    });
+                    _actorSystemService.SendSagaFailedMessage(StateData.TransactionId,
+                        $"{data.FailedConnections} projects could not be connected to your group, possibly due to their visibility status.");
                 }
             }
 
-            _actorSystemService.CallbackHandler.Tell(new SagaMessageEmittedEvent
-            {
-                TransactionId = StateData.TransactionId,
-                Message = "Your group is ready to use!",
-                Success = true,
-                Args = new Dictionary<string, string>
+            _actorSystemService.SendSagaSucceededMessage(StateData.TransactionId,
+                "Your group is ready to use!",
+                new Dictionary<string, string>
                 {
                     ["groupId"] = groupId.ConvertToEntityId()
                 }
-            });
+            );
 
             return Stop();
         }

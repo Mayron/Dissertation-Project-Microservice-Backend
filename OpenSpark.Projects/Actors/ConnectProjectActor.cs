@@ -3,6 +3,7 @@ using OpenSpark.Domain;
 using OpenSpark.Shared.Commands.Projects;
 using OpenSpark.Shared.Events.Sagas;
 using System;
+using OpenSpark.Shared;
 
 namespace OpenSpark.Projects.Actors
 {
@@ -10,11 +11,14 @@ namespace OpenSpark.Projects.Actors
     {
         public ConnectProjectActor()
         {
+            SetReceiveTimeout(TimeSpan.FromMinutes(5));
+
             Receive<ConnectProjectCommand>(command =>
             {
                 using var session = DocumentStoreSingleton.Store.OpenSession();
 
-                var project = session.Load<Project>($"project/{command.ProjectId}");
+                var ravenId = command.ProjectId.ConvertToRavenId<Project>();
+                var project = session.Load<Project>(ravenId);
 
                 if (project == null)
                     throw new ActorKilledException($"Failed to find project with id {command.ProjectId}");
@@ -31,8 +35,6 @@ namespace OpenSpark.Projects.Actors
                     Message = $"Project {project.Name} connected to group!",
                     ProjectId = command.ProjectId
                 });
-
-                Self.GracefulStop(TimeSpan.FromSeconds(5));
             });
         }
 

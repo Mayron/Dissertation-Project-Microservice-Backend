@@ -1,10 +1,11 @@
-﻿using Akka.Actor;
+﻿using System;
+using System.Collections.Immutable;
+using System.Linq;
+using Akka.Actor;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Shared.Commands;
 using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.Events.Sagas;
-using System;
-using System.Collections.Immutable;
 
 namespace OpenSpark.ApiGateway.Actors
 {
@@ -13,46 +14,59 @@ namespace OpenSpark.ApiGateway.Actors
     /// </summary>
     public class CallbackActor : ReceiveActor
     {
-        private readonly IEventEmitterService _eventEmitter;
-        private IImmutableDictionary<Guid, ClientSubscription> _subscriptions;
-
-        private class ClientSubscription
-        {
-            public string ClientCallback { get; }
-            public string ConnectionId { get; }
-
-            public ClientSubscription(string clientCallback, string connectionId)
-            {
-                ClientCallback = clientCallback;
-                ConnectionId = connectionId;
-            }
-        }
+        public IImmutableDictionary<Guid, IActorRef> _subscriptions;
 
         public CallbackActor(IEventEmitterService eventEmitter)
         {
-            _eventEmitter = eventEmitter;
-            _subscriptions = ImmutableDictionary<Guid, ClientSubscription>.Empty;
+            _subscriptions = ImmutableDictionary<Guid, IActorRef>.Empty;
 
             Receive<PayloadEvent>(@event =>
             {
                 var (connectionId, callback, eventData) = @event;
-                _eventEmitter.BroadcastToClient(connectionId, callback, eventData);
+                eventEmitter.BroadcastToClient(connectionId, callback, eventData);
             });
 
+            // Register
+            Receive<Guid>(transactionId =>
+            {
+                var subscriptionActor = Context.ActorOf(Props.Create(() =>
+                        new SagaSubscriptionActor(eventEmitter, transactionId)),
+                    $"SagaSubscription-{transactionId}");
+
+                Context.Watch(subscriptionActor);
+                _subscriptions = _subscriptions.Add(transactionId, subscriptionActor);
+            });
+
+            Receive<Terminated>(terminated =>
+            {
+                Context.Unwatch(terminated.ActorRef);
+
+                _subscriptions = _subscriptions.Where(v => 
+                    !v.Value.Equals(terminated.ActorRef)).ToImmutableDictionary();
+            });
+
+            // Client wants to subscribe
             Receive<SubscribeToSagaTransactionCommand>(command =>
             {
-                _subscriptions = _subscriptions.Add(command.TransactionId,
-                    new ClientSubscription(command.Callback, command.ConnectionId));
+                if (!_subscriptions.ContainsKey(command.TransactionId))
+                {
+                    Console.WriteLine($"Failed to subscribe to transaction: Unable to find subscription for transaction: {command.TransactionId}");
+                    return;
+                }
+
+                _subscriptions[command.TransactionId].Tell(command);
             });
 
-            Receive<SagaMessageEmittedEvent>(@event =>
+            // Saga emitted an event for the client
+            Receive<SagaFinishedEvent>(@event =>
             {
-                if (!_subscriptions.ContainsKey(@event.TransactionId)) return;
+                if (!_subscriptions.ContainsKey(@event.TransactionId))
+                {
+                    Console.WriteLine($"Failed to send saga message to client: Unable to find subscription for transaction: {@event.TransactionId}");
+                    return;
+                }
 
-                var sub = _subscriptions[@event.TransactionId];
-
-                _eventEmitter.BroadcastToClient(sub.ConnectionId, sub.ClientCallback, @event);
-                _subscriptions = _subscriptions.Remove(@event.TransactionId);
+                _subscriptions[@event.TransactionId].Tell(@event);
             });
         }
     }

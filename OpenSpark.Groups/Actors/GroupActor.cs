@@ -31,7 +31,7 @@ namespace OpenSpark.Groups.Actors
                 Self.GracefulStop(TimeSpan.FromSeconds(5));
             });
 
-            Receive<BasicGroupDetailsQuery>(query =>
+            Receive<GroupDetailsQuery>(query =>
             {
                 var queryActor = Context.ActorOf(
                     Props.Create(() => new GroupQueryActor(new GroupRepository())), 

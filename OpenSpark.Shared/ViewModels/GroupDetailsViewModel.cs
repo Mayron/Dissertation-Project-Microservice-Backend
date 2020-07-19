@@ -1,6 +1,6 @@
 ﻿namespace OpenSpark.Shared.ViewModels
 {
-    public class BasicGroupDetailsViewModel
+    public class GroupDetailsViewModel
     {
         public string About { get; set; }
         public string CategoryName { get; set; }

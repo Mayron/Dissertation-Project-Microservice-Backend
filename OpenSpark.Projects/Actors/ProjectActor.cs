@@ -1,24 +1,32 @@
 ﻿using Akka.Actor;
-using OpenSpark.Domain;
 using OpenSpark.Shared.Commands.Projects;
-using OpenSpark.Shared.Events.Sagas;
+using OpenSpark.Shared.Queries;
 using System;
-using System.Linq;
+using System.Collections.Immutable;
 
 namespace OpenSpark.Projects.Actors
 {
     public class ProjectActor : ReceiveActor
     {
+        private IImmutableDictionary<string, IActorRef> _children;
+
         public ProjectActor()
         {
             SetReceiveTimeout(TimeSpan.FromMinutes(30));
+            _children = ImmutableDictionary<string, IActorRef>.Empty;
 
             Receive<ConnectProjectCommand>(command =>
             {
-                var actorRef = Context.ActorOf(
-                    Props.Create<ConnectProjectActor>(), $"ConnectProject-{command.ProjectId}");
+                var name = $"ConnectProject-{command.ProjectId}";
 
-                actorRef.Forward(command);
+                if (!_children.ContainsKey(name))
+                {
+                    var child = Context.ActorOf(Props.Create<ConnectProjectActor>(), name);
+                    Context.Watch(child);
+                    _children = _children.Add(name, child);
+                }
+
+                _children[name].Forward(command);
             });
 
             Receive<DeleteProjectCommand>(command =>
@@ -29,6 +37,26 @@ namespace OpenSpark.Projects.Actors
                 actorRef.Forward(command);
 
                 Self.GracefulStop(TimeSpan.FromSeconds(5));
+            });
+
+            Receive<ProjectDetailsQuery>(query =>
+            {
+                var name = $"ProjectQuery-{query.ProjectId}";
+
+                if (!_children.ContainsKey(name))
+                {
+                    var child = Context.ActorOf(Props.Create<ProjectQueryActor>(), name);
+                    Context.Watch(child);
+                    _children = _children.Add(name, child);
+                }
+
+                _children[name].Forward(query);
+            });
+
+            Receive<Terminated>(terminated =>
+            {
+                Context.Unwatch(terminated.ActorRef);
+                _children = _children.Remove(terminated.ActorRef.Path.Name);
             });
         }
     }

@@ -5,7 +5,6 @@ using OpenSpark.ApiGateway.Services;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Commands.Projects;
 using OpenSpark.Shared.Commands.SagaExecutionCommands;
-using OpenSpark.Shared.Events.Sagas;
 using OpenSpark.Shared.Events.Sagas.CreatePost;
 using OpenSpark.Shared.Events.Sagas.CreateProject;
 using System;
@@ -80,12 +79,8 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                 ProjectId = @event.Project.Id
             }, Self);
 
-            _actorSystemService.CallbackHandler.Tell(new SagaMessageEmittedEvent
-            {
-                TransactionId = StateData.TransactionId,
-                Message = "Oops! Something went wrong while trying to create your project.",
-                Success = false
-            });
+            _actorSystemService.SendSagaFailedMessage(StateData.TransactionId,
+                "Oops! Something went wrong while trying to create your project.");
 
             return GoTo(SagaState.RollingBack);
         }
@@ -100,16 +95,12 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
 
         private State<SagaState, ISagaStateData> FinishSuccessfully(string ravenId)
         {
-            _actorSystemService.CallbackHandler.Tell(new SagaMessageEmittedEvent
-            {
-                TransactionId = StateData.TransactionId,
-                Message = "Your project is ready to use!",
-                Success = true,
-                Args = new Dictionary<string, string>
+            _actorSystemService.SendSagaSucceededMessage(StateData.TransactionId,
+                "Your project is ready to use!",
+                new Dictionary<string, string>
                 {
                     ["projectId"] = ravenId.ConvertToEntityId()
-                }
-            });
+                });
 
             return Stop();
         }

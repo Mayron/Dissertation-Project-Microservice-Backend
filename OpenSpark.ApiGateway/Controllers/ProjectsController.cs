@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 namespace OpenSpark.ApiGateway.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/projects")]
     public class ProjectsController : ControllerBase
     {
@@ -23,7 +24,6 @@ namespace OpenSpark.ApiGateway.Controllers
         /// <summary>
         /// POST /api/projects/create
         /// </summary>
-        [Authorize]
         [HttpPost("create")]
         public async Task<ActionResult<ValidationResult>> Create(NewProjectInputModel model)
         {
@@ -31,6 +31,20 @@ namespace OpenSpark.ApiGateway.Controllers
                 return BadRequest(ModelState.Values.SelectMany(v => v.Errors));
 
             var result = await _mediator.Send(new CreateProject.Command(model));
+
+            if (result.IsValid)
+                return Accepted(result);
+
+            return BadRequest(result);
+        }
+
+        [HttpPost("connect")]
+        public async Task<ActionResult<ValidationResult>> Connect(ConnectProjectInputModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState.Values.SelectMany(v => v.Errors));
+
+            var result = await _mediator.Send(new ConnectProject.Command(model));
 
             if (result.IsValid)
                 return Accepted(result);

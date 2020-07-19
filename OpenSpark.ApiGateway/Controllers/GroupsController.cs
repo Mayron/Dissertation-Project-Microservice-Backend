@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 namespace OpenSpark.ApiGateway.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/groups")]
     public class GroupsController : ControllerBase
     {
@@ -23,7 +24,6 @@ namespace OpenSpark.ApiGateway.Controllers
         /// <summary>
         /// POST /api/groups/create
         /// </summary>
-        [Authorize]
         [HttpPost("create")]
         public async Task<ActionResult<ValidationResult>> Create(NewGroupInputModel model)
         {

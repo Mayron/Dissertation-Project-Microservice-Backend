@@ -38,7 +38,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                 {
                     Console.WriteLine($"Unexpected message received: {ev.FsmEvent}. Current State: {StateName}");
                     return Stay();
-                };
+                }
 
                 if (error.TransactionId != StateData.TransactionId)
                 {
@@ -110,13 +110,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                     }
 
                     _eventEmitter.BroadcastToGroup(@event.GroupId, "PostAdded", @event.Post);
-
-                    _actorSystemService.CallbackHandler.Tell(new SagaMessageEmittedEvent
-                    {
-                        TransactionId = StateData.TransactionId,
-                        Message = "New post created successfully.",
-                        Success = true
-                    });
+                    _actorSystemService.SendSagaSucceededMessage(StateData.TransactionId, "New post created successfully.");
 
                     return Stop();
 
@@ -129,13 +123,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
 
         private State<SagaState, ISagaStateData> StopAndSendError(string errorMessage)
         {
-            _actorSystemService.CallbackHandler.Tell(new SagaMessageEmittedEvent
-            {
-                TransactionId = StateData.TransactionId,
-                Message = errorMessage,
-                Success = false
-            });
-
+            _actorSystemService.SendSagaFailedMessage(StateData.TransactionId, errorMessage);
             return Stop();
         }
     }

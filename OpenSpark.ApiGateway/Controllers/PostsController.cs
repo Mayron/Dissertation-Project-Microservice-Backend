@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 namespace OpenSpark.ApiGateway.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/posts")]
     public class PostsController : ControllerBase
     {
@@ -18,8 +19,7 @@ namespace OpenSpark.ApiGateway.Controllers
         {
             _mediator = mediator;
         }
-
-        [Authorize]
+        
         [HttpPost]
         public async Task<ActionResult<string>> Post(NewPostInputModel model)
         {

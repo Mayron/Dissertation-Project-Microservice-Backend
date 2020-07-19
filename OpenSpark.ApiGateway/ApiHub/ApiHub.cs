@@ -1,6 +1,7 @@
 ﻿// ReSharper disable UnusedMember.Global
 using System;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using OpenSpark.ApiGateway.Handlers;
 
@@ -22,6 +23,7 @@ namespace OpenSpark.ApiGateway.ApiHub
         public void FetchNewsFeed(string callback) =>
             _mediator.Send(new FetchNewsFeed.Query(Context.ConnectionId, callback));
 
+        [Authorize]
         public void Subscribe(string callback, string token)
         {
             if (Guid.TryParse(token, out var transactionId))

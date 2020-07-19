@@ -6,6 +6,7 @@ using OpenSpark.Shared.Queries;
 using OpenSpark.Shared.ViewModels;
 using System;
 using System.Linq;
+using OpenSpark.Shared;
 
 namespace OpenSpark.Groups.Actors
 {
@@ -16,14 +17,14 @@ namespace OpenSpark.Groups.Actors
         public GroupQueryActor(GroupRepository groupRepository)
         {
             _groupRepository = groupRepository;
-            Receive<BasicGroupDetailsQuery>(HandleBasicGroupDetailsQuery);
+            Receive<GroupDetailsQuery>(HandleGroupDetailsQuery);
         }
 
-        private void HandleBasicGroupDetailsQuery(BasicGroupDetailsQuery query)
+        private void HandleGroupDetailsQuery(GroupDetailsQuery query)
         {
             using var session = DocumentStoreSingleton.Store.OpenSession();
 
-            var groupId = $"group/{query.GroupId}";
+            var groupId = query.GroupId.ConvertToRavenId<Group>();
             var result = session.Query<GetBasicGroupDetails.Result, GetBasicGroupDetails>()
                 .SingleOrDefault(g => g.GroupId == groupId);
 
@@ -58,7 +59,7 @@ namespace OpenSpark.Groups.Actors
             }
 
             var categoryId = result.CategoryId;
-            var category = session.Query<Category>().SingleOrDefault(c => c.Id == categoryId);
+            var category = session.Load<Category>(categoryId);
 
             if (category == null)
                 Console.WriteLine($"Failed to find group category with id: {categoryId}");
@@ -67,11 +68,11 @@ namespace OpenSpark.Groups.Actors
             {
                 Callback = query.Callback,
                 ConnectionId = query.ConnectionId,
-                Payload = new BasicGroupDetailsViewModel
+                Payload = new GroupDetailsViewModel
                 {
                     About = result.About,
                     CategoryName = category?.Name ?? "Unknown",
-                    GroupId = result.GroupId,
+                    GroupId = result.GroupId.ConvertToEntityId(),
                     Name = result.Name,
                     Visibility = result.Visibility,
                     TotalMembers = result.TotalMembers

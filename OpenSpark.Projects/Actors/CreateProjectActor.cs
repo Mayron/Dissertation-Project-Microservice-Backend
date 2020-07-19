@@ -39,7 +39,9 @@ namespace OpenSpark.Projects.Actors
                     Tags = command.Tags,
                     Visibility = VisibilityStatus.Public, // TODO: Needs to be configurable on creation
                     CreatedAt = DateTime.Now,
+                    LastUpdated = DateTime.Now,
                     Subscribers = new List<string>(),
+                    TeamMembers = new List<string>()
                 };
 
                 session.Store(project);

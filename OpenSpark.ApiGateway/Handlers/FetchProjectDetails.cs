@@ -9,17 +9,17 @@ using System.Threading.Tasks;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
-    public class FetchBasicGroupDetails
+    public class FetchProjectDetails
     {
         public class Query : IRequest<Unit>
         {
-            public string GroupId { get; }
+            public string ProjectId { get; }
             public string ConnectionId { get; }
             public string Callback { get; }
 
-            public Query(string groupId, string connectionId, string callback)
+            public Query(string projectId, string connectionId, string callback)
             {
-                GroupId = groupId;
+                ProjectId = projectId;
                 ConnectionId = connectionId;
                 Callback = callback;
             }
@@ -38,9 +38,9 @@ namespace OpenSpark.ApiGateway.Handlers
 
             public Task<Unit> Handle(Query query, CancellationToken cancellationToken)
             {
-                _actorSystemService.SendGroupsMessage(new BasicGroupDetailsQuery
+                _actorSystemService.SendProjectsMessage(new ProjectDetailsQuery
                 {
-                    GroupId = query.GroupId,
+                    ProjectId = query.ProjectId,
                     ConnectionId = query.ConnectionId,
                     Callback = query.Callback,
                     User = _user

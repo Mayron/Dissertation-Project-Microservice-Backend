@@ -46,6 +46,8 @@ namespace OpenSpark.ApiGateway.Actors
                 Context.Watch(actorRef);
 
                 _children = _children.Add(command.TransactionId, actorRef);
+                _actorSystemService.RegisterTransaction(command.TransactionId);
+
                 return actorRef;
             }
 

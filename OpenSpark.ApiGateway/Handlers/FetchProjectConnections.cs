@@ -1,33 +1,25 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Threading;
-using System.Threading.Tasks;
-using Akka.Actor;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using OpenSpark.ApiGateway.Extensions;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Domain;
-using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.Queries;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
-    public class FetchUserProjects
+    public class FetchProjectConnections
     {
         public class Query : IRequest<Unit>
         {
             public string ConnectionId { get; }
             public string Callback { get; }
-            public bool Subscriptions { get; }
-            public bool Owned { get; }
 
-            public Query(string connectionId, string callback, bool subscriptions = false, bool owned = false)
+            public Query(string connectionId, string callback)
             {
                 ConnectionId = connectionId;
                 Callback = callback;
-                Subscriptions = subscriptions;
-                Owned = owned;
             }
         }
 
@@ -52,11 +44,10 @@ namespace OpenSpark.ApiGateway.Handlers
 
                 if (_user.Projects.Count == 0)
                 {
-                    _actorSystemService.SendPayloadToClient(
-                        query.ConnectionId, query.Callback, ImmutableList<string>.Empty);
+                    _actorSystemService.SendPayloadToClient(query.ConnectionId, query.Callback, _user.Projects);
                     return Unit.Task;
                 }
-                
+
                 _actorSystemService.SendProjectsMessage(new UserProjectsQuery
                 {
                     ConnectionId = query.ConnectionId,

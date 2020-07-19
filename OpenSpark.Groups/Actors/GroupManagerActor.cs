@@ -1,11 +1,10 @@
 ﻿using Akka.Actor;
-using System.Collections.Immutable;
-using System.Linq;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Commands.Groups;
 using OpenSpark.Shared.Commands.Posts;
-using OpenSpark.Shared.Events.Sagas.CreateGroup;
 using OpenSpark.Shared.Queries;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace OpenSpark.Groups.Actors
 {
@@ -19,7 +18,7 @@ namespace OpenSpark.Groups.Actors
             _children = ImmutableDictionary<string, IActorRef>.Empty;
 
             Receive<VerifyUserPostRequestCommand>(command => ForwardByGroupId(command.GroupId, command));
-            Receive<BasicGroupDetailsQuery>(query => ForwardByGroupId(query.GroupId, query));
+            Receive<GroupDetailsQuery>(query => ForwardByGroupId(query.GroupId, query));
             Receive<DeleteGroupCommand>(query => ForwardByGroupId(query.GroupId, query));
             Receive<CategoriesQuery>(query =>
             {
