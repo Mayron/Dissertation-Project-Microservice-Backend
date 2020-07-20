@@ -18,14 +18,12 @@ namespace OpenSpark.ApiGateway.Actors
         }
 
         private readonly IEventEmitterService _eventEmitter;
-        private readonly Guid _transactionId;
         private ClientSubscription _subscription;
         private SagaFinishedEvent _message;
 
         public SagaSubscriptionActor(IEventEmitterService eventEmitter, Guid transactionId)
         {
             _eventEmitter = eventEmitter;
-            _transactionId = transactionId;
 
             Receive<SubscribeToSagaTransactionCommand>(command =>
             {
@@ -46,11 +44,11 @@ namespace OpenSpark.ApiGateway.Actors
 
             Receive<SagaFinishedEvent>(@event =>
             {
-                if (@event.TransactionId != _transactionId)
+                if (@event.TransactionId != transactionId)
                 {
-                    Console.WriteLine($"Unknown transaction Id {@event.TransactionId}. Expected: {_transactionId}");
+                    Console.WriteLine($"Unknown transaction Id {@event.TransactionId}. Expected: {transactionId}");
                     return;
-                };
+                }
 
                 _message = @event;
 

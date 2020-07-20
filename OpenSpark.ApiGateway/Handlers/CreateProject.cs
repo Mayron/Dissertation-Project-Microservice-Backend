@@ -43,7 +43,7 @@ namespace OpenSpark.ApiGateway.Handlers
                     return Task.FromResult(new ValidationResult(false, "Failed to validate user request"));
 
                 var transactionId = Guid.NewGuid();
-                _actorSystemService.SagaManager.Tell(new ExecuteCreateProjectSagaCommand
+                _actorSystemService.ExecuteSaga(new ExecuteCreateProjectSagaCommand
                 {
                     SagaName = nameof(CreateProjectSagaActor),
                     TransactionId = transactionId,

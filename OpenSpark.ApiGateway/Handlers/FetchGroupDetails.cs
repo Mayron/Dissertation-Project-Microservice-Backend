@@ -6,6 +6,7 @@ using OpenSpark.Domain;
 using OpenSpark.Shared.Queries;
 using System.Threading;
 using System.Threading.Tasks;
+using OpenSpark.Shared;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
@@ -38,13 +39,14 @@ namespace OpenSpark.ApiGateway.Handlers
 
             public Task<Unit> Handle(Query query, CancellationToken cancellationToken)
             {
-                _actorSystemService.SendGroupsMessage(new GroupDetailsQuery
-                {
-                    GroupId = query.GroupId,
-                    ConnectionId = query.ConnectionId,
-                    Callback = query.Callback,
-                    User = _user
-                });
+                _actorSystemService.SendRemoteMessage(RemoteSystem.Groups, 
+                    new GroupDetailsQuery
+                    {
+                        GroupId = query.GroupId,
+                        ConnectionId = query.ConnectionId,
+                        Callback = query.Callback,
+                        User = _user
+                    });
 
                 return Unit.Task;
             }

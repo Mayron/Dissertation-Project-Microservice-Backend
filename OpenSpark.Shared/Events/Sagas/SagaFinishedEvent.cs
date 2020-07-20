@@ -9,5 +9,6 @@ namespace OpenSpark.Shared.Events.Sagas
         public bool Success { get; set; }
         public string Message { get; set; }
         public IDictionary<string, string> Args { get; set; }
+        public string[] Errors { get; set; }
     }
 }

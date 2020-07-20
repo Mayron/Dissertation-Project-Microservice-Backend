@@ -6,6 +6,7 @@ using OpenSpark.Domain;
 using OpenSpark.Shared.Queries;
 using System.Threading;
 using System.Threading.Tasks;
+using OpenSpark.Shared;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
@@ -36,12 +37,13 @@ namespace OpenSpark.ApiGateway.Handlers
 
             public Task<Unit> Handle(Query query, CancellationToken cancellationToken)
             {
-                _actorSystemService.SendDiscussionsMessage(new NewsFeedQuery
-                {
-                    ConnectionId = query.ConnectionId,
-                    Callback = query.Callback,
-                    User = _user
-                });
+                _actorSystemService.SendRemoteMessage(RemoteSystem.Discussions, 
+                    new NewsFeedQuery
+                    {
+                        ConnectionId = query.ConnectionId,
+                        Callback = query.Callback,
+                        User = _user
+                    });
 
                 return Unit.Task;
             }

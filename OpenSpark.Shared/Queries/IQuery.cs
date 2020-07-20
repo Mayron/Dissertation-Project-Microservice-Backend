@@ -1,8 +1,11 @@
-﻿namespace OpenSpark.Shared.Queries
+﻿using System;
+
+namespace OpenSpark.Shared.Queries
 {
     public interface IQuery : IMessage
     {
-        string ConnectionId { get; set; }
+        Guid Id { get; set; }
         string Callback { get; set; }
+        string ConnectionId { get; set; }
     }
 }

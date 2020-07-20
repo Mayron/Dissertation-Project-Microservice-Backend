@@ -1,14 +1,13 @@
-﻿using System.Collections.Immutable;
-using System.Threading;
-using System.Threading.Tasks;
-using Akka.Actor;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using OpenSpark.ApiGateway.Extensions;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Domain;
-using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.Queries;
+using System.Collections.Immutable;
+using System.Threading;
+using System.Threading.Tasks;
+using OpenSpark.Shared;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
@@ -58,15 +57,16 @@ namespace OpenSpark.ApiGateway.Handlers
 
                     return Unit.Task;
                 }
-                
-                _actorSystemService.SendGroupsMessage(new UserGroupsQuery
-                {
-                    ConnectionId = query.ConnectionId,
-                    Callback = query.Callback,
-                    User = _user,
-                    OwnedGroups = query.Owned,
-                    Memberships = query.Memberships
-                });
+
+                _actorSystemService.SendRemoteMessage(RemoteSystem.Groups,
+                    new UserGroupsQuery
+                    {
+                        ConnectionId = query.ConnectionId,
+                        Callback = query.Callback,
+                        User = _user,
+                        OwnedGroups = query.Owned,
+                        Memberships = query.Memberships
+                    });
 
                 return Unit.Task;
             }

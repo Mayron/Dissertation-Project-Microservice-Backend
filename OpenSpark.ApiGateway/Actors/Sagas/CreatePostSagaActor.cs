@@ -4,6 +4,7 @@ using OpenSpark.ApiGateway.Services;
 using OpenSpark.Shared.Events.Sagas;
 using OpenSpark.Shared.Events.Sagas.CreatePost;
 using System;
+using OpenSpark.Shared;
 using OpenSpark.Shared.Commands.Posts;
 using OpenSpark.Shared.Commands.SagaExecutionCommands;
 
@@ -55,12 +56,13 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
         {
             if (!(fsmEvent.FsmEvent is ExecuteAddPostSagaCommand command)) return null;
 
-            _actorSystemService.SendGroupsMessage(new VerifyUserPostRequestCommand
-            {
-                TransactionId = command.TransactionId,
-                User = command.User,
-                GroupId = command.GroupId,
-            }, Self);
+            _actorSystemService.SendRemoteMessage(RemoteSystem.Groups, 
+                new VerifyUserPostRequestCommand
+                {
+                    TransactionId = command.TransactionId,
+                    User = command.User,
+                    GroupId = command.GroupId,
+                }, Self);
 
             return GoTo(SagaState.VerifyingUser).Using(new SagaStateData(command.TransactionId));
         }
@@ -77,10 +79,11 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                     }
 
                     // User verified successfully. Begin adding post.
-                    _actorSystemService.SendDiscussionsMessage(new CreatePostCommand
-                    {
-                        TransactionId = StateData.TransactionId,
-                    }, Self);
+                    _actorSystemService.SendRemoteMessage(RemoteSystem.Discussions, 
+                        new CreatePostCommand
+                        {
+                            TransactionId = StateData.TransactionId,
+                        }, Self);
 
                     return GoTo(SagaState.CreatingPost);
 

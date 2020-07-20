@@ -1,15 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Threading;
-using System.Threading.Tasks;
-using Akka.Actor;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using OpenSpark.ApiGateway.Extensions;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Domain;
-using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.Queries;
+using System.Collections.Immutable;
+using System.Threading;
+using System.Threading.Tasks;
+using OpenSpark.Shared;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
@@ -56,8 +54,8 @@ namespace OpenSpark.ApiGateway.Handlers
                         query.ConnectionId, query.Callback, ImmutableList<string>.Empty);
                     return Unit.Task;
                 }
-                
-                _actorSystemService.SendProjectsMessage(new UserProjectsQuery
+
+                _actorSystemService.SendRemoteMessage(RemoteSystem.Projects, new UserProjectsQuery
                 {
                     ConnectionId = query.ConnectionId,
                     Callback = query.Callback,

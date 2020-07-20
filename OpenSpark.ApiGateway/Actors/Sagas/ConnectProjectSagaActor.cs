@@ -10,12 +10,14 @@ using OpenSpark.Shared.Queries;
 using OpenSpark.Shared.ViewModels;
 using System;
 using System.Collections.Generic;
+using OpenSpark.Shared;
 
 namespace OpenSpark.ApiGateway.Actors.Sagas
 {
     public class ConnectProjectSagaActor : FSM<ConnectProjectSagaActor.SagaState, ISagaStateData>
     {
         private readonly IActorSystemService _actorSystemService;
+//        protected ILoggingAdapter Log { get; } = Context.GetLogger();
 
         public enum SagaState
         {
@@ -49,11 +51,12 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             if (fsmEvent.FsmEvent is ExecuteConnectProjectSagaCommand command)
             {
                 // Send command to Groups context to validate if project is allowed to connect
-                _actorSystemService.SendGroupsMessage(new GroupDetailsQuery
-                {
-                    User = command.User,
-                    GroupId = command.GroupId,
-                }, Self);
+                _actorSystemService.SendRemoteMessage(RemoteSystem.Groups,
+                    new GroupDetailsQuery
+                    {
+                        User = command.User,
+                        GroupId = command.GroupId,
+                    }, Self);
 
                 // go to next state
                 return GoTo(SagaState.ValidatingTargetGroup).Using(new ProcessingStateData
@@ -73,23 +76,24 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             if (!(fsmEvent.FsmEvent is PayloadEvent @event) || !(StateData is ProcessingStateData data))
                 return null;
 
-            if (@event.Error != null)
+            if (@event.Errors != null)
             {
-                _actorSystemService.SendSagaFailedMessage(StateData.TransactionId, @event.Error);
+                _actorSystemService.SendSagaFailedMessage(StateData.TransactionId, @event.Errors[0]);
                 return Stop();
             }
 
             if (!(@event.Payload is GroupDetailsViewModel groupDetails))
                 throw new ActorKilledException($"Unexpected payload: {@event.Payload}");
 
-            _actorSystemService.SendProjectsMessage(new ConnectAllProjectsCommand
-            {
-                TransactionId = StateData.TransactionId,
-                GroupId = data.GroupId,
-                GroupVisibility = groupDetails.Visibility,
-                User = data.User,
-                ProjectIds = new List<string> { data.ProjectId }
-            }, Self);
+            _actorSystemService.SendRemoteMessage(RemoteSystem.Projects, 
+                new ConnectAllProjectsCommand
+                {
+                    TransactionId = StateData.TransactionId,
+                    GroupId = data.GroupId,
+                    GroupVisibility = groupDetails.Visibility,
+                    User = data.User,
+                    ProjectIds = new List<string> { data.ProjectId }
+                }, Self);
 
             // go to next state
             return GoTo(SagaState.ConnectingProject).Using(new ProcessingStateData

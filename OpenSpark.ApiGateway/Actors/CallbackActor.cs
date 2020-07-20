@@ -14,7 +14,7 @@ namespace OpenSpark.ApiGateway.Actors
     /// </summary>
     public class CallbackActor : ReceiveActor
     {
-        public IImmutableDictionary<Guid, IActorRef> _subscriptions;
+        private IImmutableDictionary<Guid, IActorRef> _subscriptions;
 
         public CallbackActor(IEventEmitterService eventEmitter)
         {

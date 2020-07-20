@@ -35,12 +35,14 @@ namespace OpenSpark.ApiGateway.Handlers
 
             public Task<Unit> Handle(Query query, CancellationToken cancellationToken)
             {
-                _actorSystemService.CallbackHandler.Tell(new SubscribeToSagaTransactionCommand
+                var command = new SubscribeToSagaTransactionCommand
                 {
                     TransactionId = query.TransactionId,
                     ConnectionId = query.ConnectionId,
                     Callback = query.Callback
-                });
+                };
+
+                _actorSystemService.SubscribeToSaga(command);
 
                 return Unit.Task;
             }

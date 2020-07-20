@@ -29,7 +29,7 @@ namespace OpenSpark.Projects.Actors
                 {
                     Callback = query.Callback,
                     ConnectionId = query.ConnectionId,
-                    Error = "This project could not be found. The owner may have removed it.",
+                    Errors = new [] {"This project could not be found. The owner may have removed it."},
                 });
 
                 return;
@@ -43,7 +43,7 @@ namespace OpenSpark.Projects.Actors
                     {
                         Callback = query.Callback,
                         ConnectionId = query.ConnectionId,
-                        Error = "You do not have permission to view this private project.",
+                        Errors = new[] {"You do not have permission to view this private project."},
                     });
 
                     return;

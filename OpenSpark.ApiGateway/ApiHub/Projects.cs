@@ -19,7 +19,7 @@ namespace OpenSpark.ApiGateway.ApiHub
             _mediator.Send(new FetchUserProjects.Query(Context.ConnectionId, callback, subscriptions: true));
 
         [Authorize]
-        public void FetchProjectConnections(string callback) =>
-            _mediator.Send(new FetchUserProjects.Query(Context.ConnectionId, callback, subscriptions: true));
+        public void FetchGroupConnectionsList(string callback, string projectId) =>
+            _mediator.Send(new FetchGroupConnectionsList.Query(Context.ConnectionId, callback, projectId));
     }
 }

@@ -2,11 +2,12 @@
 using Akka.Configuration;
 using Microsoft.Extensions.Configuration;
 using OpenSpark.ApiGateway.Actors;
-using OpenSpark.ApiGateway.Actors.Sagas;
 using OpenSpark.Shared;
+using OpenSpark.Shared.Commands;
 using OpenSpark.Shared.Commands.SagaExecutionCommands;
 using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.Events.Sagas;
+using OpenSpark.Shared.Queries;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,15 +16,7 @@ namespace OpenSpark.ApiGateway.Services
 {
     public interface IActorSystemService
     {
-        IActorRef SagaManager { get; }
-
-        void SendDiscussionsMessage(IMessage message, IActorRef callback = null);
-
-        void SendGroupsMessage(IMessage message, IActorRef callback = null);
-
-        void SendProjectsMessage(IMessage message, IActorRef callback = null);
-
-        IActorRef CreateSagaActor(ISagaExecutionCommand command);
+        void SendRemoteMessage(int remoteSystemId, IMessage message, IActorRef callback = null);
 
         void RegisterTransaction(Guid transactionId);
 
@@ -34,25 +27,29 @@ namespace OpenSpark.ApiGateway.Services
         void SendSagaFailedMessage(Guid transactionId, string message);
 
         void SendSagaSucceededMessage(Guid transactionId, string message, IDictionary<string, string> args = null);
+
+        void SubscribeToSaga(SubscribeToSagaTransactionCommand command);
+
+        void SendMultiQuery(MultiQuery query);
+
+        void ExecuteSaga(ISagaExecutionCommand command);
     }
 
     public class ActorSystemService : IActorSystemService
     {
-        private readonly IConfiguration _configuration;
-        private readonly IEventEmitterService _eventEmitter;
-        private readonly IFirestoreService _firestoreService;
         private readonly ActorSystem _localSystem;
         private readonly IActorRef _callbackHandler;
+        private readonly IActorRef _multiQueryManager;
+        private readonly IActorRef _sagaManager;
+        private readonly string _projectsRemotePath;
+        private readonly string _groupsRemotePath;
+        private readonly string _discussionsRemotePath;
 
-        public IActorRef SagaManager { get; }
-
-        public ActorSystemService(IConfiguration configuration, IEventEmitterService eventEmitter,
+        public ActorSystemService(
+            IConfiguration configuration,
+            IEventEmitterService eventEmitter,
             IFirestoreService firestoreService)
         {
-            _configuration = configuration;
-            _eventEmitter = eventEmitter;
-            _firestoreService = firestoreService;
-
             // Create local WebApiSystem
             var configString = File.ReadAllText("webapi-system.conf");
             var config = ConfigurationFactory.ParseString(configString);
@@ -60,56 +57,41 @@ namespace OpenSpark.ApiGateway.Services
 
             // Create local actors for the system
             _callbackHandler = _localSystem.ActorOf(
-                Props.Create(() => new CallbackActor(_eventEmitter)), "Callback");
+                Props.Create(() => new CallbackActor(eventEmitter)), "Callback");
 
-            SagaManager = _localSystem.ActorOf(
-                Props.Create(() => new SagaManagerActor(this)), "SagaManager");
+            _multiQueryManager = _localSystem.ActorOf(
+                Props.Create(() => new MultiQueryManagerActor(
+                    this, _callbackHandler)), "MultiQueryManager");
+
+            _sagaManager = _localSystem.ActorOf(
+                Props.Create(() => new SagaManagerActor(this, eventEmitter, firestoreService)), "SagaManager");
+
+            _projectsRemotePath = $"{configuration["akka:ProjectsRemoteUrl"]}/ProjectManager";
+            _groupsRemotePath = $"{configuration["akka:GroupsRemoteUrl"]}/GroupManager";
+            _discussionsRemotePath = $"{configuration["akka:DiscussionsRemoteUrl"]}/UserManager";
         }
 
-        public void SendDiscussionsMessage(IMessage message, IActorRef callback = null)
+        public void SendRemoteMessage(int remoteSystemId, IMessage message, IActorRef callback = null)
         {
-            var discussionsUrl = _configuration["akka:DiscussionsRemoteUrl"];
-            var userManager = _localSystem.ActorSelection($"{discussionsUrl}/UserManager");
-            userManager.Tell(message, callback ?? _callbackHandler);
-        }
-
-        public void SendGroupsMessage(IMessage message, IActorRef callback = null)
-        {
-            var groupsUrl = _configuration["akka:GroupsRemoteUrl"];
-            var groupManager = _localSystem.ActorSelection($"{groupsUrl}/GroupManager");
-            groupManager.Tell(message, callback ?? _callbackHandler);
-        }
-
-        public void SendProjectsMessage(IMessage message, IActorRef callback = null)
-        {
-            var projectsUrl = _configuration["akka:ProjectsRemoteUrl"];
-            var projectsManager = _localSystem.ActorSelection($"{projectsUrl}/ProjectManager");
-            projectsManager.Tell(message, callback ?? _callbackHandler);
-        }
-
-        public IActorRef CreateSagaActor(ISagaExecutionCommand command)
-        {
-            var actorName = $"{command.SagaName}-{command.TransactionId}";
-
-            return command.SagaName switch
+            var remoteActorPath = remoteSystemId switch
             {
-                nameof(CreatePostSagaActor) =>
-                _localSystem.ActorOf(
-                    Props.Create(() => new CreatePostSagaActor(this, _eventEmitter)), actorName),
-
-                nameof(CreateGroupSagaActor) =>
-                _localSystem.ActorOf(
-                    Props.Create(() => new CreateGroupSagaActor(this, _firestoreService)), actorName),
-
-                nameof(CreateProjectSagaActor) =>
-                _localSystem.ActorOf(
-                    Props.Create(() => new CreateProjectSagaActor(this, _firestoreService)), actorName),
-
-                _ => throw new Exception($"Failed to find SagaActor: {command.SagaName}"),
+                RemoteSystem.Groups => _groupsRemotePath,
+                RemoteSystem.Discussions => _discussionsRemotePath,
+                RemoteSystem.Projects => _projectsRemotePath,
+                _ => throw new Exception($"Invalid remote system ID: {remoteSystemId}")
             };
+
+            var managerActorRef = _localSystem.ActorSelection(remoteActorPath);
+            managerActorRef.Tell(message, callback ?? _callbackHandler);
         }
+
+        public void SendMultiQuery(MultiQuery query) => _multiQueryManager.Tell(query, _callbackHandler);
 
         public void RegisterTransaction(Guid transactionId) => _callbackHandler.Tell(transactionId);
+
+        public void SubscribeToSaga(SubscribeToSagaTransactionCommand command) => _callbackHandler.Tell(command);
+
+        public void ExecuteSaga(ISagaExecutionCommand command) => _sagaManager.Tell(command);
 
         public void SendErrorToClient(string connectionId, string callback, string errorMessage)
         {
@@ -117,7 +99,7 @@ namespace OpenSpark.ApiGateway.Services
             {
                 ConnectionId = connectionId,
                 Callback = callback,
-                Error = errorMessage
+                Errors = new[] { errorMessage }
             });
         }
 

@@ -40,37 +40,20 @@ namespace OpenSpark.Projects.Actors
 
         private bool IsVisibilityStatusValid(ConnectProjectCommand command, string projectVisibility)
         {
-            if (projectVisibility != VisibilityStatus.Private &&
-                command.GroupVisibility == VisibilityStatus.Private)
+            var (canConnect, error) =
+                VisibilityHelper.CanProjectConnectToGroup(projectVisibility, command.GroupVisibility);
+
+            if (canConnect) return true;
+
+            Sender.Tell(new ProjectFailedToConnectEvent
             {
-                var message = projectVisibility == VisibilityStatus.Unlisted ? "an unlisted" : "a public";
+                TransactionId = command.TransactionId,
+                Message = error,
+                ProjectId = command.ProjectId
+            });
 
-                Sender.Tell(new ProjectFailedToConnectEvent
-                {
-                    TransactionId = command.TransactionId,
-                    Message = $"Cannot connect a private group to {message} project.",
-                    ProjectId = command.ProjectId
-                });
-
-                Self.GracefulStop(TimeSpan.FromSeconds(5));
-                return false;
-            }
-
-            if (projectVisibility == VisibilityStatus.Public &&
-                command.GroupVisibility == VisibilityStatus.Unlisted)
-            {
-                Sender.Tell(new ProjectFailedToConnectEvent
-                {
-                    TransactionId = command.TransactionId,
-                    Message = "Cannot connect an unlisted group to a public project.",
-                    ProjectId = command.ProjectId
-                });
-
-                Self.GracefulStop(TimeSpan.FromSeconds(5));
-                return false;
-            }
-
-            return true;
+            Context.Stop(Self);
+            return false;
         }
     }
 }

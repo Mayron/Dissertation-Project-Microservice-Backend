@@ -34,7 +34,7 @@ namespace OpenSpark.Groups.Actors
                 {
                     Callback = query.Callback,
                     ConnectionId = query.ConnectionId,
-                    Error = "This group could not be found. The owner may have removed it.",
+                    Errors = new [] {"This group could not be found. The owner may have removed it."},
                 });
 
                 Self.GracefulStop(TimeSpan.FromSeconds(5));
@@ -50,7 +50,7 @@ namespace OpenSpark.Groups.Actors
                     {
                         Callback = query.Callback,
                         ConnectionId = query.ConnectionId,
-                        Error = "You do not have permission to view this private group.",
+                        Errors = new [] {"You do not have permission to view this private group."},
                     });
 
                     Self.GracefulStop(TimeSpan.FromSeconds(5));

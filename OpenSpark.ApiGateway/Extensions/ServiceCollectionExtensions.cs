@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using OpenSpark.ApiGateway.Services;
+using ActorSystemService = OpenSpark.ApiGateway.Services.ActorSystemService;
 
 namespace OpenSpark.ApiGateway.Extensions
 {

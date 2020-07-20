@@ -49,7 +49,7 @@ namespace OpenSpark.ApiGateway.Handlers
                         "You do not have permission to connect to the selected group."));
 
                 var transactionId = Guid.NewGuid();
-                _actorSystemService.SagaManager.Tell(new ExecuteConnectProjectSagaCommand
+                _actorSystemService.ExecuteSaga(new ExecuteConnectProjectSagaCommand
                 {
                     SagaName = nameof(CreateProjectSagaActor),
                     TransactionId = transactionId,

@@ -41,14 +41,15 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             if (fsmEvent.FsmEvent is ExecuteCreateProjectSagaCommand command)
             {
                 // Send command to Groups context to create new group
-                _actorSystemService.SendProjectsMessage(new CreateProjectCommand
-                {
-                    TransactionId = command.TransactionId,
-                    User = command.User,
-                    Name = command.Name,
-                    About = command.About,
-                    Tags = command.Tags,
-                }, Self);
+                _actorSystemService.SendRemoteMessage(RemoteSystem.Projects, 
+                    new CreateProjectCommand
+                    {
+                        TransactionId = command.TransactionId,
+                        User = command.User,
+                        Name = command.Name,
+                        About = command.About,
+                        Tags = command.Tags,
+                    }, Self);
 
                 // go to next state
                 return GoTo(SagaState.CreatingProject).Using(new ProcessingStateData
@@ -73,11 +74,12 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
 
             Console.WriteLine($"Rolling back {nameof(CreatePostSagaActor)}.");
 
-            _actorSystemService.SendProjectsMessage(new DeleteProjectCommand
-            {
-                TransactionId = @event.TransactionId,
-                ProjectId = @event.Project.Id
-            }, Self);
+            _actorSystemService.SendRemoteMessage(RemoteSystem.Projects, 
+                new DeleteProjectCommand
+                {
+                    TransactionId = @event.TransactionId,
+                    ProjectId = @event.Project.Id
+                }, Self);
 
             _actorSystemService.SendSagaFailedMessage(StateData.TransactionId,
                 "Oops! Something went wrong while trying to create your project.");
