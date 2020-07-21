@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Immutable;
-using Akka.Actor;
+﻿using Akka.Actor;
 using OpenSpark.ApiGateway.Actors.MultiQueries;
-using OpenSpark.ApiGateway.Models;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Shared.Events;
 using OpenSpark.Shared.Queries;
+using System;
 
 namespace OpenSpark.ApiGateway.Actors
 {
@@ -19,28 +17,36 @@ namespace OpenSpark.ApiGateway.Actors
 
             Receive<MultiQuery>(multiQuery =>
             {
+                multiQuery.Id = Guid.NewGuid();
                 var target = CreateMultiQueryActor(multiQuery);
 
                 // creating this will auto trigger queries to fire
-                Context.ActorOf(Props.Create(() => 
-                        new MultiQueryHandlerActor(multiQuery, target, actorSystemService)), 
+                Context.ActorOf(Props.Create(() =>
+                        new MultiQueryHandlerActor(multiQuery, target, actorSystemService)),
                     $"MultiQueryHandler-{multiQuery.Id}");
             });
 
             Receive<MultiPayloadEvent>(@event => { });
         }
 
-        private IActorRef CreateMultiQueryActor(MultiQuery query)
+        private IActorRef CreateMultiQueryActor(MultiQuery multiQuery)
         {
-            var actorName = $"{query.MultiQueryName}-{query.Id}";
+            var actorName = $"{multiQuery.MultiQueryName}-{multiQuery.Id}";
 
-            return query.MultiQueryName switch
+            foreach (var queryContext in multiQuery.Queries)
+            {
+                var query = queryContext.Query;
+                query.Id = Guid.NewGuid();
+                query.MultiQueryId = multiQuery.Id;
+            }
+
+            return multiQuery.MultiQueryName switch
             {
                 nameof(GroupConnectsListMultiQueryActor) =>
                 Context.ActorOf(
-                    Props.Create(() => new GroupConnectsListMultiQueryActor(query, _callbackActor)), actorName),
+                    Props.Create(() => new GroupConnectsListMultiQueryActor(multiQuery, _callbackActor)), actorName),
 
-                _ => throw new Exception($"Failed to find MultiQueryActor: {query.MultiQueryName}"),
+                _ => throw new Exception($"Failed to find MultiQueryActor: {multiQuery.MultiQueryName}"),
             };
         }
     }

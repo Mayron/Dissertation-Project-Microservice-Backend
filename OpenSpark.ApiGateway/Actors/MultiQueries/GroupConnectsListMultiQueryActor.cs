@@ -6,25 +6,24 @@ using OpenSpark.Shared.Queries;
 using OpenSpark.Shared.ViewModels;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace OpenSpark.ApiGateway.Actors.MultiQueries
 {
     public class GroupConnectsListMultiQueryActor : ReceiveActor
     {
-        private readonly MultiQuery _query;
+        private readonly MultiQuery _multiQuery;
 
-        public GroupConnectsListMultiQueryActor(MultiQuery query, IActorRef callback)
+        public GroupConnectsListMultiQueryActor(MultiQuery multiQuery, IActorRef callback)
         {
-            _query = query;
+            _multiQuery = multiQuery;
 
-            SetReceiveTimeout(TimeSpan.FromSeconds(query.TimeOutInSeconds * 2));
+            //            SetReceiveTimeout(TimeSpan.FromSeconds(query.TimeOutInSeconds * 2));
 
             Receive<MultiPayloadEvent>(@event =>
             {
-                if (@event.MultiQueryId != query.Id)
-                    throw new Exception($"Invalid multi query Id. Expected {query.Id} but got {@event.MultiQueryId}");
+                if (@event.MultiQueryId != multiQuery.Id)
+                    throw new Exception($"Invalid multi query Id. Expected {multiQuery.Id} but got {@event.MultiQueryId}");
 
                 var payload = AggregatePayload(@event.Payloads);
                 callback.Tell(payload);
@@ -36,20 +35,20 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueries
             {
                 callback.Tell(new PayloadEvent
                 {
-                    ConnectionId = query.ConnectionId,
-                    Callback = query.Callback,
-                    Errors = new [] { "Request timed out" }
+                    ConnectionId = multiQuery.ConnectionId,
+                    Callback = multiQuery.Callback,
+                    Errors = new[] { "Request timed out" }
                 });
                 Context.Stop(Self);
             });
         }
 
-        private PayloadEvent AggregatePayload(IImmutableDictionary<Guid, IPayloadEvent> payloads)
+        private PayloadEvent AggregatePayload(IEnumerable<IPayloadEvent> payloads)
         {
             var successful = new List<object>();
             var errors = new List<string>();
 
-            foreach (var (_, @event) in payloads) // not sure what to do with key yet
+            foreach (var @event in payloads) // not sure what to do with key yet
             {
                 switch (@event)
                 {
@@ -67,19 +66,19 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueries
             {
                 return new PayloadEvent
                 {
-                    ConnectionId = _query.ConnectionId,
-                    Callback = _query.Callback,
+                    ConnectionId = _multiQuery.ConnectionId,
+                    Callback = _multiQuery.Callback,
                     Errors = errors.ToArray()
                 };
             }
 
-            if (successful.Count != _query.Queries.Count)
+            if (successful.Count != _multiQuery.Queries.Count)
             {
-                Console.WriteLine($"Corrupt multi-query data. Expected {_query.Queries.Count} results but got {successful.Count} with no errors.");
+                Console.WriteLine($"Corrupt multi-query data. Expected {_multiQuery.Queries.Count} results but got {successful.Count} with no errors.");
                 return new PayloadEvent
                 {
-                    ConnectionId = _query.ConnectionId,
-                    Callback = _query.Callback,
+                    ConnectionId = _multiQuery.ConnectionId,
+                    Callback = _multiQuery.Callback,
                     Errors = new[] { "Oops! Something went wrong while retrieving data." }
                 };
             }
@@ -90,9 +89,9 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueries
                 .Single();
 
             var groups = successful
-                .Where(s => s is UserGroupsViewModel)
-                .Cast<UserGroupsViewModel>()
-                .ToList();
+                .Where(s => s is List<UserGroupsViewModel>)
+                .Cast<List<UserGroupsViewModel>>()
+                .Single();
 
             var results = new List<ConnectionViewModel>();
 
@@ -113,8 +112,8 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueries
 
             return new PayloadEvent
             {
-                ConnectionId = _query.ConnectionId,
-                Callback = _query.Callback,
+                ConnectionId = _multiQuery.ConnectionId,
+                Callback = _multiQuery.Callback,
                 Payload = results
             };
         }

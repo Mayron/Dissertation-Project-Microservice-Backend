@@ -53,10 +53,8 @@ namespace OpenSpark.Projects.Actors
                     throw new ActorKilledException("Invalid query request");
                 }
 
-                Sender.Tell(new PayloadEvent
+                Sender.Tell(new PayloadEvent(query)
                 {
-                    ConnectionId = query.ConnectionId,
-                    Callback = query.Callback,
                     Payload = projects.Select(p => new UserGroupsViewModel
                     {
                         Name = p.Name,

@@ -1,13 +1,12 @@
 ﻿using Akka.Actor;
 using OpenSpark.ApiGateway.Models.StateData;
+using OpenSpark.ApiGateway.Services;
 using OpenSpark.Shared.Events;
 using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.Queries;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using OpenSpark.ApiGateway.Services;
 
 namespace OpenSpark.ApiGateway.Actors
 {
@@ -22,10 +21,7 @@ namespace OpenSpark.ApiGateway.Actors
         private sealed class MultiQueryTimeout
         {
             public static MultiQueryTimeout Instance { get; } = new MultiQueryTimeout();
-
-            private MultiQueryTimeout()
-            {
-            }
+            private MultiQueryTimeout() {}
         }
 
         public MultiQueryHandlerActor(MultiQuery multiQuery, IActorRef target, IActorSystemService actorSystemService)
@@ -40,7 +36,7 @@ namespace OpenSpark.ApiGateway.Actors
             _actorSystemService = actorSystemService;
 
             var pending = multiQuery.Queries.ToDictionary(
-                queryContext => queryContext.Query.Id, 
+                queryContext => queryContext.Query.Id,
                 queryContext => queryContext.RemoteSystemId);
 
             Become(WaitingForReplies(new MultiQueryState(pending)));
@@ -50,9 +46,11 @@ namespace OpenSpark.ApiGateway.Actors
         {
             return message =>
             {
+                Console.WriteLine($"Message reply received: {message}");
+
                 switch (message)
                 {
-                    case PayloadEvent @event when _queries.FirstOrDefault(q => q.Query.Id == @event.QueryId) != null:
+                    case PayloadEvent @event when @event.MultiQueryId == _multiQueryId:
                         ReceivedEvent(@event.QueryId, @event, state);
                         break;
 
@@ -60,14 +58,16 @@ namespace OpenSpark.ApiGateway.Actors
                         Console.WriteLine("Multi-Query timed out");
                         Context.Stop(Self);
                         break;
+                    default:
+                        throw new Exception($"Unknown message type: {message}");
                 }
             };
         }
 
-        private void ReceivedEvent(Guid key, IPayloadEvent @event, MultiQueryState state)
+        private void ReceivedEvent(Guid queryId, IPayloadEvent @event, MultiQueryState state)
         {
-            var nextPendingState = state.Pending.Remove(key);
-            var nextReceivedState = state.Received.Add(key, @event);
+            var nextPendingState = state.Pending.Remove(queryId);
+            var nextReceivedState = state.Received.Add(queryId, @event);
 
             if (nextPendingState.Count == 0)
             {
@@ -75,7 +75,7 @@ namespace OpenSpark.ApiGateway.Actors
                 _target.Tell(new MultiPayloadEvent
                 {
                     MultiQueryId = _multiQueryId,
-                    Payloads = nextReceivedState.ToImmutableDictionary()
+                    Payloads = nextReceivedState.Values.ToList()
                 });
 
                 Context.Stop(Self);
@@ -89,10 +89,7 @@ namespace OpenSpark.ApiGateway.Actors
         protected override void PreStart()
         {
             foreach (var queryContext in _queries)
-            {
-                queryContext.Query.Id = _multiQueryId;
-                _actorSystemService.SendRemoteMessage(queryContext.RemoteSystemId, queryContext.Query, _target);
-            }
+                _actorSystemService.SendRemoteMessage(queryContext.RemoteSystemId, queryContext.Query, Self);
         }
 
         protected override void PostStop()

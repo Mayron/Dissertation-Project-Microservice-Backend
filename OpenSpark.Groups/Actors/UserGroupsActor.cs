@@ -66,10 +66,8 @@ namespace OpenSpark.Groups.Actors
                     throw new ActorKilledException("Invalid query request");
                 }
 
-                Sender.Tell(new PayloadEvent
+                Sender.Tell(new PayloadEvent(query)
                 {
-                    ConnectionId = query.ConnectionId,
-                    Callback = query.Callback,
                     Payload = groups.Select(g => new UserGroupsViewModel
                     {
                         Name = g.Name,

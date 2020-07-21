@@ -42,15 +42,15 @@ namespace OpenSpark.ApiGateway.Handlers
 
             public Task<Unit> Handle(Query query, CancellationToken cancellationToken)
             {
-                if (_user == null)
+                if (_user == null || _user.Projects.Count == 0)
                 {
                     _actorSystemService.SendErrorToClient(query.ConnectionId, query.Callback, "Unauthorized");
                     return Unit.Task;
                 }
 
-                if (_user.Projects.Count == 0)
+                if (_user.Groups.Count == 0)
                 {
-                    _actorSystemService.SendPayloadToClient(query.ConnectionId, query.Callback, _user.Projects);
+                    _actorSystemService.SendPayloadToClient(query.ConnectionId, query.Callback, _user.Groups);
                     return Unit.Task;
                 }
 
@@ -60,7 +60,7 @@ namespace OpenSpark.ApiGateway.Handlers
                         User = _user,
                         ConnectionId = query.ConnectionId,
                         Callback = query.Callback,
-                        Id = Guid.NewGuid(),
+                        TimeOutInSeconds = 600,
                         MultiQueryName = nameof(GroupConnectsListMultiQueryActor),
                         Queries = new List<QueryContext>
                         {

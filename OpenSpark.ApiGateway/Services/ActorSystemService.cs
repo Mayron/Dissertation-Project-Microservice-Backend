@@ -30,7 +30,7 @@ namespace OpenSpark.ApiGateway.Services
 
         void SubscribeToSaga(SubscribeToSagaTransactionCommand command);
 
-        void SendMultiQuery(MultiQuery query);
+        void SendMultiQuery(MultiQuery multiQuery);
 
         void ExecuteSaga(ISagaExecutionCommand command);
     }
@@ -75,9 +75,9 @@ namespace OpenSpark.ApiGateway.Services
         {
             var remoteActorPath = remoteSystemId switch
             {
+                RemoteSystem.Projects => _projectsRemotePath,
                 RemoteSystem.Groups => _groupsRemotePath,
                 RemoteSystem.Discussions => _discussionsRemotePath,
-                RemoteSystem.Projects => _projectsRemotePath,
                 _ => throw new Exception($"Invalid remote system ID: {remoteSystemId}")
             };
 
@@ -85,7 +85,7 @@ namespace OpenSpark.ApiGateway.Services
             managerActorRef.Tell(message, callback ?? _callbackHandler);
         }
 
-        public void SendMultiQuery(MultiQuery query) => _multiQueryManager.Tell(query, _callbackHandler);
+        public void SendMultiQuery(MultiQuery multiQuery) => _multiQueryManager.Tell(multiQuery, _callbackHandler);
 
         public void RegisterTransaction(Guid transactionId) => _callbackHandler.Tell(transactionId);
 

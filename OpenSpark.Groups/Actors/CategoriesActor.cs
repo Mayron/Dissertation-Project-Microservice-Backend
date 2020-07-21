@@ -24,10 +24,8 @@ namespace OpenSpark.Groups.Actors
                     _categories = session.Query<Category>().ToImmutableList();
                 }
 
-                Sender.Tell(new PayloadEvent
+                Sender.Tell(new PayloadEvent(query)
                 {
-                    ConnectionId = query.ConnectionId,
-                    Callback = query.Callback,
                     Payload = _categories
                         .Select(c => new KeyValuePair<string, string>(c.Name, c.Id))
                         .ToList()

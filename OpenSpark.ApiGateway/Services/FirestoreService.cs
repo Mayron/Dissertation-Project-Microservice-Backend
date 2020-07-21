@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using OpenSpark.Shared;
 
 namespace OpenSpark.ApiGateway.Services
 {
@@ -66,7 +67,7 @@ namespace OpenSpark.ApiGateway.Services
 
         public async Task<bool> AddUserToGroupsAsync(User user, params Group[] groups)
         {
-            var groupIds = groups.Select(g => (object)g.Id).ToArray();
+            var groupIds = groups.Select(g => (object)g.Id.ConvertToEntityId()).ToArray();
             return await UpdateUserArrayField(user, "groups", groupIds);
         }
 
@@ -92,7 +93,7 @@ namespace OpenSpark.ApiGateway.Services
 
         public async Task<bool> AddUserToProjectsAsync(User user, params Project[] projects)
         {
-            var projectIds = projects.Select(g => (object)g.Id).ToArray();
+            var projectIds = projects.Select(g => (object)g.Id.ConvertToEntityId()).ToArray();
             return await UpdateUserArrayField(user, "projects", projectIds);
         }
 

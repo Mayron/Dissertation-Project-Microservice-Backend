@@ -25,10 +25,8 @@ namespace OpenSpark.Projects.Actors
 
             if (project == null)
             {
-                Sender.Tell(new PayloadEvent
+                Sender.Tell(new PayloadEvent(query)
                 {
-                    Callback = query.Callback,
-                    ConnectionId = query.ConnectionId,
                     Errors = new [] {"This project could not be found. The owner may have removed it."},
                 });
 
@@ -39,10 +37,8 @@ namespace OpenSpark.Projects.Actors
             {
                 if (!project.TeamMembers.Contains(query.User.AuthUserId))
                 {
-                    Sender.Tell(new PayloadEvent
+                    Sender.Tell(new PayloadEvent(query)
                     {
-                        Callback = query.Callback,
-                        ConnectionId = query.ConnectionId,
                         Errors = new[] {"You do not have permission to view this private project."},
                     });
 
@@ -50,10 +46,8 @@ namespace OpenSpark.Projects.Actors
                 }
             }
 
-            Sender.Tell(new PayloadEvent
+            Sender.Tell(new PayloadEvent(query)
             {
-                Callback = query.Callback,
-                ConnectionId = query.ConnectionId,
                 Payload = new ProjectDetailsViewModel
                 {
                     ConnectedGroupId = project.ConnectedGroupId,

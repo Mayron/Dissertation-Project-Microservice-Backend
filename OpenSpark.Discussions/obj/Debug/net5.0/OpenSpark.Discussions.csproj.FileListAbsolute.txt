@@ -1,11 +1,5 @@
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Discussions\bin\Debug\net5.0\appsettings.json
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Discussions\bin\Debug\net5.0\OpenSpark.Discussions.exe
-S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Discussions\bin\Debug\net5.0\discussions-system.conf
-S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Discussions\bin\Debug\net5.0\OpenSpark.Discussions.deps.json
-S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Discussions\bin\Debug\net5.0\OpenSpark.Discussions.runtimeconfig.json
-S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Discussions\bin\Debug\net5.0\OpenSpark.Discussions.runtimeconfig.dev.json
-S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Discussions\bin\Debug\net5.0\OpenSpark.Discussions.dll
-S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Discussions\bin\Debug\net5.0\OpenSpark.Discussions.pdb
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Discussions\bin\Debug\net5.0\Akka.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Discussions\bin\Debug\net5.0\Akka.Remote.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Discussions\bin\Debug\net5.0\DotNetty.Buffers.dll
@@ -49,4 +43,10 @@ S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Discu
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Discussions\obj\Debug\net5.0\OpenSpark.Discussions.csproj.CopyComplete
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Discussions\obj\Debug\net5.0\OpenSpark.Discussions.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Discussions\obj\Debug\net5.0\OpenSpark.Discussions.pdb
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Discussions\bin\Debug\net5.0\discussions-system.conf
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Discussions\bin\Debug\net5.0\OpenSpark.Discussions.deps.json
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Discussions\bin\Debug\net5.0\OpenSpark.Discussions.runtimeconfig.json
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Discussions\bin\Debug\net5.0\OpenSpark.Discussions.runtimeconfig.dev.json
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Discussions\bin\Debug\net5.0\OpenSpark.Discussions.dll
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Discussions\bin\Debug\net5.0\OpenSpark.Discussions.pdb
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Discussions\obj\Debug\net5.0\OpenSpark.Discussions.genruntimeconfig.cache

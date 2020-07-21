@@ -4,7 +4,7 @@ using OpenSpark.Domain;
 
 namespace OpenSpark.Shared.Queries
 {
-    public class MultiQuery : IQuery
+    public class MultiQuery
     {
         public IList<QueryContext> Queries { get; set; }
         public User User { get; set; }

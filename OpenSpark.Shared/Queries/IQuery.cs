@@ -4,8 +4,9 @@ namespace OpenSpark.Shared.Queries
 {
     public interface IQuery : IMessage
     {
-        Guid Id { get; set; }
         string Callback { get; set; }
         string ConnectionId { get; set; }
+        Guid MultiQueryId { get; set; }
+        Guid Id { get; set; }
     }
 }

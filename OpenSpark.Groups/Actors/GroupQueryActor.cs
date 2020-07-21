@@ -30,10 +30,8 @@ namespace OpenSpark.Groups.Actors
 
             if (result == null)
             {
-                Sender.Tell(new PayloadEvent
+                Sender.Tell(new PayloadEvent(query)
                 {
-                    Callback = query.Callback,
-                    ConnectionId = query.ConnectionId,
                     Errors = new [] {"This group could not be found. The owner may have removed it."},
                 });
 
@@ -46,10 +44,8 @@ namespace OpenSpark.Groups.Actors
                 var member = _groupRepository.GetGroupMemberByAuthUserId(query.User.AuthUserId, query.GroupId);
                 if (member == null)
                 {
-                    Sender.Tell(new PayloadEvent
+                    Sender.Tell(new PayloadEvent(query)
                     {
-                        Callback = query.Callback,
-                        ConnectionId = query.ConnectionId,
                         Errors = new [] {"You do not have permission to view this private group."},
                     });
 
@@ -64,10 +60,8 @@ namespace OpenSpark.Groups.Actors
             if (category == null)
                 Console.WriteLine($"Failed to find group category with id: {categoryId}");
 
-            Sender.Tell(new PayloadEvent
+            Sender.Tell(new PayloadEvent(query)
             {
-                Callback = query.Callback,
-                ConnectionId = query.ConnectionId,
                 Payload = new GroupDetailsViewModel
                 {
                     About = result.About,

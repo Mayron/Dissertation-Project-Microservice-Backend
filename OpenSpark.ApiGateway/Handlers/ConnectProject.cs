@@ -51,7 +51,7 @@ namespace OpenSpark.ApiGateway.Handlers
                 var transactionId = Guid.NewGuid();
                 _actorSystemService.ExecuteSaga(new ExecuteConnectProjectSagaCommand
                 {
-                    SagaName = nameof(CreateProjectSagaActor),
+                    SagaName = nameof(ConnectProjectSagaActor),
                     TransactionId = transactionId,
                     User = _user,
                     GroupId = command.GroupId,

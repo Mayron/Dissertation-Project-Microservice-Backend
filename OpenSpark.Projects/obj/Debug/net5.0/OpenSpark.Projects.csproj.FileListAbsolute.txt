@@ -1,10 +1,4 @@
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Projects\bin\Debug\net5.0\OpenSpark.Projects.exe
-S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Projects\bin\Debug\net5.0\projects-system.conf
-S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Projects\bin\Debug\net5.0\OpenSpark.Projects.deps.json
-S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Projects\bin\Debug\net5.0\OpenSpark.Projects.runtimeconfig.json
-S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Projects\bin\Debug\net5.0\OpenSpark.Projects.runtimeconfig.dev.json
-S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Projects\bin\Debug\net5.0\OpenSpark.Projects.dll
-S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Projects\bin\Debug\net5.0\OpenSpark.Projects.pdb
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Projects\bin\Debug\net5.0\Akka.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Projects\bin\Debug\net5.0\Akka.Remote.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Projects\bin\Debug\net5.0\DotNetty.Buffers.dll
@@ -42,4 +36,10 @@ S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Proje
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Projects\obj\Debug\net5.0\OpenSpark.Projects.csproj.CopyComplete
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Projects\obj\Debug\net5.0\OpenSpark.Projects.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Projects\obj\Debug\net5.0\OpenSpark.Projects.pdb
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Projects\bin\Debug\net5.0\projects-system.conf
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Projects\bin\Debug\net5.0\OpenSpark.Projects.deps.json
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Projects\bin\Debug\net5.0\OpenSpark.Projects.runtimeconfig.json
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Projects\bin\Debug\net5.0\OpenSpark.Projects.runtimeconfig.dev.json
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Projects\bin\Debug\net5.0\OpenSpark.Projects.dll
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Projects\bin\Debug\net5.0\OpenSpark.Projects.pdb
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.Projects\obj\Debug\net5.0\OpenSpark.Projects.genruntimeconfig.cache
