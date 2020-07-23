@@ -9,7 +9,8 @@
       "OpenSpark.Shared/1.0.0": {
         "dependencies": {
           "OpenSpark.Domain": "1.0.0",
-          "RavenDB.Client": "4.2.103"
+          "RavenDB.Client": "4.2.103",
+          "Slugify.Core": "2.3.0"
         },
         "runtime": {
           "OpenSpark.Shared.dll": {}
@@ -163,6 +164,14 @@
       "runtime.ubuntu.14.04-x64.runtime.native.System.Security.Cryptography.OpenSsl/4.3.0": {},
       "runtime.ubuntu.16.04-x64.runtime.native.System.Security.Cryptography.OpenSsl/4.3.0": {},
       "runtime.ubuntu.16.10-x64.runtime.native.System.Security.Cryptography.OpenSsl/4.3.0": {},
+      "Slugify.Core/2.3.0": {
+        "runtime": {
+          "lib/netstandard2.0/Slugify.Core.dll": {
+            "assemblyVersion": "2.3.0.0",
+            "fileVersion": "2.3.0.0"
+          }
+        }
+      },
       "System.AppContext/4.3.0": {
         "dependencies": {
           "System.Runtime": "4.3.0"
@@ -878,6 +887,13 @@
       "sha512": "sha512-VB5cn/7OzUfzdnC8tqAIMQciVLiq2epm2NrAm1E9OjNRyG4lVhfR61SMcLizejzQP8R8Uf/0l5qOIbUEi+RdEg==",
       "path": "runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl/4.3.0",
       "hashPath": "runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512"
+    },
+    "Slugify.Core/2.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-M9TVnKaNwl2JweZxRZ6CcIB6Qx2Y+hCDIFZWnGlPhPEfJI1C/pirnvbVxXYc+IOzM1Ijxx7nOduz4mVdY14/MA==",
+      "path": "slugify.core/2.3.0",
+      "hashPath": "slugify.core.2.3.0.nupkg.sha512"
     },
     "System.AppContext/4.3.0": {
       "type": "package",

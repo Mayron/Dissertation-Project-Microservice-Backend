@@ -6,6 +6,6 @@ namespace OpenSpark.Domain
     {
         public string Id { get; set; }
         public string Name { get; set; }
-        public List<string> PermissionIds { get; set; }
+        public HashSet<string> PermissionIds { get; set; }
     }
 }

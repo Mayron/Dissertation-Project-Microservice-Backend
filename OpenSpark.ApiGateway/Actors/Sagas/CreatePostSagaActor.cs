@@ -1,19 +1,20 @@
 ﻿using Akka.Actor;
 using OpenSpark.ApiGateway.Models.StateData;
 using OpenSpark.ApiGateway.Services;
-using OpenSpark.Shared.Events.Sagas;
-using OpenSpark.Shared.Events.Sagas.CreatePost;
-using System;
+using OpenSpark.Domain;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Commands.Posts;
 using OpenSpark.Shared.Commands.SagaExecutionCommands;
+using OpenSpark.Shared.Events;
+using OpenSpark.Shared.Events.CreatePost;
+using System;
+using System.Collections.Generic;
 
 namespace OpenSpark.ApiGateway.Actors.Sagas
 {
     public class CreatePostSagaActor : FSM<CreatePostSagaActor.SagaState, ISagaStateData>
     {
         private readonly IActorSystemService _actorSystemService;
-        private readonly IEventEmitterService _eventEmitter;
 
         public enum SagaState
         {
@@ -22,33 +23,41 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             CreatingPost,
         }
 
-        public CreatePostSagaActor(IActorSystemService actorSystemService, IEventEmitterService eventEmitter)
+        private class ProcessingStateData : ISagaStateData
+        {
+            public Guid TransactionId { get; set; }
+            public User User { get; set; }
+            public string GroupId { get; set; }
+            public string Title { get; set; }
+            public string Body { get; set; }
+            public string GroupName { get; set; }
+        }
+
+        public CreatePostSagaActor(IActorSystemService actorSystemService)
         {
             _actorSystemService = actorSystemService;
-            _eventEmitter = eventEmitter;
 
             StartWith(SagaState.Idle, IdleStateData.Instance);
 
             When(SagaState.Idle, HandleIdleEvents);
             When(SagaState.VerifyingUser, HandleVerifyingUserEvents); // TimeSpan.FromSeconds(5)
-            When(SagaState.CreatingPost, HandleAddingPostEvents); // TimeSpan.FromSeconds(5)
+            When(SagaState.CreatingPost, HandleCreatingPostEvents); // TimeSpan.FromSeconds(5)
 
             WhenUnhandled(ev =>
             {
-                if (!(ev.FsmEvent is SagaErrorEvent error))
+                switch (ev.FsmEvent)
                 {
-                    Console.WriteLine($"Unexpected message received: {ev.FsmEvent}. Current State: {StateName}");
-                    return Stay();
-                }
+                    case StateTimeout _:
+                        return StopAndSendError("Oops! Request timed out while verifying request.");
 
-                if (error.TransactionId != StateData.TransactionId)
-                {
-                    Console.WriteLine($"Expected SagaErrorEvent to have transaction Id {StateData.TransactionId} but received {error.TransactionId}. Error message: {error.Message}");
-                    return Stay();
-                }
+                    case ErrorEvent error:
+                        Console.WriteLine($"CreatePostSaga received error: {error.Message}");
+                        return StopAndSendError("Oops! Something unexpected happened.");
 
-                Console.WriteLine(error.Message);
-                return StopAndSendError("Oops! Something unexpected happened.");
+                    default:
+                        Console.WriteLine($"CreatePostSaga received unexpected message: {ev.FsmEvent}. Current State: {StateName}");
+                        return Stay();
+                }
             });
         }
 
@@ -56,72 +65,61 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
         {
             if (!(fsmEvent.FsmEvent is ExecuteAddPostSagaCommand command)) return null;
 
-            _actorSystemService.SendRemoteMessage(RemoteSystem.Groups, 
-                new VerifyUserPostRequestCommand
+            _actorSystemService.SendRemoteSagaMessage(RemoteSystem.Groups, Self,
+                new VerifyPostRequestCommand
                 {
-                    TransactionId = command.TransactionId,
                     User = command.User,
                     GroupId = command.GroupId,
-                }, Self);
+                });
 
-            return GoTo(SagaState.VerifyingUser).Using(new SagaStateData(command.TransactionId));
+            return GoTo(SagaState.VerifyingUser).Using(new ProcessingStateData
+            {
+                TransactionId = command.TransactionId,
+                User = command.User,
+                Title = command.Title,
+                Body = command.Body,
+                GroupId = command.GroupId
+            });
         }
 
         private State<SagaState, ISagaStateData> HandleVerifyingUserEvents(Event<ISagaStateData> fsmEvent)
         {
             switch (fsmEvent.FsmEvent)
             {
-                case UserVerifiedEvent @event:
-                    if (@event.TransactionId != StateData.TransactionId)
-                    {
-                        Console.WriteLine($"Unexpected transaction Id for UserVerifiedEvent: {@event.TransactionId}");
-                        return Stay();
-                    }
-
+                case UserVerifiedEvent @event when StateData is ProcessingStateData data:
                     // User verified successfully. Begin adding post.
-                    _actorSystemService.SendRemoteMessage(RemoteSystem.Discussions, 
+                    _actorSystemService.SendRemoteSagaMessage(RemoteSystem.Discussions, Self,
                         new CreatePostCommand
                         {
-                            TransactionId = StateData.TransactionId,
-                        }, Self);
+                            Title = data.Title,
+                            Body = data.Body,
+                            User = data.User,
+                            GroupId = data.GroupId,
+                        });
 
+                    data.GroupName = @event.GroupName;
                     return GoTo(SagaState.CreatingPost);
 
-                case UserVerificationFailedEvent @event:
-                    if (@event.TransactionId == StateData.TransactionId)
-                        return StopAndSendError("You do not have permission to post to this group.");
-
-                    Console.WriteLine($"Unexpected transaction Id for UserVerificationFailedEvent: {@event.TransactionId}");
-                    return Stay();
-
-                case StateTimeout _:
-                    return StopAndSendError("Oops! Request timed out while verifying request.");
+                case UserVerificationFailedEvent _:
+                    return StopAndSendError("You do not have permission to post to this group.");
             }
 
             return null;
         }
 
-        private State<SagaState, ISagaStateData> HandleAddingPostEvents(Event<ISagaStateData> fsmEvent)
+        private State<SagaState, ISagaStateData> HandleCreatingPostEvents(Event<ISagaStateData> fsmEvent)
         {
-            switch (fsmEvent.FsmEvent)
-            {
-                case PostAddedEvent @event:
-                    if (@event.TransactionId != StateData.TransactionId)
-                    {
-                        Console.WriteLine($"Unexpected transaction Id for PostAddedEvent: {@event.TransactionId}");
-                        return Stay();
-                    }
+            if (!(fsmEvent.FsmEvent is PostCreatedEvent @event)) return null;
 
-                    _eventEmitter.BroadcastToGroup(@event.GroupId, "PostAdded", @event.Post);
-                    _actorSystemService.SendSagaSucceededMessage(StateData.TransactionId, "New post created successfully.");
+            _actorSystemService.SendSagaSucceededMessage(
+                StateData.TransactionId, 
+                "New post created successfully.",
+                new Dictionary<string, string>
+                {
+                    ["postId"] = @event.PostId
+                });
 
-                    return Stop();
-
-                case StateTimeout _:
-                    return StopAndSendError("Oops! Request timed out while created post.");
-            }
-
-            return null;
+            return Stop();
         }
 
         private State<SagaState, ISagaStateData> StopAndSendError(string errorMessage)

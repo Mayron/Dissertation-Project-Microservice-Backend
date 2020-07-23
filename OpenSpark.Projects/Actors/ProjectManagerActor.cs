@@ -1,9 +1,9 @@
 ﻿using Akka.Actor;
+using OpenSpark.Shared;
 using OpenSpark.Shared.Commands.Projects;
+using OpenSpark.Shared.Queries;
 using System.Collections.Immutable;
 using System.Linq;
-using OpenSpark.Shared;
-using OpenSpark.Shared.Queries;
 
 namespace OpenSpark.Projects.Actors
 {
@@ -14,39 +14,29 @@ namespace OpenSpark.Projects.Actors
         public ProjectManagerActor()
         {
             _children = ImmutableDictionary<string, IActorRef>.Empty;
+            var createProjectPool = Context.ActorOf(CreateProjectActor.Props, "CreateProjectPool");
+            var projectQueryPool = Context.ActorOf(ProjectQueryActor.Props, "ProjectQueryPool");
 
             Receive<DeleteProjectCommand>(command => ForwardByProjectId(command.ProjectId, command));
-            Receive<ProjectDetailsQuery>(query => ForwardByProjectId(query.ProjectId, query));
 
             Receive<ConnectAllProjectsCommand>(command =>
             {
                 foreach (var projectId in command.ProjectIds)
                 {
-                    var projectActor = GetChildActor(projectId);
-                    projectActor.Forward(new ConnectProjectCommand
+                    ForwardByProjectId(projectId, new ConnectProjectCommand
                     {
                         GroupId = command.GroupId,
                         ProjectId = projectId,
                         GroupVisibility = command.GroupVisibility,
                         User = command.User,
-                        TransactionId = command.TransactionId
                     });
                 }
             });
 
-            Receive<CreateProjectCommand>(command =>
-            {
-                var actorRef = Context.ActorOf(
-                    Props.Create<CreateProjectActor>(), $"CreateProject-{command.TransactionId}");
-
-                actorRef.Forward(command);
-            });
-
-            Receive<UserProjectsQuery>(query =>
-            {
-                var actorRef = Context.ActorOf(Props.Create<UserProjectsActor>());
-                actorRef.Forward(query);
-            });
+            // Pools
+            Receive<CreateProjectCommand>(command => createProjectPool.Forward(command));
+            Receive<ProjectDetailsQuery>(query => projectQueryPool.Forward(query));
+            Receive<UserProjectsQuery>(query => projectQueryPool.Forward(query));
 
             Receive<Terminated>(terminated =>
             {
@@ -57,9 +47,9 @@ namespace OpenSpark.Projects.Actors
             });
         }
 
-        private void ForwardByProjectId(string project, IMessage message)
+        private void ForwardByProjectId(string projectId, IMessage message)
         {
-            var actorRef = GetChildActor(project);
+            var actorRef = GetChildActor(projectId);
             actorRef.Forward(message);
         }
 
@@ -68,9 +58,9 @@ namespace OpenSpark.Projects.Actors
             if (_children.ContainsKey(projectId))
                 return _children[projectId];
 
-            var groupActor = Context.ActorOf(Props.Create<ProjectActor>(), $"Project-{projectId}");
+            var groupActor = Context.Watch(Context.ActorOf(
+                Props.Create<ProjectActor>(), $"Project-{projectId}"));
 
-            Context.Watch(groupActor);
             _children = _children.Add(projectId, groupActor);
 
             return groupActor;

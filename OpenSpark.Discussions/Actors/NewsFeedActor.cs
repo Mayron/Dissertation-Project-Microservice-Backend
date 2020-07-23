@@ -1,28 +1,26 @@
 ﻿using Akka.Actor;
+using Akka.Routing;
 using OpenSpark.Discussions.Indexes;
-using OpenSpark.Domain;
+using OpenSpark.Shared;
 using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.Queries;
 using OpenSpark.Shared.ViewModels;
 using Raven.Client.Documents.Linq;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using OpenSpark.Shared;
+using Group = OpenSpark.Domain.Group;
 
 namespace OpenSpark.Discussions.Actors
 {
     public class NewsFeedActor : ReceiveActor
     {
-        private readonly User _user;
-
-        public NewsFeedActor(User user)
+        public NewsFeedActor()
         {
-            _user = user;
-
             Receive<NewsFeedQuery>(query =>
             {
-                var posts = _user == null ? GetMostPopularPosts() : GetUserNewsFeed();
+                var posts = query.User == null
+                    ? GetMostPopularPosts()
+                    : GetUserNewsFeed(query.User.Groups);
 
                 var payload = new PayloadEvent
                 {
@@ -33,20 +31,19 @@ namespace OpenSpark.Discussions.Actors
 
                 // This will go to the callback actor
                 Sender.Tell(payload);
-
-                Self.GracefulStop(TimeSpan.FromSeconds(5));
             });
         }
 
         /// <summary>
         /// Gets the relevant posts for the given authenticated user.
         /// </summary>
-        private IEnumerable<GetGroupPosts.Result> GetUserNewsFeed()
+        private static IEnumerable<GetGroupPosts.Result> GetUserNewsFeed(IEnumerable<string> groups)
         {
+            var ravenGroupIds = groups.Select(g => g.ConvertToRavenId<Group>());
             using var session = DocumentStoreSingleton.Store.OpenSession();
 
             var query = session.Query<GetGroupPosts.Result, GetGroupPosts>()
-                .Where(d => d.GroupId.In(_user.Groups));
+                .Where(d => d.GroupId.In(ravenGroupIds));
 
             return SortResults(query);
         }
@@ -83,6 +80,8 @@ namespace OpenSpark.Discussions.Actors
             .ThenByDescending(p => p.Votes)
             .ToList();
 
-       
+        public static Props Props { get; } = Props.Create<NewsFeedActor>()
+            .WithRouter(new RoundRobinPool(5,
+                new DefaultResizer(1, 10)));
     }
 }

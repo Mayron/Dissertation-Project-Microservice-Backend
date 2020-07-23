@@ -1,15 +1,15 @@
 ﻿using Akka.Actor;
 using OpenSpark.ApiGateway.Models.StateData;
-using OpenSpark.ApiGateway.Models.StateData.CreateGroup;
 using OpenSpark.ApiGateway.Services;
-using OpenSpark.Shared.Events.Sagas;
-using OpenSpark.Shared.Events.Sagas.CreateGroup;
-using System;
-using System.Collections.Generic;
+using OpenSpark.Domain;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Commands.Groups;
 using OpenSpark.Shared.Commands.Projects;
 using OpenSpark.Shared.Commands.SagaExecutionCommands;
+using OpenSpark.Shared.Events.ConnectProject;
+using OpenSpark.Shared.Events.CreateGroup;
+using System;
+using System.Collections.Generic;
 
 namespace OpenSpark.ApiGateway.Actors.Sagas
 {
@@ -24,6 +24,16 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             CreatingGroup,
             UpdateConnectedProjects,
             RollingBack
+        }
+
+        private class ProcessingStateData : ISagaStateData
+        {
+            public Guid TransactionId { get; set; }
+            public User User { get; set; }
+            public List<string> Connecting { get; set; }
+            public int SuccessfulConnections { get; set; }
+            public int FailedConnections { get; set; }
+            public string GroupId { get; set; }
         }
 
         public CreateGroupSagaActor(IActorSystemService actorSystemService, IFirestoreService firestoreService)
@@ -44,17 +54,16 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             if (fsmEvent.FsmEvent is ExecuteCreateGroupSagaCommand command)
             {
                 // Send command to Groups context to create new group
-                _actorSystemService.SendRemoteMessage(RemoteSystem.Groups,
+                _actorSystemService.SendRemoteSagaMessage(RemoteSystem.Groups, Self,
                     new CreateGroupCommand
                     {
-                        TransactionId = command.TransactionId,
                         User = command.User,
                         Name = command.Name,
                         About = command.About,
                         CategoryId = command.CategoryId,
                         Tags = command.Tags,
                         Connected = command.Connecting
-                    }, Self);
+                    });
 
                 // go to next state
                 return GoTo(SagaState.CreatingGroup).Using(new ProcessingStateData
@@ -80,14 +89,13 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             {
                 if (data.Connecting.Count <= 0) return FinishSuccessfully(@event.Group.Id);
 
-                _actorSystemService.SendRemoteMessage(RemoteSystem.Projects, 
+                _actorSystemService.SendRemoteSagaMessage(RemoteSystem.Projects, Self,
                     new ConnectAllProjectsCommand
                     {
-                        TransactionId = @event.TransactionId,
                         GroupId = @event.Group.Id,
                         ProjectIds = data.Connecting,
                         GroupVisibility = @event.Group.Visibility
-                    }, Self);
+                    });
 
                 return GoTo(SagaState.UpdateConnectedProjects).Using(new ProcessingStateData
                 {
@@ -99,12 +107,11 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
 
             Console.WriteLine($"Rolling back {nameof(CreateGroupSagaActor)}.");
 
-            _actorSystemService.SendRemoteMessage(RemoteSystem.Groups, 
+            _actorSystemService.SendRemoteSagaMessage(RemoteSystem.Groups, Self,
                 new DeleteGroupCommand
                 {
-                    TransactionId = @event.TransactionId,
                     GroupId = @event.Group.Id
-                }, Self);
+                });
 
             _actorSystemService.SendSagaFailedMessage(StateData.TransactionId,
                 "Oops! Something went wrong while trying to create your group.");

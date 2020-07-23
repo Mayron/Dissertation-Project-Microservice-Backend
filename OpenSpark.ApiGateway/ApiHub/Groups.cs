@@ -10,6 +10,9 @@ namespace OpenSpark.ApiGateway.ApiHub
         public void FetchGroup(string callback, string groupId) =>
             _mediator.Send(new FetchGroupDetails.Query(groupId, Context.ConnectionId, callback));
 
+        public void FetchGroupProjects(string callback, string groupId) =>
+            _mediator.Send(new FetchGroupDetails.Query(groupId, Context.ConnectionId, callback));
+
         [Authorize]
         public void FetchUserGroups(string callback) =>
             _mediator.Send(new FetchUserGroups.Query(Context.ConnectionId, callback, owned: true));
@@ -20,5 +23,8 @@ namespace OpenSpark.ApiGateway.ApiHub
 
         public void FetchCategories(string callback) =>
             _mediator.Send(new FetchCategories.Query(Context.ConnectionId, callback));
+
+        public void SearchGroups(string callback, string searchQuery) =>
+            _mediator.Send(new SearchGroups.Query(Context.ConnectionId, callback, searchQuery));
     }
 }

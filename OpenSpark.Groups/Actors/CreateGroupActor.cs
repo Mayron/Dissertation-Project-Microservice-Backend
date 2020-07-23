@@ -1,11 +1,14 @@
 ﻿using Akka.Actor;
 using OpenSpark.Domain;
+using OpenSpark.Shared;
 using OpenSpark.Shared.Commands.Groups;
-using OpenSpark.Shared.Events.Sagas;
-using OpenSpark.Shared.Events.Sagas.CreateGroup;
+using OpenSpark.Shared.Events;
+using OpenSpark.Shared.Events.CreateGroup;
 using OpenSpark.Shared.RavenDb;
 using System;
 using System.Collections.Generic;
+using Akka.Routing;
+using Group = OpenSpark.Domain.Group;
 
 namespace OpenSpark.Groups.Actors
 {
@@ -19,17 +22,15 @@ namespace OpenSpark.Groups.Actors
 
                 if (session.IsNameTaken<Group>(command.Name))
                 {
-                    Sender.Tell(new SagaErrorEvent
+                    Sender.Tell(new ErrorEvent
                     {
-                        Message = "Group name taken",
-                        TransactionId = command.TransactionId
+                        Message = "Group name taken"
                     });
 
-                    Self.GracefulStop(TimeSpan.FromSeconds(5));
                     return;
                 }
 
-                var groupId = session.GenerateRavenId<Group>();
+                var groupId = session.GenerateRavenIdFromName<Group>(command.Name);
                 var memberId = session.GenerateRavenId<Member>();
 
                 var member = new Member
@@ -38,6 +39,7 @@ namespace OpenSpark.Groups.Actors
                     Id = memberId,
                     AuthUserId = command.User.AuthUserId,
                     Joined = DateTime.Now,
+                    RoleIds = new List<string> { AppConstants.ImplicitGroupRoles.OwnerRole }
                 };
 
                 var group = new Group
@@ -50,8 +52,8 @@ namespace OpenSpark.Groups.Actors
                     CategoryId = command.CategoryId,
                     Tags = command.Tags,
                     Visibility = VisibilityStatus.Public, // TODO: Needs to be configurable on creation
-                    ConnectedProjects = command.Connected,
-                    Roles = new List<Role>(),
+                    ListedProjects = command.Connected,
+                    Roles = RolesHelper.GetDefaultGroupRoles(),
                     BannedUsers = new List<string>(),
                     CreatedAt = DateTime.Now,
                 };
@@ -62,12 +64,13 @@ namespace OpenSpark.Groups.Actors
 
                 Sender.Tell(new GroupCreatedEvent
                 {
-                    TransactionId = command.TransactionId,
                     Group = group
                 });
-
-                Self.GracefulStop(TimeSpan.FromSeconds(5));
             });
         }
+
+        public static Props Props { get; } = Props.Create<CreateGroupActor>()
+            .WithRouter(new RoundRobinPool(1,
+                new DefaultResizer(1, 5)));
     }
 }

@@ -103,6 +103,10 @@
             "RavenDB.Client": {
               "target": "Package",
               "version": "[4.2.103, )"
+            },
+            "Slugify.Core": {
+              "target": "Package",
+              "version": "[2.3.0, )"
             }
           },
           "imports": [

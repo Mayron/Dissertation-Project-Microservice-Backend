@@ -18,18 +18,15 @@ namespace OpenSpark.ApiGateway.Handlers
     {
         public class Query : IRequest<ValidationResult>
         {
-            public Post Post { get; }
+            public string Body { get; set; }
+            public string Title { get; set; }
             public string GroupId { get; set; }
 
             public Query(NewPostInputModel model)
             {
                 GroupId = model.GroupId;
-                Post = new Post
-                {
-                    Body = model.Body,
-                    Title = model.Title,
-                    CreatedAt = DateTime.Now
-                };
+                Body = model.Body;
+                Title = model.Title;
             }
         }
 
@@ -55,7 +52,8 @@ namespace OpenSpark.ApiGateway.Handlers
                     SagaName = nameof(CreatePostSagaActor),
                     TransactionId = transactionId,
                     GroupId = query.GroupId,
-                    Post = query.Post,
+                    Title = query.Title,
+                    Body = query.Body,
                     User = _user
                 });
 

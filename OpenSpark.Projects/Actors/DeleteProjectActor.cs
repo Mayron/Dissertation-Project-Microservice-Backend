@@ -1,7 +1,7 @@
 ﻿using Akka.Actor;
 using OpenSpark.Shared.Commands.Projects;
-using OpenSpark.Shared.Events.Sagas.CreatePost;
 using System;
+using OpenSpark.Shared.Events.CreatePost;
 
 namespace OpenSpark.Projects.Actors
 {
@@ -18,7 +18,6 @@ namespace OpenSpark.Projects.Actors
 
                 Sender.Tell(new ProjectDeletedEvent
                 {
-                    TransactionId = command.TransactionId,
                     ProjectId = command.ProjectId
                 });
 

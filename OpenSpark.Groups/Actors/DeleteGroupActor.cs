@@ -1,8 +1,8 @@
 ﻿using Akka.Actor;
 using OpenSpark.Domain;
 using OpenSpark.Shared.Commands.Groups;
-using OpenSpark.Shared.Events.Sagas.CreateGroup;
 using System;
+using OpenSpark.Shared.Events.CreateGroup;
 
 namespace OpenSpark.Groups.Actors
 {
@@ -28,7 +28,6 @@ namespace OpenSpark.Groups.Actors
 
                 Sender.Tell(new GroupDeletedEvent
                 {
-                    TransactionId = command.TransactionId,
                     GroupId = command.GroupId
                 });
 

@@ -12,6 +12,7 @@ namespace OpenSpark.Shared.Queries
         public int TimeOutInSeconds { get; set; } = 8;
         public string Callback { get; set; }
         public string ConnectionId { get; set; }
-        public string MultiQueryName { get; set; }
+        public string Aggregator { get; set; }
+        public string Handler { get; set; }
     }
 }

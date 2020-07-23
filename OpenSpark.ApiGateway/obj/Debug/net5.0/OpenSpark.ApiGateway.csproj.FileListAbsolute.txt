@@ -101,3 +101,4 @@ S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGa
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\obj\Debug\net5.0\OpenSpark.ApiGateway.dll
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\obj\Debug\net5.0\OpenSpark.ApiGateway.pdb
 S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\obj\Debug\net5.0\OpenSpark.ApiGateway.genruntimeconfig.cache
+S:\Users\MJR_4\University\Masters Project\Codebase\openspark-api\OpenSpark.ApiGateway\bin\Debug\net5.0\Slugify.Core.dll

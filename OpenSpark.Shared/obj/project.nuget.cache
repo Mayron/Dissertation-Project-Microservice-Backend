@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "cWWAlNGhYMVX1jdRtnKMIPwvtrEuz5NkXsSuQOq+ofhBsOqZTIKT9D7IJLhWMfo/oQZy4q995gXJWPPAuho43g==",
+  "dgSpecHash": "whCFbb/D2hNAplW0my4cjYo7q7z+VbN97h5QldXWdzydnN7/VPB6l/a+v55nv+3R7k/OmtbEM1q/xu/j1ZrmsA==",
   "success": true,
   "projectFilePath": "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Shared\\OpenSpark.Shared.csproj",
   "expectedPackageFiles": [
@@ -28,6 +28,7 @@
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\runtime.ubuntu.14.04-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.ubuntu.14.04-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\runtime.ubuntu.16.04-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.ubuntu.16.04-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl\\4.3.0\\runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl.4.3.0.nupkg.sha512",
+    "C:\\Users\\MJR_4\\.nuget\\packages\\slugify.core\\2.3.0\\slugify.core.2.3.0.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\system.appcontext\\4.3.0\\system.appcontext.4.3.0.nupkg.sha512",
     "C:\\Users\\MJR_4\\.nuget\\packages\\system.buffers\\4.5.1\\system.buffers.4.5.1.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\system.collections\\4.3.0\\system.collections.4.3.0.nupkg.sha512",

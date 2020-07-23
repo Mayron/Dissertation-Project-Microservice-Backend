@@ -1,25 +1,15 @@
-﻿using System;
-using Akka.Actor;
+﻿using Akka.Actor;
 using OpenSpark.Shared.Commands.Groups;
-using OpenSpark.Shared.Commands.Posts;
 using OpenSpark.Shared.Queries;
+using System;
 
 namespace OpenSpark.Groups.Actors
 {
     public class GroupActor : ReceiveActor
     {
-        public GroupActor(string groupId)
+        public GroupActor()
         {
             SetReceiveTimeout(TimeSpan.FromMinutes(30));
-
-            Receive<VerifyUserPostRequestCommand>(command =>
-            {
-                var verifyActor = Context.ActorOf(
-                    Props.Create(() => new VerifyUserPostActor(groupId, new GroupRepository())), 
-                    $"VerifyUserPost-{command.TransactionId}");
-
-                verifyActor.Forward(command);
-            });
 
             Receive<DeleteGroupCommand>(command =>
             {
@@ -28,13 +18,23 @@ namespace OpenSpark.Groups.Actors
 
                 verifyActor.Forward(command);
 
-                Self.GracefulStop(TimeSpan.FromSeconds(5));
+                Context.Stop(Self);
             });
 
             Receive<GroupDetailsQuery>(query =>
             {
                 var queryActor = Context.ActorOf(
-                    Props.Create(() => new GroupQueryActor(new GroupRepository())), 
+                    Props.Create(() => new GroupQueryActor(new GroupRepository())),
+                    $"GroupQuery-{query.ConnectionId}");
+
+                queryActor.Forward(query);
+            });
+
+
+            Receive<GroupProjectsQuery>(query =>
+            {
+                var queryActor = Context.ActorOf(
+                    Props.Create(() => new GroupQueryActor(new GroupRepository())),
                     $"GroupQuery-{query.ConnectionId}");
 
                 queryActor.Forward(query);

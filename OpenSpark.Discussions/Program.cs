@@ -17,7 +17,7 @@ namespace OpenSpark.Discussions
             using var actorSystem = ActorSystem.Create("DiscussionsSystem", config);
 
             // Create actors for system
-            actorSystem.ActorOf(Props.Create<UserManagerActor>(), "UserManager");
+            actorSystem.ActorOf(Props.Create<DiscussionManagerActor>(), "DiscussionManager");
 
             Console.WriteLine("Discussions actor system created.");
             Console.ReadKey();

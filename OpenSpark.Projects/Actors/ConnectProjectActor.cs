@@ -1,9 +1,9 @@
 ﻿using Akka.Actor;
 using OpenSpark.Domain;
-using OpenSpark.Shared.Commands.Projects;
-using OpenSpark.Shared.Events.Sagas;
-using System;
 using OpenSpark.Shared;
+using OpenSpark.Shared.Commands.Projects;
+using OpenSpark.Shared.Events.ConnectProject;
+using System;
 
 namespace OpenSpark.Projects.Actors
 {
@@ -31,7 +31,6 @@ namespace OpenSpark.Projects.Actors
 
                 Sender.Tell(new ProjectConnectedEvent
                 {
-                    TransactionId = command.TransactionId,
                     Message = $"Project {project.Name} connected to group!",
                     ProjectId = command.ProjectId
                 });
@@ -47,7 +46,6 @@ namespace OpenSpark.Projects.Actors
 
             Sender.Tell(new ProjectFailedToConnectEvent
             {
-                TransactionId = command.TransactionId,
                 Message = error,
                 ProjectId = command.ProjectId
             });

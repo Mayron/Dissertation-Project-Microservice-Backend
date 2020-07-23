@@ -2,22 +2,22 @@
 using OpenSpark.ApiGateway.Models.StateData;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Domain;
+using OpenSpark.Shared;
 using OpenSpark.Shared.Commands.Projects;
 using OpenSpark.Shared.Commands.SagaExecutionCommands;
+using OpenSpark.Shared.Events.ConnectProject;
 using OpenSpark.Shared.Events.Payloads;
-using OpenSpark.Shared.Events.Sagas;
 using OpenSpark.Shared.Queries;
 using OpenSpark.Shared.ViewModels;
 using System;
 using System.Collections.Generic;
-using OpenSpark.Shared;
 
 namespace OpenSpark.ApiGateway.Actors.Sagas
 {
     public class ConnectProjectSagaActor : FSM<ConnectProjectSagaActor.SagaState, ISagaStateData>
     {
         private readonly IActorSystemService _actorSystemService;
-//        protected ILoggingAdapter Log { get; } = Context.GetLogger();
+        //        protected ILoggingAdapter Log { get; } = Context.GetLogger();
 
         public enum SagaState
         {
@@ -51,12 +51,12 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             if (fsmEvent.FsmEvent is ExecuteConnectProjectSagaCommand command)
             {
                 // Send command to Groups context to validate if project is allowed to connect
-                _actorSystemService.SendRemoteMessage(RemoteSystem.Groups,
+                _actorSystemService.SendRemoteSagaMessage(RemoteSystem.Groups, Self,
                     new GroupDetailsQuery
                     {
                         User = command.User,
                         GroupId = command.GroupId,
-                    }, Self);
+                    });
 
                 // go to next state
                 return GoTo(SagaState.ValidatingTargetGroup).Using(new ProcessingStateData
@@ -85,15 +85,14 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             if (!(@event.Payload is GroupDetailsViewModel groupDetails))
                 throw new ActorKilledException($"Unexpected payload: {@event.Payload}");
 
-            _actorSystemService.SendRemoteMessage(RemoteSystem.Projects, 
+            _actorSystemService.SendRemoteSagaMessage(RemoteSystem.Projects, Self,
                 new ConnectAllProjectsCommand
                 {
-                    TransactionId = StateData.TransactionId,
                     GroupId = data.GroupId,
                     GroupVisibility = groupDetails.Visibility,
                     User = data.User,
                     ProjectIds = new List<string> { data.ProjectId }
-                }, Self);
+                });
 
             // go to next state
             return GoTo(SagaState.ConnectingProject).Using(new ProcessingStateData

@@ -6,7 +6,6 @@ namespace OpenSpark.Shared.Commands.Groups
 {
     public class CreateGroupCommand : ICommand
     {
-        public Guid TransactionId { get; set; }
         public string Name { get; set; }
         public List<string> Connected { get; set; }
         public List<string> Tags { get; set; }

@@ -76,7 +76,7 @@ namespace OpenSpark.Groups.Actors
                     }).ToList()
                 });
 
-                Self.GracefulStop(TimeSpan.FromSeconds(5));
+                Context.Stop(Self);
             });
         }
     }

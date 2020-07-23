@@ -1,6 +1,5 @@
 ﻿using Akka.Actor;
 using OpenSpark.Shared.Commands.Projects;
-using OpenSpark.Shared.Queries;
 using System;
 using System.Collections.Immutable;
 
@@ -37,20 +36,6 @@ namespace OpenSpark.Projects.Actors
                 actorRef.Forward(command);
 
                 Self.GracefulStop(TimeSpan.FromSeconds(5));
-            });
-
-            Receive<ProjectDetailsQuery>(query =>
-            {
-                var name = $"ProjectQuery-{query.ProjectId}";
-
-                if (!_children.ContainsKey(name))
-                {
-                    var child = Context.ActorOf(Props.Create<ProjectQueryActor>(), name);
-                    Context.Watch(child);
-                    _children = _children.Add(name, child);
-                }
-
-                _children[name].Forward(query);
             });
 
             Receive<Terminated>(terminated =>

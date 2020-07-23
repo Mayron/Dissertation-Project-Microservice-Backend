@@ -1,52 +1,66 @@
 ﻿using Akka.Actor;
-using OpenSpark.ApiGateway.Actors.MultiQueries;
 using OpenSpark.ApiGateway.Services;
-using OpenSpark.Shared.Events;
+using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.Queries;
 using System;
+using OpenSpark.ApiGateway.Actors.PayloadAggregators;
 
 namespace OpenSpark.ApiGateway.Actors
 {
     public class MultiQueryManagerActor : ReceiveActor
     {
+        private readonly IActorSystemService _actorSystemService;
         private readonly IActorRef _callbackActor;
 
         public MultiQueryManagerActor(IActorSystemService actorSystemService, IActorRef callbackActor)
         {
+            _actorSystemService = actorSystemService;
             _callbackActor = callbackActor;
 
             Receive<MultiQuery>(multiQuery =>
             {
                 multiQuery.Id = Guid.NewGuid();
-                var target = CreateMultiQueryActor(multiQuery);
 
-                // creating this will auto trigger queries to fire
-                Context.ActorOf(Props.Create(() =>
-                        new MultiQueryHandlerActor(multiQuery, target, actorSystemService)),
-                    $"MultiQueryHandler-{multiQuery.Id}");
+                foreach (var queryContext in multiQuery.Queries)
+                {
+                    var query = queryContext.Query;
+                    query.Id = Guid.NewGuid();
+                    query.MultiQueryId = multiQuery.Id;
+                }
+
+                var target = CreateAggregator(multiQuery);
+                var handler = CreateHandler(multiQuery, target);
             });
 
             Receive<MultiPayloadEvent>(@event => { });
         }
 
-        private IActorRef CreateMultiQueryActor(MultiQuery multiQuery)
+        private IActorRef CreateAggregator(MultiQuery multiQuery)
         {
-            var actorName = $"{multiQuery.MultiQueryName}-{multiQuery.Id}";
+            var actorName = $"{multiQuery.Aggregator}-{multiQuery.Id}";
 
-            foreach (var queryContext in multiQuery.Queries)
+            return multiQuery.Aggregator switch
             {
-                var query = queryContext.Query;
-                query.Id = Guid.NewGuid();
-                query.MultiQueryId = multiQuery.Id;
-            }
-
-            return multiQuery.MultiQueryName switch
-            {
-                nameof(GroupConnectsListMultiQueryActor) =>
+                nameof(GroupConnectionsListAggregatorActor) =>
                 Context.ActorOf(
-                    Props.Create(() => new GroupConnectsListMultiQueryActor(multiQuery, _callbackActor)), actorName),
+                    Props.Create(() => new GroupConnectionsListAggregatorActor(multiQuery, _callbackActor)), actorName),
 
-                _ => throw new Exception($"Failed to find MultiQueryActor: {multiQuery.MultiQueryName}"),
+                _ => throw new Exception($"Failed to find aggregator: {multiQuery.Aggregator}"),
+            };
+        }
+
+        private IActorRef CreateHandler(MultiQuery multiQuery, IActorRef aggregator)
+        {
+            var actorName = $"{multiQuery.Handler}-{multiQuery.Id}";
+
+            return multiQuery.Handler switch
+            {
+                nameof(MultiQueryParallelHandlerActor) =>
+                // creating this will auto trigger queries to fire
+                Context.ActorOf(Props.Create(() =>
+                        new MultiQueryParallelHandlerActor(multiQuery, aggregator, _actorSystemService)), actorName),
+
+                _ => throw new Exception($"Failed to find handler: {multiQuery.Aggregator}"),
             };
         }
     }

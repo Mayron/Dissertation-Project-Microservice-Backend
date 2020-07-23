@@ -48,7 +48,7 @@ namespace OpenSpark.Groups
                 {
                     session.Store(new Category
                     {
-                        Id = Utils.GenerateRandomId("category"),
+                        Id = session.GenerateRavenId<Category>(),
                         Name = category
                     });
                 }

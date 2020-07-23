@@ -63,7 +63,7 @@ namespace OpenSpark.ApiGateway.Actors
         private void Broadcast(string connectionId, string callback)
         {
             _eventEmitter.BroadcastToClient(connectionId, callback, _message);
-            Self.GracefulStop(TimeSpan.FromSeconds(5));
+            Context.Stop(Self);
         }
     }
 }

@@ -1,14 +1,14 @@
 ﻿using Akka.Actor;
 using OpenSpark.ApiGateway.Models.StateData;
-using OpenSpark.ApiGateway.Models.StateData.CreateProject;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Commands.Projects;
 using OpenSpark.Shared.Commands.SagaExecutionCommands;
-using OpenSpark.Shared.Events.Sagas.CreatePost;
-using OpenSpark.Shared.Events.Sagas.CreateProject;
 using System;
 using System.Collections.Generic;
+using OpenSpark.Domain;
+using OpenSpark.Shared.Events.CreatePost;
+using OpenSpark.Shared.Events.CreateProject;
 
 namespace OpenSpark.ApiGateway.Actors.Sagas
 {
@@ -22,6 +22,12 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             Idle,
             CreatingProject,
             RollingBack
+        }
+
+        private class ProcessingStateData : ISagaStateData
+        {
+            public Guid TransactionId { get; set; }
+            public User User { get; set; }
         }
 
         public CreateProjectSagaActor(IActorSystemService actorSystemService, IFirestoreService firestoreService)
@@ -41,15 +47,14 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             if (fsmEvent.FsmEvent is ExecuteCreateProjectSagaCommand command)
             {
                 // Send command to Groups context to create new group
-                _actorSystemService.SendRemoteMessage(RemoteSystem.Projects, 
+                _actorSystemService.SendRemoteSagaMessage(RemoteSystem.Projects, Self,
                     new CreateProjectCommand
                     {
-                        TransactionId = command.TransactionId,
                         User = command.User,
                         Name = command.Name,
                         About = command.About,
                         Tags = command.Tags,
-                    }, Self);
+                    });
 
                 // go to next state
                 return GoTo(SagaState.CreatingProject).Using(new ProcessingStateData
@@ -74,12 +79,11 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
 
             Console.WriteLine($"Rolling back {nameof(CreatePostSagaActor)}.");
 
-            _actorSystemService.SendRemoteMessage(RemoteSystem.Projects, 
+            _actorSystemService.SendRemoteSagaMessage(RemoteSystem.Projects, Self,
                 new DeleteProjectCommand
                 {
-                    TransactionId = @event.TransactionId,
                     ProjectId = @event.Project.Id
-                }, Self);
+                });
 
             _actorSystemService.SendSagaFailedMessage(StateData.TransactionId,
                 "Oops! Something went wrong while trying to create your project.");

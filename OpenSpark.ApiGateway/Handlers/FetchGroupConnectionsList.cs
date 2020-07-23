@@ -1,15 +1,16 @@
-﻿using MediatR;
+﻿using System;
+using MediatR;
 using Microsoft.AspNetCore.Http;
-using OpenSpark.ApiGateway.Actors.MultiQueries;
 using OpenSpark.ApiGateway.Extensions;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Domain;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Queries;
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using OpenSpark.ApiGateway.Actors;
+using OpenSpark.ApiGateway.Actors.PayloadAggregators;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
@@ -60,8 +61,8 @@ namespace OpenSpark.ApiGateway.Handlers
                         User = _user,
                         ConnectionId = query.ConnectionId,
                         Callback = query.Callback,
-                        TimeOutInSeconds = 600,
-                        MultiQueryName = nameof(GroupConnectsListMultiQueryActor),
+                        Aggregator = nameof(GroupConnectionsListAggregatorActor),
+                        Handler = nameof(MultiQueryParallelHandlerActor),
                         Queries = new List<QueryContext>
                         {
                             new QueryContext

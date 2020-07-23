@@ -501,6 +501,15 @@
           }
         }
       },
+      "Slugify.Core/2.3.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/Slugify.Core.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard2.0/Slugify.Core.dll": {}
+        }
+      },
       "System.AppContext/4.3.0": {
         "type": "package",
         "dependencies": {
@@ -1842,7 +1851,8 @@
         "framework": ".NETCoreApp,Version=v5.0",
         "dependencies": {
           "OpenSpark.Domain": "1.0.0",
-          "RavenDB.Client": "4.2.103"
+          "RavenDB.Client": "4.2.103",
+          "Slugify.Core": "2.3.0"
         },
         "compile": {
           "bin/placeholder/OpenSpark.Shared.dll": {}
@@ -2495,6 +2505,20 @@
         "runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl.4.3.2.nupkg.sha512",
         "runtime.ubuntu.16.10-x64.runtime.native.system.security.cryptography.openssl.nuspec",
         "runtimes/ubuntu.16.10-x64/native/System.Security.Cryptography.Native.OpenSsl.so"
+      ]
+    },
+    "Slugify.Core/2.3.0": {
+      "sha512": "M9TVnKaNwl2JweZxRZ6CcIB6Qx2Y+hCDIFZWnGlPhPEfJI1C/pirnvbVxXYc+IOzM1Ijxx7nOduz4mVdY14/MA==",
+      "type": "package",
+      "path": "slugify.core/2.3.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net40/Slugify.Core.dll",
+        "lib/netstandard1.3/Slugify.Core.dll",
+        "lib/netstandard2.0/Slugify.Core.dll",
+        "slugify.core.2.3.0.nupkg.sha512",
+        "slugify.core.nuspec"
       ]
     },
     "System.AppContext/4.3.0": {

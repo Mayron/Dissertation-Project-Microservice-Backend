@@ -18,6 +18,8 @@ namespace OpenSpark.ApiGateway.Services
     {
         void SendRemoteMessage(int remoteSystemId, IMessage message, IActorRef callback = null);
 
+        void SendRemoteSagaMessage(int remoteSystemId, IActorRef sagaActor, IMessage message);
+
         void RegisterTransaction(Guid transactionId);
 
         void SendErrorToClient(string connectionId, string callback, string errorMessage);
@@ -64,25 +66,25 @@ namespace OpenSpark.ApiGateway.Services
                     this, _callbackHandler)), "MultiQueryManager");
 
             _sagaManager = _localSystem.ActorOf(
-                Props.Create(() => new SagaManagerActor(this, eventEmitter, firestoreService)), "SagaManager");
+                Props.Create(() => new SagaManagerActor(this, firestoreService)), "SagaManager");
 
             _projectsRemotePath = $"{configuration["akka:ProjectsRemoteUrl"]}/ProjectManager";
             _groupsRemotePath = $"{configuration["akka:GroupsRemoteUrl"]}/GroupManager";
-            _discussionsRemotePath = $"{configuration["akka:DiscussionsRemoteUrl"]}/UserManager";
+            _discussionsRemotePath = $"{configuration["akka:DiscussionsRemoteUrl"]}/DiscussionManager";
         }
 
         public void SendRemoteMessage(int remoteSystemId, IMessage message, IActorRef callback = null)
         {
-            var remoteActorPath = remoteSystemId switch
-            {
-                RemoteSystem.Projects => _projectsRemotePath,
-                RemoteSystem.Groups => _groupsRemotePath,
-                RemoteSystem.Discussions => _discussionsRemotePath,
-                _ => throw new Exception($"Invalid remote system ID: {remoteSystemId}")
-            };
-
-            var managerActorRef = _localSystem.ActorSelection(remoteActorPath);
+            var remotePath = GetRemotePath(remoteSystemId);
+            var managerActorRef = _localSystem.ActorSelection(remotePath);
             managerActorRef.Tell(message, callback ?? _callbackHandler);
+        }
+
+        public void SendRemoteSagaMessage(int remoteSystemId, IActorRef sagaActor, IMessage message)
+        {
+            var remotePath = GetRemotePath(remoteSystemId);
+            var managerActorRef = _localSystem.ActorSelection(remotePath);
+            managerActorRef.Tell(message, sagaActor);
         }
 
         public void SendMultiQuery(MultiQuery multiQuery) => _multiQueryManager.Tell(multiQuery, _callbackHandler);
@@ -128,6 +130,17 @@ namespace OpenSpark.ApiGateway.Services
                 Success = success,
                 Args = args
             });
+        }
+
+        private string GetRemotePath(int remoteSystemId)
+        {
+            return remoteSystemId switch
+            {
+                RemoteSystem.Projects => _projectsRemotePath,
+                RemoteSystem.Groups => _groupsRemotePath,
+                RemoteSystem.Discussions => _discussionsRemotePath,
+                _ => throw new Exception($"Invalid remote system ID: {remoteSystemId}")
+            };
         }
 
         public void Dispose()

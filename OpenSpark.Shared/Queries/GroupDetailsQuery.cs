@@ -11,5 +11,6 @@ namespace OpenSpark.Shared.Queries
         public Guid Id { get; set; }
         public string GroupId { get; set; }
         public User User { get; set; }
+        public bool RetrieveGroupNameOnly { get; set; }
     }
 }
