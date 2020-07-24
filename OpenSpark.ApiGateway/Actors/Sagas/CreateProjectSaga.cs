@@ -1,18 +1,18 @@
 ﻿using Akka.Actor;
-using OpenSpark.ApiGateway.Models.StateData;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Commands.Projects;
 using OpenSpark.Shared.Commands.SagaExecutionCommands;
 using System;
 using System.Collections.Generic;
+using OpenSpark.ApiGateway.StateData;
 using OpenSpark.Domain;
 using OpenSpark.Shared.Events.CreatePost;
 using OpenSpark.Shared.Events.CreateProject;
 
 namespace OpenSpark.ApiGateway.Actors.Sagas
 {
-    public class CreateProjectSagaActor : FSM<CreateProjectSagaActor.SagaState, ISagaStateData>
+    public class CreateProjectSaga : FSM<CreateProjectSaga.SagaState, ISagaStateData>
     {
         private readonly IActorSystemService _actorSystemService;
         private readonly IFirestoreService _firestoreService;
@@ -30,7 +30,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             public User User { get; set; }
         }
 
-        public CreateProjectSagaActor(IActorSystemService actorSystemService, IFirestoreService firestoreService)
+        public CreateProjectSaga(IActorSystemService actorSystemService, IFirestoreService firestoreService)
         {
             _actorSystemService = actorSystemService;
             _firestoreService = firestoreService;
@@ -77,7 +77,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
 
             if (success) return FinishSuccessfully(@event.Project.Id);
 
-            Console.WriteLine($"Rolling back {nameof(CreatePostSagaActor)}.");
+            Console.WriteLine($"Rolling back {nameof(CreatePostSaga)}.");
 
             _actorSystemService.SendRemoteSagaMessage(RemoteSystem.Projects, Self,
                 new DeleteProjectCommand
@@ -95,7 +95,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
         {
             if (!(fsmEvent.FsmEvent is ProjectDeletedEvent)) return null;
 
-            Console.WriteLine($"Successfully rolled back {nameof(CreatePostSagaActor)}.");
+            Console.WriteLine($"Successfully rolled back {nameof(CreatePostSaga)}.");
             return Stop();
         }
 

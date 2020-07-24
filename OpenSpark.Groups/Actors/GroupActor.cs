@@ -2,11 +2,17 @@
 using OpenSpark.Shared.Commands.Groups;
 using OpenSpark.Shared.Queries;
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using OpenSpark.Domain;
+using OpenSpark.Shared.Events.Payloads;
 
 namespace OpenSpark.Groups.Actors
 {
     public class GroupActor : ReceiveActor
     {
+        // Handle less common commands or messages that rely on group state
         public GroupActor()
         {
             SetReceiveTimeout(TimeSpan.FromMinutes(30));
@@ -19,25 +25,6 @@ namespace OpenSpark.Groups.Actors
                 verifyActor.Forward(command);
 
                 Context.Stop(Self);
-            });
-
-            Receive<GroupDetailsQuery>(query =>
-            {
-                var queryActor = Context.ActorOf(
-                    Props.Create(() => new GroupQueryActor(new GroupRepository())),
-                    $"GroupQuery-{query.ConnectionId}");
-
-                queryActor.Forward(query);
-            });
-
-
-            Receive<GroupProjectsQuery>(query =>
-            {
-                var queryActor = Context.ActorOf(
-                    Props.Create(() => new GroupQueryActor(new GroupRepository())),
-                    $"GroupQuery-{query.ConnectionId}");
-
-                queryActor.Forward(query);
             });
         }
     }

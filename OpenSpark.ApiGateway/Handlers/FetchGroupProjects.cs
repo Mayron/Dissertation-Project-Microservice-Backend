@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using MediatR;
-using Microsoft.AspNetCore.Http;
-using OpenSpark.ApiGateway.Extensions;
+﻿using MediatR;
 using OpenSpark.ApiGateway.Services;
-using OpenSpark.Domain;
+using OpenSpark.Shared;
 using OpenSpark.Shared.Queries;
 using System.Threading;
 using System.Threading.Tasks;
-using OpenSpark.Shared;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
@@ -19,31 +14,42 @@ namespace OpenSpark.ApiGateway.Handlers
             public string GroupId { get; }
             public string ConnectionId { get; }
             public string Callback { get; }
+            public int Amount { get; }
 
-            public Query(string groupId, string connectionId, string callback)
+            public Query(string groupId, string connectionId, string callback, int amount = 5)
             {
                 GroupId = groupId;
                 ConnectionId = connectionId;
                 Callback = callback;
+                Amount = amount;
             }
         }
 
         public class Handler : IRequestHandler<Query, Unit>
         {
             private readonly IActorSystemService _actorSystemService;
-            private readonly User _user;
+            private readonly IMessageContextBuilderService _builder;
 
-            public Handler(IActorSystemService actorSystemService, IHttpContextAccessor context)
+            public Handler(IActorSystemService actorSystemService, IMessageContextBuilderService builder)
             {
                 _actorSystemService = actorSystemService;
-                _user = context.GetFirebaseUser();
+                _builder = builder;
             }
 
             public Task<Unit> Handle(Query query, CancellationToken cancellationToken)
             {
-                // TODO: 1- Need to use GroupProjectsQuery to get all projects and
-                // TODO: 2- then use ProjectDetailsQuery with RetrieveProjectNameOnly true
-                // TODO: 3- This will need a "Saga"-Like FSM actor, but what to call it?
+                var remoteQuery = new GroupProjectsQuery
+                {
+                    GroupId = query.GroupId,
+                    TakeAmount = query.Amount
+                };
+
+                var context = _builder.CreateQueryContext(remoteQuery)
+                    .SetClientCallback(query.Callback, query.ConnectionId)
+                    .ForRemoteSystem(RemoteSystem.Projects)
+                    .Build();
+
+                _actorSystemService.SendRemoteQuery(context);
 
                 return Unit.Task;
             }

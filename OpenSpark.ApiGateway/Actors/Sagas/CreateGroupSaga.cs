@@ -1,5 +1,4 @@
 ﻿using Akka.Actor;
-using OpenSpark.ApiGateway.Models.StateData;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Domain;
 using OpenSpark.Shared;
@@ -10,10 +9,12 @@ using OpenSpark.Shared.Events.ConnectProject;
 using OpenSpark.Shared.Events.CreateGroup;
 using System;
 using System.Collections.Generic;
+using OpenSpark.ApiGateway.StateData;
+using OpenSpark.Shared.Commands.Sagas;
 
 namespace OpenSpark.ApiGateway.Actors.Sagas
 {
-    public class CreateGroupSagaActor : FSM<CreateGroupSagaActor.SagaState, ISagaStateData>
+    public class CreateGroupSaga : FSM<CreateGroupSaga.SagaState, ISagaStateData>
     {
         private readonly IActorSystemService _actorSystemService;
         private readonly IFirestoreService _firestoreService;
@@ -36,7 +37,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             public string GroupId { get; set; }
         }
 
-        public CreateGroupSagaActor(IActorSystemService actorSystemService, IFirestoreService firestoreService)
+        public CreateGroupSaga(IActorSystemService actorSystemService, IFirestoreService firestoreService)
         {
             _actorSystemService = actorSystemService;
             _firestoreService = firestoreService;
@@ -62,7 +63,6 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                         About = command.About,
                         CategoryId = command.CategoryId,
                         Tags = command.Tags,
-                        Connected = command.Connecting
                     });
 
                 // go to next state
@@ -105,7 +105,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                 });
             }
 
-            Console.WriteLine($"Rolling back {nameof(CreateGroupSagaActor)}.");
+            Console.WriteLine($"Rolling back {nameof(CreateGroupSaga)}.");
 
             _actorSystemService.SendRemoteSagaMessage(RemoteSystem.Groups, Self,
                 new DeleteGroupCommand
@@ -143,7 +143,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
         {
             if (!(fsmEvent.FsmEvent is GroupDeletedEvent)) return null;
 
-            Console.WriteLine($"Successfully rolled back {nameof(CreateGroupSagaActor)}.");
+            Console.WriteLine($"Successfully rolled back {nameof(CreateGroupSaga)}.");
             return Stop();
         }
 

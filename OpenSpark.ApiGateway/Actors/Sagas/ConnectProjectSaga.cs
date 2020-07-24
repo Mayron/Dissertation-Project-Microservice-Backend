@@ -1,5 +1,4 @@
 ﻿using Akka.Actor;
-using OpenSpark.ApiGateway.Models.StateData;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Domain;
 using OpenSpark.Shared;
@@ -11,10 +10,12 @@ using OpenSpark.Shared.Queries;
 using OpenSpark.Shared.ViewModels;
 using System;
 using System.Collections.Generic;
+using OpenSpark.ApiGateway.StateData;
+using OpenSpark.Shared.Commands.Sagas;
 
 namespace OpenSpark.ApiGateway.Actors.Sagas
 {
-    public class ConnectProjectSagaActor : FSM<ConnectProjectSagaActor.SagaState, ISagaStateData>
+    public class ConnectProjectSaga : FSM<ConnectProjectSaga.SagaState, ISagaStateData>
     {
         private readonly IActorSystemService _actorSystemService;
         //        protected ILoggingAdapter Log { get; } = Context.GetLogger();
@@ -35,7 +36,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             public string GroupName { get; set; }
         }
 
-        public ConnectProjectSagaActor(IActorSystemService actorSystemService)
+        public ConnectProjectSaga(IActorSystemService actorSystemService)
         {
             _actorSystemService = actorSystemService;
 

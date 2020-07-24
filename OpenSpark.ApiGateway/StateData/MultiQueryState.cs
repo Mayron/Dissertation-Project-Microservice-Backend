@@ -1,9 +1,9 @@
-﻿using OpenSpark.Shared.Events.Payloads;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using OpenSpark.Shared.Events.Payloads;
 
-namespace OpenSpark.ApiGateway.Models.StateData
+namespace OpenSpark.ApiGateway.StateData
 {
     public class MultiQueryState
     {

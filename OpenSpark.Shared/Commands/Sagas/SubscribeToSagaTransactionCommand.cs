@@ -1,7 +1,7 @@
 ﻿using System;
 using OpenSpark.Domain;
 
-namespace OpenSpark.Shared.Commands
+namespace OpenSpark.Shared.Commands.Sagas
 {
     public class SubscribeToSagaTransactionCommand : ICommand
     {

@@ -1,15 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Akka.Actor;
+using OpenSpark.ApiGateway.Builders;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Queries;
 using OpenSpark.Shared.ViewModels;
 
 namespace OpenSpark.ApiGateway.Actors.PayloadAggregators
 {
-    public class GroupConnectionsListAggregatorActor : BaseMultiPayloadAggregatorActor
+    public class GroupConnectionsListAggregator : BaseMultiPayloadAggregatorActor
     {
-        public GroupConnectionsListAggregatorActor(MultiQuery multiQuery, IActorRef callback) : base(multiQuery, callback)
+        public GroupConnectionsListAggregator(MultiQueryContext context, IActorRef callback) : base(context, callback)
         {
         }
 

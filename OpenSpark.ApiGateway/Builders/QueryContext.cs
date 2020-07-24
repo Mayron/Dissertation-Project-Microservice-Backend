@@ -1,4 +1,6 @@
-﻿namespace OpenSpark.Shared.Queries
+﻿using OpenSpark.Shared.Queries;
+
+namespace OpenSpark.ApiGateway.Builders
 {
     public class QueryContext
     {

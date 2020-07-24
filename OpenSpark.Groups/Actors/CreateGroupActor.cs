@@ -52,7 +52,6 @@ namespace OpenSpark.Groups.Actors
                     CategoryId = command.CategoryId,
                     Tags = command.Tags,
                     Visibility = VisibilityStatus.Public, // TODO: Needs to be configurable on creation
-                    ListedProjects = command.Connected,
                     Roles = RolesHelper.GetDefaultGroupRoles(),
                     BannedUsers = new List<string>(),
                     CreatedAt = DateTime.Now,

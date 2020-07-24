@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace OpenSpark.ApiGateway.Models.StateData
+namespace OpenSpark.ApiGateway.StateData
 {
     public class SagaStateData : ISagaStateData
     {

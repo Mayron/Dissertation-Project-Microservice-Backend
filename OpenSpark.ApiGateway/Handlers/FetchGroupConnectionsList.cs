@@ -1,6 +1,6 @@
-﻿using System;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http;
+using OpenSpark.ApiGateway.Actors.PayloadAggregators;
 using OpenSpark.ApiGateway.Extensions;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Domain;
@@ -9,8 +9,7 @@ using OpenSpark.Shared.Queries;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using OpenSpark.ApiGateway.Actors;
-using OpenSpark.ApiGateway.Actors.PayloadAggregators;
+using OpenSpark.ApiGateway.Actors.MultiQueryHandlers;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
@@ -33,11 +32,13 @@ namespace OpenSpark.ApiGateway.Handlers
         public class Handler : IRequestHandler<Query, Unit>
         {
             private readonly IActorSystemService _actorSystemService;
+            private readonly IMessageContextBuilderService _builder;
             private readonly User _user;
 
-            public Handler(IActorSystemService actorSystemService, IHttpContextAccessor context)
+            public Handler(IActorSystemService actorSystemService, IHttpContextAccessor context, IMessageContextBuilderService builder)
             {
                 _actorSystemService = actorSystemService;
+                _builder = builder;
                 _user = context.GetFirebaseUser();
             }
 
@@ -45,46 +46,23 @@ namespace OpenSpark.ApiGateway.Handlers
             {
                 if (_user == null || _user.Projects.Count == 0)
                 {
-                    _actorSystemService.SendErrorToClient(query.ConnectionId, query.Callback, "Unauthorized");
+                    _actorSystemService.SendErrorToClient(query.Callback, query.ConnectionId, "Unauthorized");
                     return Unit.Task;
                 }
 
                 if (_user.Groups.Count == 0)
                 {
-                    _actorSystemService.SendPayloadToClient(query.ConnectionId, query.Callback, _user.Groups);
+                    _actorSystemService.SendEmptyPayloadToClient(query.Callback, query.ConnectionId);
                     return Unit.Task;
                 }
 
-                _actorSystemService.SendMultiQuery(
-                    new MultiQuery
-                    {
-                        User = _user,
-                        ConnectionId = query.ConnectionId,
-                        Callback = query.Callback,
-                        Aggregator = nameof(GroupConnectionsListAggregatorActor),
-                        Handler = nameof(MultiQueryParallelHandlerActor),
-                        Queries = new List<QueryContext>
-                        {
-                            new QueryContext
-                            {
-                                RemoteSystemId = RemoteSystem.Groups,
-                                Query = new UserGroupsQuery
-                                {
-                                    User = _user,
-                                    OwnedGroups = true
-                                },
-                            },
-                            new QueryContext
-                            {
-                                RemoteSystemId = RemoteSystem.Projects,
-                                Query = new ProjectDetailsQuery
-                                {
-                                    User = _user,
-                                    ProjectId = query.ProjectId
-                                }
-                            }
-                        }
-                    });
+                var context = _builder.CreateMultiQueryContext<MultiQueryParallelHandler, GroupConnectionsListAggregator>()
+                    .SetClientCallback(query.Callback, query.ConnectionId)
+                    .AddQuery(new UserGroupsQuery {OwnedGroups = true}, RemoteSystem.Groups)
+                    .AddQuery(new ProjectDetailsQuery {ProjectId = query.ProjectId}, RemoteSystem.Projects)
+                    .Build();
+
+                _actorSystemService.SendMultiQuery(context);
 
                 return Unit.Task;
             }

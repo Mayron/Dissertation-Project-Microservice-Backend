@@ -12,47 +12,42 @@ namespace OpenSpark.Groups.Actors
     {
         private IImmutableDictionary<string, IActorRef> _children;
         private IActorRef _categoriesActor;
-        private readonly IActorRef _searchPool;
-        private readonly IActorRef _createGroupPool;
-        private readonly IActorRef _verifyPostPool;
+        private readonly IActorRef _searchPool = Context.ActorOf(SearchGroupsActor.Props, "SearchQueryPool");
+        private readonly IActorRef _createGroupPool = Context.ActorOf(CreateGroupActor.Props, "CreateGroupPool");
+        private readonly IActorRef _verifyPostPool = Context.ActorOf(VerifyPostActor.Props, "VerifyPostPool");
+        private readonly IActorRef _groupQueryPool = Context.ActorOf(GroupQueryActor.Props, "GroupQueryPool");
 
         public GroupManagerActor()
         {
             _children = ImmutableDictionary<string, IActorRef>.Empty;
-            _createGroupPool = Context.ActorOf(CreateGroupActor.Props, "CreateGroupPool");
-            _searchPool = Context.ActorOf(SearchGroupsActor.Props, "SearchQueryPool");
-            _verifyPostPool = Context.ActorOf(VerifyPostActor.Props, "VerifyPostPool");
-            _verifyPostPool = Context.ActorOf(GroupQueryActor.Props, "GroupQueryPool");
-
-            Receive<GroupDetailsQuery>(query => ForwardByGroupId(query.GroupId, query));
-            Receive<GroupProjectsQuery>(query => ForwardByGroupId(query.GroupId, query));
+            
             Receive<DeleteGroupCommand>(query => ForwardByGroupId(query.GroupId, query));
             Receive<CategoriesQuery>(query =>
             {
                 if (_categoriesActor == null)
-                {
-                    _categoriesActor = Context.ActorOf(Props.Create<CategoriesActor>(), "Categories");
-                    Context.Watch(_categoriesActor);
-                }
+                     _categoriesActor = Context.Watch(Context.ActorOf(Props.Create<CategoriesActor>(), "Categories"));
 
                 _categoriesActor.Forward(query);
             });
 
+            // Pools
+            Receive<GroupDetailsQuery>(query => _groupQueryPool.Forward(query));
+            Receive<UserGroupsQuery>(query => _groupQueryPool.Forward(query));
             Receive<SearchGroupsQuery>(query => _searchPool.Forward(query));
             Receive<CreateGroupCommand>(command => _createGroupPool.Forward(command));
             Receive<VerifyPostRequestCommand>(command => _verifyPostPool.Forward(command));
 
-            Receive<UserGroupsQuery>(query =>
-            {
-                var actorRef = Context.ActorOf(Props.Create<UserGroupsActor>());
-                actorRef.Forward(query);
-            });
-
             Receive<Terminated>(terminated =>
             {
                 Context.Unwatch(terminated.ActorRef);
-                if (!_children.Any(u => u.Value.Equals(terminated.ActorRef))) return;
 
+                if (_categoriesActor != null && _categoriesActor.Equals(terminated.ActorRef))
+                {
+                    _categoriesActor = null;
+                    return;
+                }
+
+                if (!_children.Any(u => u.Value.Equals(terminated.ActorRef))) return;
                 _children = _children.Where(u => !u.Value.Equals(terminated.ActorRef)).ToImmutableDictionary();
             });
         }

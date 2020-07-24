@@ -1,12 +1,9 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Http;
-using OpenSpark.ApiGateway.Extensions;
 using OpenSpark.ApiGateway.Services;
-using OpenSpark.Domain;
+using OpenSpark.Shared;
 using OpenSpark.Shared.Queries;
 using System.Threading;
 using System.Threading.Tasks;
-using OpenSpark.Shared;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
@@ -29,24 +26,22 @@ namespace OpenSpark.ApiGateway.Handlers
         public class Handler : IRequestHandler<Query, Unit>
         {
             private readonly IActorSystemService _actorSystemService;
-            private readonly User _user;
+            private readonly IMessageContextBuilderService _builder;
 
-            public Handler(IActorSystemService actorSystemService, IHttpContextAccessor context)
+            public Handler(IActorSystemService actorSystemService, IMessageContextBuilderService builder)
             {
                 _actorSystemService = actorSystemService;
-                _user = context.GetFirebaseUser();
+                _builder = builder;
             }
 
             public Task<Unit> Handle(Query query, CancellationToken cancellationToken)
             {
-                _actorSystemService.SendRemoteMessage(RemoteSystem.Projects, 
-                    new ProjectDetailsQuery
-                    {
-                        ProjectId = query.ProjectId,
-                        ConnectionId = query.ConnectionId,
-                        Callback = query.Callback,
-                        User = _user
-                    });
+                var context = _builder.CreateQueryContext(new ProjectDetailsQuery { ProjectId = query.ProjectId })
+                    .SetClientCallback(query.Callback, query.ConnectionId)
+                    .ForRemoteSystem(RemoteSystem.Projects)
+                    .Build();
+
+                _actorSystemService.SendRemoteQuery(context);
 
                 return Unit.Task;
             }

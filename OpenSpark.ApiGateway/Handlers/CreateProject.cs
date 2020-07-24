@@ -1,5 +1,4 @@
-﻿using Akka.Actor;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using OpenSpark.ApiGateway.Actors.Sagas;
 using OpenSpark.ApiGateway.Extensions;
@@ -29,11 +28,13 @@ namespace OpenSpark.ApiGateway.Handlers
         public class Handler : IRequestHandler<Command, ValidationResult>
         {
             private readonly IActorSystemService _actorSystemService;
+            private readonly IMessageContextBuilderService _builder;
             private readonly User _user;
 
-            public Handler(IActorSystemService actorSystemService, IHttpContextAccessor context)
+            public Handler(IActorSystemService actorSystemService, IHttpContextAccessor context, IMessageContextBuilderService builder)
             {
                 _actorSystemService = actorSystemService;
+                _builder = builder;
                 _user = context.GetFirebaseUser();
             }
 
@@ -42,18 +43,17 @@ namespace OpenSpark.ApiGateway.Handlers
                 if (_user == null)
                     return Task.FromResult(new ValidationResult(false, "Failed to validate user request"));
 
-                var transactionId = Guid.NewGuid();
-                _actorSystemService.ExecuteSaga(new ExecuteCreateProjectSagaCommand
+                var sagaExecutionCommand = new ExecuteCreateProjectSagaCommand
                 {
-                    SagaName = nameof(CreateProjectSagaActor),
-                    TransactionId = transactionId,
                     Name = command.Model.Name,
                     About = command.Model.About,
                     Tags = command.Model.Tags,
-                    User = _user
-                });
+                };
 
-                return Task.FromResult(new ValidationResult(true, transactionId.ToString()));
+                var context = _builder.CreateSagaContext<CreateProjectSaga>(sagaExecutionCommand).Build();
+                _actorSystemService.ExecuteSaga(context);
+
+                return Task.FromResult(new ValidationResult(true, context.TransactionId.ToString()));
             }
         }
     }

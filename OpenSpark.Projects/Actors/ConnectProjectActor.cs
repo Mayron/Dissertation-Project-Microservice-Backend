@@ -17,8 +17,8 @@ namespace OpenSpark.Projects.Actors
             {
                 using var session = DocumentStoreSingleton.Store.OpenSession();
 
-                var ravenId = command.ProjectId.ConvertToRavenId<Project>();
-                var project = session.Load<Project>(ravenId);
+                var ravenProjectId = command.ProjectId.ConvertToRavenId<Project>();
+                var project = session.Load<Project>(ravenProjectId);
 
                 if (project == null)
                     throw new ActorKilledException($"Failed to find project with id {command.ProjectId}");
@@ -26,7 +26,10 @@ namespace OpenSpark.Projects.Actors
                 var isValid = IsVisibilityStatusValid(command, project.Visibility);
                 if (!isValid) return;
 
-                project.ConnectedGroupId = command.GroupId;
+                var ravenGroupId = command.GroupId.ConvertToRavenId<Group>();
+
+                project.ConnectedGroupId = ravenGroupId;
+                project.LinkedGroups.Add(ravenGroupId); // displayed on group page
                 session.SaveChanges();
 
                 Sender.Tell(new ProjectConnectedEvent

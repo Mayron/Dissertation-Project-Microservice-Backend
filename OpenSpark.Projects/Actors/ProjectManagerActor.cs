@@ -37,6 +37,7 @@ namespace OpenSpark.Projects.Actors
             Receive<CreateProjectCommand>(command => createProjectPool.Forward(command));
             Receive<ProjectDetailsQuery>(query => projectQueryPool.Forward(query));
             Receive<UserProjectsQuery>(query => projectQueryPool.Forward(query));
+            Receive<GroupProjectsQuery>(query => projectQueryPool.Forward(query));
 
             Receive<Terminated>(terminated =>
             {

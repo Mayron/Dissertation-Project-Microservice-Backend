@@ -1,15 +1,16 @@
-﻿using Akka.Actor;
-using OpenSpark.ApiGateway.Models.StateData;
-using OpenSpark.ApiGateway.Services;
-using OpenSpark.Shared.Events.Payloads;
-using OpenSpark.Shared.Queries;
-using System;
+﻿using System;
 using System.Collections.Immutable;
 using System.Linq;
+using Akka.Actor;
+using OpenSpark.ApiGateway.Builders;
+using OpenSpark.ApiGateway.Services;
+using OpenSpark.ApiGateway.StateData;
+using OpenSpark.Shared.Events.Payloads;
+using OpenSpark.Shared.Queries;
 
-namespace OpenSpark.ApiGateway.Actors
+namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
 {
-    public class MultiQueryParallelHandlerActor : UntypedActor
+    public class MultiQueryParallelHandler : UntypedActor
     {
         private readonly ICancelable _queryTimeoutTimer;
         private readonly IImmutableList<QueryContext> _queries;
@@ -24,19 +25,19 @@ namespace OpenSpark.ApiGateway.Actors
             private MultiQueryTimeout() {}
         }
 
-        public MultiQueryParallelHandlerActor(MultiQuery multiQuery, IActorRef aggregator, IActorSystemService actorSystemService)
+        public MultiQueryParallelHandler(MultiQueryContext multiQueryContext, IActorRef aggregator, IActorSystemService actorSystemService)
         {
-            _multiQueryId = multiQuery.Id;
+            _multiQueryId = multiQueryContext.Id;
 
             _queryTimeoutTimer = Context.System.Scheduler
-                .ScheduleTellOnceCancelable(multiQuery.TimeOutInSeconds, Self, MultiQueryTimeout.Instance, Self);
+                .ScheduleTellOnceCancelable(multiQueryContext.TimeoutInSeconds, Self, MultiQueryTimeout.Instance, Self);
 
-            _queries = multiQuery.Queries.ToImmutableList();
+            _queries = multiQueryContext.Queries.ToImmutableList();
             _aggregator = aggregator;
             _actorSystemService = actorSystemService;
 
-            var pending = multiQuery.Queries.ToDictionary(
-                queryContext => queryContext.Query.Id,
+            var pending = multiQueryContext.Queries.ToDictionary(
+                queryContext => queryContext.Query.MetaData.QueryId,
                 queryContext => queryContext.RemoteSystemId);
 
             Become(WaitingForReplies(new MultiQueryState(pending)));
@@ -50,8 +51,8 @@ namespace OpenSpark.ApiGateway.Actors
 
                 switch (message)
                 {
-                    case PayloadEvent @event when @event.MultiQueryId == _multiQueryId:
-                        ReceivedEvent(@event.QueryId, @event, state);
+                    case PayloadEvent @event when @event.MetaData.MultiQueryId == _multiQueryId:
+                        ReceivedEvent(@event.MetaData.QueryId, @event, state);
                         break;
 
                     case MultiQueryTimeout _:
@@ -90,7 +91,7 @@ namespace OpenSpark.ApiGateway.Actors
         protected override void PreStart()
         {
             foreach (var queryContext in _queries)
-                _actorSystemService.SendRemoteMessage(queryContext.RemoteSystemId, queryContext.Query, Self);
+                _actorSystemService.SendRemoteQuery(queryContext, Self);
         }
 
         protected override void PostStop()

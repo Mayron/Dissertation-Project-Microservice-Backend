@@ -7,6 +7,7 @@ using OpenSpark.Shared.ViewModels;
 using System.Collections.Generic;
 using System.Linq;
 using Akka.Routing;
+using Group = OpenSpark.Domain.Group;
 
 namespace OpenSpark.Projects.Actors
 {
@@ -20,6 +21,28 @@ namespace OpenSpark.Projects.Actors
         {
             Receive<ProjectDetailsQuery>(HandleProjectDetailsQuery);
             Receive<UserProjectsQuery>(HandleUserProjectsQuery);
+            Receive<GroupProjectsQuery>(HandleGroupProjectsQuery);
+        }
+
+        private void HandleGroupProjectsQuery(GroupProjectsQuery query)
+        {
+            using var session = DocumentStoreSingleton.Store.OpenSession();
+
+            var ravenGroupId = query.GroupId.ConvertToRavenId<Group>();
+
+            var linkedProjects = session.Query<Project>()
+                .Where(p => p.LinkedGroups.Contains(ravenGroupId))
+                .OrderByDescending(p => p.Subscribers.Count)
+                .Select(p => new
+                {
+                    p.Id,
+                    p.Name
+                })
+                .Take(query.TakeAmount)
+                .Cast<INamedEntity>()
+                .ToList();
+
+            Sender.Tell(new PayloadEvent(query) { Payload = linkedProjects });
         }
 
         private void HandleUserProjectsQuery(UserProjectsQuery query)

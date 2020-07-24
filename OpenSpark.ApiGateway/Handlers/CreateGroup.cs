@@ -1,14 +1,12 @@
-﻿using Akka.Actor;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using OpenSpark.ApiGateway.Actors.Sagas;
 using OpenSpark.ApiGateway.Extensions;
 using OpenSpark.ApiGateway.InputModels;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Domain;
-using OpenSpark.Shared.Commands.SagaExecutionCommands;
+using OpenSpark.Shared.Commands.Sagas;
 using OpenSpark.Shared.ViewModels;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -29,11 +27,13 @@ namespace OpenSpark.ApiGateway.Handlers
         public class Handler : IRequestHandler<Command, ValidationResult>
         {
             private readonly IActorSystemService _actorSystemService;
+            private readonly IMessageContextBuilderService _builder;
             private readonly User _user;
 
-            public Handler(IActorSystemService actorSystemService, IHttpContextAccessor context)
+            public Handler(IActorSystemService actorSystemService, IHttpContextAccessor context, IMessageContextBuilderService builder)
             {
                 _actorSystemService = actorSystemService;
+                _builder = builder;
                 _user = context.GetFirebaseUser();
             }
 
@@ -42,21 +42,19 @@ namespace OpenSpark.ApiGateway.Handlers
                 if (_user == null)
                     return Task.FromResult(new ValidationResult(false, "Failed to validate user request"));
 
-                var transactionId = Guid.NewGuid();
-
-                _actorSystemService.ExecuteSaga(new ExecuteCreateGroupSagaCommand
+                var sagaExecutionCommand = new ExecuteCreateGroupSagaCommand
                 {
-                    SagaName = nameof(CreateGroupSagaActor),
-                    TransactionId = transactionId,
                     Name = command.Model.Name,
                     About = command.Model.About,
                     CategoryId = command.Model.CategoryId,
                     Tags = command.Model.Tags,
                     Connecting = command.Model.Connected,
-                    User = _user
-                });
+                };
 
-                return Task.FromResult(new ValidationResult(true, transactionId.ToString()));
+                var context = _builder.CreateSagaContext<CreateGroupSaga>(sagaExecutionCommand).Build();
+                _actorSystemService.ExecuteSaga(context);
+
+                return Task.FromResult(new ValidationResult(true, context.TransactionId.ToString()));
             }
         }
     }

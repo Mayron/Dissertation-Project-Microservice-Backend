@@ -22,15 +22,7 @@ namespace OpenSpark.Discussions.Actors
                     ? GetMostPopularPosts()
                     : GetUserNewsFeed(query.User.Groups);
 
-                var payload = new PayloadEvent
-                {
-                    ConnectionId = query.ConnectionId,
-                    Callback = query.Callback,
-                    Payload = MapRequests(posts)
-                };
-
-                // This will go to the callback actor
-                Sender.Tell(payload);
+                Sender.Tell(new PayloadEvent(query) { Payload = MapRequests(posts) });
             });
         }
 

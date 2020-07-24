@@ -44,7 +44,8 @@ namespace OpenSpark.Projects.Actors
                     CreatedAt = DateTime.Now,
                     LastUpdated = DateTime.Now,
                     Subscribers = new List<string>(),
-                    TeamMembers = new List<string>()
+                    TeamMembers = new List<string>(),
+                    LinkedGroups = new List<string>()
                 };
 
                 session.Store(project);

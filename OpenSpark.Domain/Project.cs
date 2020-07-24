@@ -17,5 +17,6 @@ namespace OpenSpark.Domain
         public List<string> TeamMembers { get; set; }
         public DateTime LastUpdated { get; set; }
         public int TotalDownloads { get; set; }
+        public List<string> LinkedGroups { get; set; }
     }
 }

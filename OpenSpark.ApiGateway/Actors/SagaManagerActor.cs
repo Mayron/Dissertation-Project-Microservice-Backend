@@ -1,10 +1,10 @@
 ﻿using Akka.Actor;
 using OpenSpark.ApiGateway.Actors.Sagas;
 using OpenSpark.ApiGateway.Services;
-using OpenSpark.Shared.Commands.SagaExecutionCommands;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using OpenSpark.ApiGateway.Builders;
 
 namespace OpenSpark.ApiGateway.Actors
 {
@@ -26,9 +26,9 @@ namespace OpenSpark.ApiGateway.Actors
         {
             switch (message)
             {
-                case ISagaExecutionCommand command:
-                    var actorRef = GetChildActorRef(command);
-                    actorRef?.Tell(command);
+                case SagaContext context:
+                    var actorRef = GetChildActorRef(context);
+                    actorRef?.Tell(context.Command);
                     break;
 
                 case Terminated terminated:
@@ -38,40 +38,40 @@ namespace OpenSpark.ApiGateway.Actors
             }
         }
 
-        public IActorRef GetChildActorRef(ISagaExecutionCommand command)
+        public IActorRef GetChildActorRef(SagaContext context)
         {
-            if (_children.ContainsKey(command.TransactionId))
-                return _children[command.TransactionId];
+            if (_children.ContainsKey(context.TransactionId))
+                return _children[context.TransactionId];
 
-            var sagaActorRef = Context.Watch(CreateSagaActor(command));
+            var sagaActorRef = Context.Watch(CreateSagaActor(context));
 
-            _children = _children.Add(command.TransactionId, sagaActorRef);
-            _actorSystemService.RegisterTransaction(command.TransactionId);
+            _children = _children.Add(context.TransactionId, sagaActorRef);
+            _actorSystemService.RegisterTransaction(context.TransactionId);
 
             return sagaActorRef;
         }
 
-        private IActorRef CreateSagaActor(ISagaExecutionCommand command)
+        private IActorRef CreateSagaActor(SagaContext command)
         {
             var actorName = $"{command.SagaName}-{command.TransactionId}";
 
             return command.SagaName switch
             {
-                nameof(CreatePostSagaActor) =>
+                nameof(CreatePostSaga) =>
                 Context.ActorOf(
-                    Props.Create(() => new CreatePostSagaActor(_actorSystemService)), actorName),
+                    Props.Create(() => new CreatePostSaga(_actorSystemService)), actorName),
 
-                nameof(CreateGroupSagaActor) =>
+                nameof(CreateGroupSaga) =>
                 Context.ActorOf(
-                    Props.Create(() => new CreateGroupSagaActor(_actorSystemService, _firestoreService)), actorName),
+                    Props.Create(() => new CreateGroupSaga(_actorSystemService, _firestoreService)), actorName),
 
-                nameof(CreateProjectSagaActor) =>
+                nameof(CreateProjectSaga) =>
                 Context.ActorOf(
-                    Props.Create(() => new CreateProjectSagaActor(_actorSystemService, _firestoreService)), actorName),
+                    Props.Create(() => new CreateProjectSaga(_actorSystemService, _firestoreService)), actorName),
 
-                nameof(ConnectProjectSagaActor) =>
+                nameof(ConnectProjectSaga) =>
                 Context.ActorOf(
-                    Props.Create(() => new ConnectProjectSagaActor(_actorSystemService)), actorName),
+                    Props.Create(() => new ConnectProjectSaga(_actorSystemService)), actorName),
 
                 _ => throw new Exception($"Failed to find SagaActor: {command.SagaName}"),
             };

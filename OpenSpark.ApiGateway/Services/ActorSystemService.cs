@@ -11,30 +11,24 @@ using OpenSpark.Shared.Queries;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using OpenSpark.ApiGateway.Builders;
+using OpenSpark.Shared.Commands.Sagas;
 
 namespace OpenSpark.ApiGateway.Services
 {
     public interface IActorSystemService
     {
-        void SendRemoteMessage(int remoteSystemId, IMessage message, IActorRef callback = null);
-
-        void SendRemoteSagaMessage(int remoteSystemId, IActorRef sagaActor, IMessage message);
-
+        void ExecuteSaga(SagaContext context);
         void RegisterTransaction(Guid transactionId);
-
-        void SendErrorToClient(string connectionId, string callback, string errorMessage);
-
-        void SendPayloadToClient(string connectionId, string callback, object payload);
-
+        void SendEmptyPayloadToClient(string clientCallbackMethod, string connectionId);
+        void SendMultiQuery(MultiQueryContext multiQueryContext);
+        void SendErrorToClient(string clientCallbackMethod, string connectionId, string errorMessage);
+//        void SendRemoteMessage(int remoteSystemId, IMessage message, IActorRef callback = null);
+        void SendRemoteQuery(QueryContext context, IActorRef callback = null);
+        void SendRemoteSagaMessage(int remoteSystemId, IActorRef sagaActor, IMessage message);
         void SendSagaFailedMessage(Guid transactionId, string message);
-
         void SendSagaSucceededMessage(Guid transactionId, string message, IDictionary<string, string> args = null);
-
         void SubscribeToSaga(SubscribeToSagaTransactionCommand command);
-
-        void SendMultiQuery(MultiQuery multiQuery);
-
-        void ExecuteSaga(ISagaExecutionCommand command);
     }
 
     public class ActorSystemService : IActorSystemService
@@ -73,11 +67,17 @@ namespace OpenSpark.ApiGateway.Services
             _discussionsRemotePath = $"{configuration["akka:DiscussionsRemoteUrl"]}/DiscussionManager";
         }
 
-        public void SendRemoteMessage(int remoteSystemId, IMessage message, IActorRef callback = null)
+        /// <summary>
+        /// Sends a query with metadata to a remote actor system.
+        /// </summary>
+        /// <param name="context">Contains information needed to send the query to the correct endpoint with metadata.</param>
+        /// <param name="callback">By default, the callback will be CallbackActor but a
+        /// Saga or MultiQueryHandler may need to set this to itself.</param>
+        public void SendRemoteQuery(QueryContext context, IActorRef callback = null)
         {
-            var remotePath = GetRemotePath(remoteSystemId);
+            var remotePath = GetRemotePath(context.RemoteSystemId);
             var managerActorRef = _localSystem.ActorSelection(remotePath);
-            managerActorRef.Tell(message, callback ?? _callbackHandler);
+            managerActorRef.Tell(context.Query, callback ?? _callbackHandler);
         }
 
         public void SendRemoteSagaMessage(int remoteSystemId, IActorRef sagaActor, IMessage message)
@@ -87,33 +87,36 @@ namespace OpenSpark.ApiGateway.Services
             managerActorRef.Tell(message, sagaActor);
         }
 
-        public void SendMultiQuery(MultiQuery multiQuery) => _multiQueryManager.Tell(multiQuery, _callbackHandler);
+        public void SendMultiQuery(MultiQueryContext multiQueryContext) => 
+            _multiQueryManager.Tell(multiQueryContext, _callbackHandler);
+
+        public void ExecuteSaga(SagaContext context) => _sagaManager.Tell(context);
 
         public void RegisterTransaction(Guid transactionId) => _callbackHandler.Tell(transactionId);
 
         public void SubscribeToSaga(SubscribeToSagaTransactionCommand command) => _callbackHandler.Tell(command);
 
-        public void ExecuteSaga(ISagaExecutionCommand command) => _sagaManager.Tell(command);
-
-        public void SendErrorToClient(string connectionId, string callback, string errorMessage)
-        {
+        public void SendErrorToClient(string clientCallbackMethod, string connectionId, string errorMessage) =>
             _callbackHandler.Tell(new PayloadEvent
             {
-                ConnectionId = connectionId,
-                Callback = callback,
+                MetaData = new QueryMetaData
+                {
+                    ConnectionId = connectionId,
+                    Callback = clientCallbackMethod,
+                },
                 Errors = new[] { errorMessage }
             });
-        }
 
-        public void SendPayloadToClient(string connectionId, string callback, object payload)
-        {
+        public void SendEmptyPayloadToClient(string clientCallbackMethod, string connectionId) =>
             _callbackHandler.Tell(new PayloadEvent
             {
-                ConnectionId = connectionId,
-                Callback = callback,
-                Payload = payload
+                MetaData = new QueryMetaData
+                {
+                    ConnectionId = connectionId,
+                    Callback = clientCallbackMethod,
+                },
+                Payload = new string[] {}
             });
-        }
 
         public void SendSagaFailedMessage(Guid transactionId, string message) =>
             SendSagaMessage(transactionId, message, false);

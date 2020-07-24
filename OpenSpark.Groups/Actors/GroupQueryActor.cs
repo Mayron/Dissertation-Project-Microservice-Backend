@@ -5,9 +5,11 @@ using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.Queries;
 using OpenSpark.Shared.ViewModels;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Akka.Routing;
 using OpenSpark.Shared;
+using Raven.Client.Documents;
 using Group = OpenSpark.Domain.Group;
 
 namespace OpenSpark.Groups.Actors
@@ -16,11 +18,15 @@ namespace OpenSpark.Groups.Actors
     {
         private readonly GroupRepository _groupRepository;
 
+        public static Props Props { get; } = Props.Create<GroupQueryActor>()
+            .WithRouter(new RoundRobinPool(5,
+                new DefaultResizer(1, 10)));
+
         public GroupQueryActor()
         {
             _groupRepository = new GroupRepository();
             Receive<GroupDetailsQuery>(HandleGroupDetailsQuery);
-            Receive<GroupProjectsQuery>(HandleGroupProjectsQuery);
+            Receive<UserGroupsQuery>(HandleUserGroupsQuery);
         }
 
         private void HandleGroupDetailsQuery(GroupDetailsQuery query)
@@ -68,29 +74,65 @@ namespace OpenSpark.Groups.Actors
                 }
             });
         }
-        
-        private void HandleGroupProjectsQuery(GroupProjectsQuery query)
+
+        private void HandleUserGroupsQuery(UserGroupsQuery query)
         {
             using var session = DocumentStoreSingleton.Store.OpenSession();
+            List<Group> groups;
 
-            var ravenGroupId = query.GroupId.ConvertToRavenId<Group>();
-            var group = session.Load<Group>(ravenGroupId);
-
-            if (group == null)
+            if (query.OwnedGroups)
             {
-                Sender.Tell(new PayloadEvent(query)
-                {
-                    Errors = new[] { "This group could not be found. The owner may have removed it." },
-                });
-
-                return;
+                groups = session.Query<Group>()
+                    .Where(g => g.OwnerUserId == query.User.AuthUserId)
+                    .OrderByDescending(g => g.Members.Count)
+                    .Select(g => new Group
+                    {
+                        Id = g.Id,
+                        Name = g.Name,
+                        Visibility = g.Visibility
+                    })
+                    .ToList();
             }
+            else if (query.Memberships)
+            {
+                var userId = query.User.AuthUserId;
 
-            if (!IsUserRestrictedFromQuerying(query, ravenGroupId, group.Visibility)) return;
+                var members = session.Query<Member>()
+                    .Include(m => m.GroupId)
+                    .Where(m => m.AuthUserId == userId)
+                    .OrderByDescending(m => m.Contribution)
+                    .ToList();
+
+                groups = new List<Group>(members.Count);
+
+                foreach (var member in members)
+                {
+                    // this will not require querying the server as we included it.
+                    // We do not want groups we own as they go into their own "Groups" section.
+                    var membership = session.Query<Group>()
+                        .Select(g => new Group
+                        {
+                            Id = g.Id,
+                            Name = g.Name
+                        })
+                        .FirstOrDefault(g => g.Id == member.GroupId && g.OwnerUserId != member.Id);
+
+                    groups.Add(membership);
+                }
+            }
+            else
+            {
+                throw new ActorKilledException("Invalid query request");
+            }
 
             Sender.Tell(new PayloadEvent(query)
             {
-                Payload = group.ListedProjects
+                Payload = groups.Select(g => new UserGroupsViewModel
+                {
+                    Name = g.Name,
+                    Id = g.Id.ConvertToEntityId(),
+                    Visibility = g.Visibility
+                }).ToList()
             });
         }
 
@@ -108,9 +150,5 @@ namespace OpenSpark.Groups.Actors
 
             return false;
         }
-
-        public static Props Props { get; } = Props.Create<GroupQueryActor>()
-            .WithRouter(new RoundRobinPool(5,
-                new DefaultResizer(1, 10)));
     }
 }

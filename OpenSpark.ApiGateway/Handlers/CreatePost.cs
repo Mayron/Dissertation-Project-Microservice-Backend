@@ -1,5 +1,4 @@
-﻿using Akka.Actor;
-using MediatR;
+﻿using MediatR;
 using Microsoft.AspNetCore.Http;
 using OpenSpark.ApiGateway.Actors.Sagas;
 using OpenSpark.ApiGateway.Extensions;
@@ -11,6 +10,7 @@ using OpenSpark.Shared.ViewModels;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using OpenSpark.Shared.Commands.Sagas;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
@@ -33,11 +33,13 @@ namespace OpenSpark.ApiGateway.Handlers
         public class Handler : IRequestHandler<Query, ValidationResult>
         {
             private readonly IActorSystemService _actorSystemService;
+            private readonly IMessageContextBuilderService _builder;
             private readonly User _user;
 
-            public Handler(IActorSystemService actorSystemService, IHttpContextAccessor context)
+            public Handler(IActorSystemService actorSystemService, IHttpContextAccessor context, IMessageContextBuilderService builder)
             {
                 _actorSystemService = actorSystemService;
+                _builder = builder;
                 _user = context.GetFirebaseUser();
             }
 
@@ -46,18 +48,17 @@ namespace OpenSpark.ApiGateway.Handlers
                 if (_user == null)
                     return Task.FromResult(new ValidationResult(false, "Failed to validate user request"));
 
-                var transactionId = Guid.NewGuid();
-                _actorSystemService.ExecuteSaga(new ExecuteAddPostSagaCommand
+                var sagaExecutionCommand = new ExecuteCreatePostSagaCommand
                 {
-                    SagaName = nameof(CreatePostSagaActor),
-                    TransactionId = transactionId,
                     GroupId = query.GroupId,
                     Title = query.Title,
                     Body = query.Body,
-                    User = _user
-                });
+                };
 
-                return Task.FromResult(new ValidationResult(true, transactionId.ToString()));
+                var context = _builder.CreateSagaContext<CreatePostSaga>(sagaExecutionCommand).Build();
+                _actorSystemService.ExecuteSaga(context);
+
+                return Task.FromResult(new ValidationResult(true, context.TransactionId.ToString()));
             }
         }
     }

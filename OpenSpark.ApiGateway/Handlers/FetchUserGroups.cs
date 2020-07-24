@@ -3,11 +3,10 @@ using Microsoft.AspNetCore.Http;
 using OpenSpark.ApiGateway.Extensions;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Domain;
+using OpenSpark.Shared;
 using OpenSpark.Shared.Queries;
-using System.Collections.Immutable;
 using System.Threading;
 using System.Threading.Tasks;
-using OpenSpark.Shared;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
@@ -32,11 +31,13 @@ namespace OpenSpark.ApiGateway.Handlers
         public class Handler : IRequestHandler<Query, Unit>
         {
             private readonly IActorSystemService _actorSystemService;
+            private readonly IMessageContextBuilderService _builder;
             private readonly User _user;
 
-            public Handler(IActorSystemService actorSystemService, IHttpContextAccessor context)
+            public Handler(IActorSystemService actorSystemService, IHttpContextAccessor context, IMessageContextBuilderService builder)
             {
                 _actorSystemService = actorSystemService;
+                _builder = builder;
                 _user = context.GetFirebaseUser();
             }
 
@@ -44,29 +45,28 @@ namespace OpenSpark.ApiGateway.Handlers
             {
                 if (_user == null)
                 {
-                    _actorSystemService.SendErrorToClient(
-                        query.ConnectionId, query.Callback, "Unauthorized");
-
+                    _actorSystemService.SendErrorToClient(query.Callback, query.ConnectionId, "Unauthorized");
                     return Unit.Task;
                 }
 
                 if (_user.Groups.Count == 0)
                 {
-                    _actorSystemService.SendPayloadToClient(
-                        query.ConnectionId, query.Callback, ImmutableList<string>.Empty);
-
+                    _actorSystemService.SendEmptyPayloadToClient(query.Callback, query.ConnectionId);
                     return Unit.Task;
                 }
 
-                _actorSystemService.SendRemoteMessage(RemoteSystem.Groups,
-                    new UserGroupsQuery
-                    {
-                        ConnectionId = query.ConnectionId,
-                        Callback = query.Callback,
-                        User = _user,
-                        OwnedGroups = query.Owned,
-                        Memberships = query.Memberships
-                    });
+                var remoteQuery = new UserGroupsQuery
+                {
+                    OwnedGroups = query.Owned,
+                    Memberships = query.Memberships
+                };
+
+                var context = _builder.CreateQueryContext(remoteQuery)
+                    .SetClientCallback(query.Callback, query.ConnectionId)
+                    .ForRemoteSystem(RemoteSystem.Groups)
+                    .Build();
+
+                _actorSystemService.SendRemoteQuery(context);
 
                 return Unit.Task;
             }

@@ -1,5 +1,4 @@
 ﻿using Akka.Actor;
-using OpenSpark.ApiGateway.Models.StateData;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Domain;
 using OpenSpark.Shared;
@@ -9,10 +8,12 @@ using OpenSpark.Shared.Events;
 using OpenSpark.Shared.Events.CreatePost;
 using System;
 using System.Collections.Generic;
+using OpenSpark.ApiGateway.StateData;
+using OpenSpark.Shared.Commands.Sagas;
 
 namespace OpenSpark.ApiGateway.Actors.Sagas
 {
-    public class CreatePostSagaActor : FSM<CreatePostSagaActor.SagaState, ISagaStateData>
+    public class CreatePostSaga : FSM<CreatePostSaga.SagaState, ISagaStateData>
     {
         private readonly IActorSystemService _actorSystemService;
 
@@ -33,7 +34,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             public string GroupName { get; set; }
         }
 
-        public CreatePostSagaActor(IActorSystemService actorSystemService)
+        public CreatePostSaga(IActorSystemService actorSystemService)
         {
             _actorSystemService = actorSystemService;
 
@@ -63,7 +64,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
 
         public State<SagaState, ISagaStateData> HandleIdleEvents(Event<ISagaStateData> fsmEvent)
         {
-            if (!(fsmEvent.FsmEvent is ExecuteAddPostSagaCommand command)) return null;
+            if (!(fsmEvent.FsmEvent is ExecuteCreatePostSagaCommand command)) return null;
 
             _actorSystemService.SendRemoteSagaMessage(RemoteSystem.Groups, Self,
                 new VerifyPostRequestCommand

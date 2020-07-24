@@ -14,7 +14,6 @@ namespace OpenSpark.Domain
         public string About { get; set; }
         public string CategoryId { get; set; }
         public List<string> Tags { get; set; }
-        public List<string> ListedProjects { get; set; }
         public string OwnerUserId { get; set; }
         public DateTime CreatedAt { get; set; }
     }

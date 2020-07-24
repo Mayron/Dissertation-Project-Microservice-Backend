@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Akka.Actor;
+using OpenSpark.ApiGateway.Builders;
 using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.Queries;
 
@@ -8,18 +9,18 @@ namespace OpenSpark.ApiGateway.Actors.PayloadAggregators
 {
     public abstract class BaseMultiPayloadAggregatorActor : ReceiveActor
     {
-        private readonly MultiQuery _multiQuery;
+        private readonly MultiQueryContext _context;
 
-        protected BaseMultiPayloadAggregatorActor(MultiQuery multiQuery, IActorRef callback)
+        protected BaseMultiPayloadAggregatorActor(MultiQueryContext context, IActorRef callback)
         {
-            _multiQuery = multiQuery;
+            _context = context;
 
             // SetReceiveTimeout(TimeSpan.FromSeconds(query.TimeOutInSeconds * 2));
 
             Receive<MultiPayloadEvent>(@event =>
             {
-                if (@event.MultiQueryId != multiQuery.Id)
-                    throw new Exception($"Invalid multi query Id. Expected {multiQuery.Id} but got {@event.MultiQueryId}");
+                if (@event.MultiQueryId != _context.Id)
+                    throw new Exception($"Invalid multi query Id. Expected {_context.Id} but got {@event.MultiQueryId}");
 
                 var payload = AggregatePayload(@event.Payloads);
                 callback.Tell(payload);
@@ -31,8 +32,11 @@ namespace OpenSpark.ApiGateway.Actors.PayloadAggregators
             {
                 callback.Tell(new PayloadEvent
                 {
-                    ConnectionId = multiQuery.ConnectionId,
-                    Callback = multiQuery.Callback,
+                    MetaData = new QueryMetaData
+                    {
+                        ConnectionId = _context.ConnectionId,
+                        Callback = _context.Callback,
+                    },
                     Errors = new[] { "Request timed out" }
                 });
 
@@ -63,30 +67,39 @@ namespace OpenSpark.ApiGateway.Actors.PayloadAggregators
             {
                 return new PayloadEvent
                 {
-                    ConnectionId = _multiQuery.ConnectionId,
-                    Callback = _multiQuery.Callback,
+                    MetaData = new QueryMetaData
+                    {
+                        ConnectionId = _context.ConnectionId,
+                        Callback = _context.Callback,
+                    },
                     Errors = errors.ToArray()
                 };
             }
 
-            if (successful.Count == _multiQuery.Queries.Count)
+            if (successful.Count == _context.Queries.Count)
             {
                 var results = GetAggregatedPayload(successful);
 
                 return new PayloadEvent
                 {
-                    ConnectionId = _multiQuery.ConnectionId,
-                    Callback = _multiQuery.Callback,
+                    MetaData = new QueryMetaData
+                    {
+                        ConnectionId = _context.ConnectionId,
+                        Callback = _context.Callback,
+                    },
                     Payload = results
                 };
             }
 
-            Console.WriteLine($"Corrupt multi-query data. Expected {_multiQuery.Queries.Count} results but got {successful.Count} with no errors.");
+            Console.WriteLine($"Corrupt multi-query data. Expected {_context.Queries.Count} results but got {successful.Count} with no errors.");
 
             return new PayloadEvent
             {
-                ConnectionId = _multiQuery.ConnectionId,
-                Callback = _multiQuery.Callback,
+                MetaData = new QueryMetaData
+                {
+                    ConnectionId = _context.ConnectionId,
+                    Callback = _context.Callback,
+                },
                 Errors = new[] { "Oops! Something went wrong while retrieving data." }
             };
         }
