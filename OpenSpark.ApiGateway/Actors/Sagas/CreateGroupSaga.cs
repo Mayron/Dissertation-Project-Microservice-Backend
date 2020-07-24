@@ -1,16 +1,16 @@
 ﻿using Akka.Actor;
 using OpenSpark.ApiGateway.Services;
+using OpenSpark.ApiGateway.StateData;
 using OpenSpark.Domain;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Commands.Groups;
 using OpenSpark.Shared.Commands.Projects;
-using OpenSpark.Shared.Commands.SagaExecutionCommands;
+using OpenSpark.Shared.Commands.Sagas;
+using OpenSpark.Shared.Events;
 using OpenSpark.Shared.Events.ConnectProject;
 using OpenSpark.Shared.Events.CreateGroup;
 using System;
 using System.Collections.Generic;
-using OpenSpark.ApiGateway.StateData;
-using OpenSpark.Shared.Commands.Sagas;
 
 namespace OpenSpark.ApiGateway.Actors.Sagas
 {
@@ -48,6 +48,23 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             When(SagaState.CreatingGroup, HandleCreatingGroupEvents);
             When(SagaState.UpdateConnectedProjects, HandleUpdateConnectedProjectsEvents);
             When(SagaState.RollingBack, HandleRollingBackEvents);
+
+            WhenUnhandled(ev =>
+            {
+                switch (ev.FsmEvent)
+                {
+                    case StateTimeout _:
+                        return StopAndSendError("Oops! Request timed out while verifying request.");
+
+                    case ErrorEvent error:
+                        Console.WriteLine($"CreateGroupSaga received error: {error.Message}");
+                        return StopAndSendError(error.Message);
+
+                    default:
+                        Console.WriteLine($"CreatePostSaga received unexpected message: {ev.FsmEvent}. Current State: {StateName}");
+                        return Stay();
+                }
+            });
         }
 
         private State<SagaState, ISagaStateData> HandleIdleEvents(Event<ISagaStateData> fsmEvent)
@@ -62,6 +79,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                         Name = command.Name,
                         About = command.About,
                         CategoryId = command.CategoryId,
+                        Visibility = command.Visibility,
                         Tags = command.Tags,
                     });
 
@@ -172,6 +190,12 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                 }
             );
 
+            return Stop();
+        }
+
+        private State<SagaState, ISagaStateData> StopAndSendError(string errorMessage)
+        {
+            _actorSystemService.SendSagaFailedMessage(StateData.TransactionId, errorMessage);
             return Stop();
         }
     }

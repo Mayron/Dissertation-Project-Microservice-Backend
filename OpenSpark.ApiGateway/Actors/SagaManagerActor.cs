@@ -46,7 +46,6 @@ namespace OpenSpark.ApiGateway.Actors
             var sagaActorRef = Context.Watch(CreateSagaActor(context));
 
             _children = _children.Add(context.TransactionId, sagaActorRef);
-            _actorSystemService.RegisterTransaction(context.TransactionId);
 
             return sagaActorRef;
         }

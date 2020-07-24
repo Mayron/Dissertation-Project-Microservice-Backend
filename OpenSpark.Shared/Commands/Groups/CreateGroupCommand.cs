@@ -11,5 +11,6 @@ namespace OpenSpark.Shared.Commands.Groups
         public string CategoryId { get; set; }
         public string About { get; set; }
         public User User { get; set; }
+        public string Visibility { get; set; }
     }
 }

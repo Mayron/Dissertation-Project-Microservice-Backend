@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using OpenSpark.Domain;
-
-namespace OpenSpark.Shared
+﻿namespace OpenSpark.Shared
 {
     public static class AppConstants
     {
@@ -30,6 +27,11 @@ namespace OpenSpark.Shared
         public static class ExplicitGroupRoles
         {
             public const string ModeratorRole = "922FE103-5131-4F56-9C74-4F7A3C2A754F";
+        }
+
+        public static class UserMessages
+        {
+            public const string GroupNameTaken = "Sorry, that group name has already been taken. Please choose a different name.";
         }
     }
 }

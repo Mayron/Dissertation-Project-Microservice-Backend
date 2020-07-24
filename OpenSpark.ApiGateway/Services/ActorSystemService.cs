@@ -2,32 +2,37 @@
 using Akka.Configuration;
 using Microsoft.Extensions.Configuration;
 using OpenSpark.ApiGateway.Actors;
+using OpenSpark.ApiGateway.Builders;
 using OpenSpark.Shared;
-using OpenSpark.Shared.Commands;
-using OpenSpark.Shared.Commands.SagaExecutionCommands;
+using OpenSpark.Shared.Commands.Sagas;
 using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.Events.Sagas;
 using OpenSpark.Shared.Queries;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using OpenSpark.ApiGateway.Builders;
-using OpenSpark.Shared.Commands.Sagas;
+using System.Threading.Tasks;
 
 namespace OpenSpark.ApiGateway.Services
 {
     public interface IActorSystemService
     {
-        void ExecuteSaga(SagaContext context);
-        void RegisterTransaction(Guid transactionId);
+        Task RegisterAndExecuteSagaAsync(SagaContext context);
+
         void SendEmptyPayloadToClient(string clientCallbackMethod, string connectionId);
+
         void SendMultiQuery(MultiQueryContext multiQueryContext);
+
         void SendErrorToClient(string clientCallbackMethod, string connectionId, string errorMessage);
-//        void SendRemoteMessage(int remoteSystemId, IMessage message, IActorRef callback = null);
+
         void SendRemoteQuery(QueryContext context, IActorRef callback = null);
+
         void SendRemoteSagaMessage(int remoteSystemId, IActorRef sagaActor, IMessage message);
+
         void SendSagaFailedMessage(Guid transactionId, string message);
+
         void SendSagaSucceededMessage(Guid transactionId, string message, IDictionary<string, string> args = null);
+
         void SubscribeToSaga(SubscribeToSagaTransactionCommand command);
     }
 
@@ -87,12 +92,17 @@ namespace OpenSpark.ApiGateway.Services
             managerActorRef.Tell(message, sagaActor);
         }
 
-        public void SendMultiQuery(MultiQueryContext multiQueryContext) => 
+        public void SendMultiQuery(MultiQueryContext multiQueryContext) =>
             _multiQueryManager.Tell(multiQueryContext, _callbackHandler);
 
-        public void ExecuteSaga(SagaContext context) => _sagaManager.Tell(context);
+        public async Task RegisterAndExecuteSagaAsync(SagaContext context)
+        {
+            // Register saga before sending
+            await _callbackHandler.Ask<bool>(context.TransactionId);
 
-        public void RegisterTransaction(Guid transactionId) => _callbackHandler.Tell(transactionId);
+            // Send request to execute saga
+            _sagaManager.Tell(context);
+        }
 
         public void SubscribeToSaga(SubscribeToSagaTransactionCommand command) => _callbackHandler.Tell(command);
 
@@ -115,7 +125,7 @@ namespace OpenSpark.ApiGateway.Services
                     ConnectionId = connectionId,
                     Callback = clientCallbackMethod,
                 },
-                Payload = new string[] {}
+                Payload = new string[] { }
             });
 
         public void SendSagaFailedMessage(Guid transactionId, string message) =>

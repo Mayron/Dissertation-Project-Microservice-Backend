@@ -12,5 +12,6 @@ namespace OpenSpark.Shared.Commands.SagaExecutionCommands
         public string Name { get; set; }
         public string About { get; set; }
         public List<string> Tags { get; set; }
+        public string Visibility { get; set; }
     }
 }

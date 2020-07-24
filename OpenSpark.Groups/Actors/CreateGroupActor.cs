@@ -24,7 +24,7 @@ namespace OpenSpark.Groups.Actors
                 {
                     Sender.Tell(new ErrorEvent
                     {
-                        Message = "Group name taken"
+                        Message = AppConstants.UserMessages.GroupNameTaken
                     });
 
                     return;
@@ -51,7 +51,7 @@ namespace OpenSpark.Groups.Actors
                     Name = command.Name,
                     CategoryId = command.CategoryId,
                     Tags = command.Tags,
-                    Visibility = VisibilityStatus.Public, // TODO: Needs to be configurable on creation
+                    Visibility = VisibilityHelper.GetCleanVisibility(command.Visibility),
                     Roles = RolesHelper.GetDefaultGroupRoles(),
                     BannedUsers = new List<string>(),
                     CreatedAt = DateTime.Now,

@@ -5,6 +5,7 @@ using OpenSpark.Shared.RavenDb;
 using System;
 using System.Collections.Generic;
 using Akka.Routing;
+using OpenSpark.Shared;
 using OpenSpark.Shared.Events;
 using OpenSpark.Shared.Events.CreateProject;
 
@@ -40,7 +41,7 @@ namespace OpenSpark.Projects.Actors
                     About = command.About,
                     Name = command.Name,
                     Tags = command.Tags,
-                    Visibility = VisibilityStatus.Public, // TODO: Needs to be configurable on creation
+                    Visibility = VisibilityHelper.GetCleanVisibility(command.Visibility),
                     CreatedAt = DateTime.Now,
                     LastUpdated = DateTime.Now,
                     Subscribers = new List<string>(),

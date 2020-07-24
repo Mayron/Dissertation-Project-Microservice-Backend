@@ -39,14 +39,14 @@ namespace OpenSpark.ApiGateway.Handlers
                 _user = context.GetFirebaseUser();
             }
 
-            public Task<ValidationResult> Handle(Command command, CancellationToken cancellationToken)
+            public async Task<ValidationResult> Handle(Command command, CancellationToken cancellationToken)
             {
                 if (_user == null || !_user.Projects.Contains(command.ProjectId))
-                    return Task.FromResult(new ValidationResult(false, "Failed to validate user request"));
+                    return new ValidationResult(false, "Failed to validate user request");
 
                 if (!_user.Groups.Contains(command.GroupId))
-                    return Task.FromResult(new ValidationResult(false,
-                        "You do not have permission to connect to the selected group."));
+                    return new ValidationResult(false,
+                        "You do not have permission to connect to the selected group.");
 
                 var sagaExecutionCommand = new ExecuteConnectProjectSagaCommand
                 {
@@ -55,10 +55,10 @@ namespace OpenSpark.ApiGateway.Handlers
                 };
 
                 var context = _builder.CreateSagaContext<ConnectProjectSaga>(sagaExecutionCommand).Build();
-                _actorSystemService.ExecuteSaga(context);
+                await _actorSystemService.RegisterAndExecuteSagaAsync(context);
 
-                return Task.FromResult(new ValidationResult(true,
-                    context.TransactionId.ToString()));
+                return new ValidationResult(true,
+                    context.TransactionId.ToString());
             }
         }
     }

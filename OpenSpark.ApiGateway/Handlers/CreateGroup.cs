@@ -37,24 +37,25 @@ namespace OpenSpark.ApiGateway.Handlers
                 _user = context.GetFirebaseUser();
             }
 
-            public Task<ValidationResult> Handle(Command command, CancellationToken cancellationToken)
+            public async Task<ValidationResult> Handle(Command command, CancellationToken cancellationToken)
             {
                 if (_user == null)
-                    return Task.FromResult(new ValidationResult(false, "Failed to validate user request"));
+                    return new ValidationResult(false, "Failed to validate user request");
 
                 var sagaExecutionCommand = new ExecuteCreateGroupSagaCommand
                 {
                     Name = command.Model.Name,
                     About = command.Model.About,
+                    Visibility = command.Model.Visibility,
                     CategoryId = command.Model.CategoryId,
                     Tags = command.Model.Tags,
                     Connecting = command.Model.Connected,
                 };
 
                 var context = _builder.CreateSagaContext<CreateGroupSaga>(sagaExecutionCommand).Build();
-                _actorSystemService.ExecuteSaga(context);
+                await _actorSystemService.RegisterAndExecuteSagaAsync(context);
 
-                return Task.FromResult(new ValidationResult(true, context.TransactionId.ToString()));
+                return new ValidationResult(true, context.TransactionId.ToString());
             }
         }
     }

@@ -7,7 +7,6 @@ using OpenSpark.ApiGateway.Services;
 using OpenSpark.Domain;
 using OpenSpark.Shared.Commands.SagaExecutionCommands;
 using OpenSpark.Shared.ViewModels;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -38,22 +37,23 @@ namespace OpenSpark.ApiGateway.Handlers
                 _user = context.GetFirebaseUser();
             }
 
-            public Task<ValidationResult> Handle(Command command, CancellationToken cancellationToken)
+            public async Task<ValidationResult> Handle(Command command, CancellationToken cancellationToken)
             {
                 if (_user == null)
-                    return Task.FromResult(new ValidationResult(false, "Failed to validate user request"));
+                    return new ValidationResult(false, "Failed to validate user request");
 
                 var sagaExecutionCommand = new ExecuteCreateProjectSagaCommand
                 {
                     Name = command.Model.Name,
                     About = command.Model.About,
                     Tags = command.Model.Tags,
+                    Visibility = command.Model.Visibility
                 };
 
                 var context = _builder.CreateSagaContext<CreateProjectSaga>(sagaExecutionCommand).Build();
-                _actorSystemService.ExecuteSaga(context);
+                await _actorSystemService.RegisterAndExecuteSagaAsync(context);
 
-                return Task.FromResult(new ValidationResult(true, context.TransactionId.ToString()));
+                return new ValidationResult(true, context.TransactionId.ToString());
             }
         }
     }

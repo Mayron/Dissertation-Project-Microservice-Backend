@@ -36,6 +36,7 @@ namespace OpenSpark.ApiGateway.Actors
 
                 Context.Watch(subscriptionActor);
                 _subscriptions = _subscriptions.Add(transactionId, subscriptionActor);
+                Sender.Tell(true);
             });
 
             Receive<Terminated>(terminated =>

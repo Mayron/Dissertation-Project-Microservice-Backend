@@ -10,5 +10,6 @@ namespace OpenSpark.Shared.Commands.Projects
         public List<string> Tags { get; set; }
         public string About { get; set; }
         public User User { get; set; }
+        public string Visibility { get; set; }
     }
 }

@@ -15,5 +15,6 @@ namespace OpenSpark.Shared.Commands.Sagas
         public string CategoryId { get; set; }
         public List<string> Tags { get; set; }
         public List<string> Connecting { get; set; }
+        public string Visibility { get; set; }
     }
 }

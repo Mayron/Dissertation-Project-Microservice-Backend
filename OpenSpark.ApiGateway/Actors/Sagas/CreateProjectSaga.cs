@@ -54,6 +54,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                         Name = command.Name,
                         About = command.About,
                         Tags = command.Tags,
+                        Visibility = command.Visibility
                     });
 
                 // go to next state

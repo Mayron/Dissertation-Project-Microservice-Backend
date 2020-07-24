@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using OpenSpark.Domain;
-using OpenSpark.Shared.Events.Sagas;
 
 namespace OpenSpark.Shared
 {
@@ -28,6 +23,14 @@ namespace OpenSpark.Shared
             }
 
             return (true, null);
+        }
+
+        public static string GetCleanVisibility(string visibility)
+        {
+            if (VisibilityStatus.GetAll().Contains(visibility)) return visibility;
+
+            Console.WriteLine($"Unknown visibility status: {visibility}");
+            return VisibilityStatus.Public;
         }
     }
 }
