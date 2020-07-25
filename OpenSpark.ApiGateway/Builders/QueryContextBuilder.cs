@@ -8,6 +8,7 @@ namespace OpenSpark.ApiGateway.Builders
     {
         IQueryContextBuilder ForRemoteSystem(int remoteSystemId);
         IQueryContextBuilder SetClientCallback(string connectionId, string clientCallbackMethod);
+        IQueryContextBuilder SetMultiQueryId(Guid id);
         QueryContext Build();
     }
 
@@ -18,6 +19,7 @@ namespace OpenSpark.ApiGateway.Builders
         private string _connectionId;
         private string _clientCallbackMethod;
         private readonly IQuery _query;
+        private Guid _multiQueryId;
 
         internal QueryContextBuilder(IQuery query, User user)
         {
@@ -38,11 +40,18 @@ namespace OpenSpark.ApiGateway.Builders
             return this;
         }
 
+        public IQueryContextBuilder SetMultiQueryId(Guid multiQueryId)
+        {
+            _multiQueryId = multiQueryId;
+            return this;
+        }
+
         public QueryContext Build()
         {
             _query.User = _user;
             _query.MetaData = new QueryMetaData
             {
+                MultiQueryId = _multiQueryId,
                 ConnectionId = _connectionId,
                 Callback = _clientCallbackMethod,
                 CreatedAt = DateTime.Now,

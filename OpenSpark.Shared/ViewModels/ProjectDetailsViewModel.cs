@@ -13,5 +13,6 @@ namespace OpenSpark.Shared.ViewModels
         public bool Subscribed { get; set; }
         public int TotalDownloads { get; set; }
         public string LastUpdated { get; set; }
+        public bool IsOwner { get; set; }
     }
 }

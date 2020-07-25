@@ -5,12 +5,12 @@ using OpenSpark.Shared.Events.Payloads;
 
 namespace OpenSpark.ApiGateway.StateData
 {
-    public class MultiQueryState
+    public class MultiQueryStateData
     {
         public IImmutableDictionary<Guid, IPayloadEvent> Received { get; }
         public IImmutableDictionary<Guid, int> Pending { get; }
 
-        public MultiQueryState(
+        public MultiQueryStateData(
             IImmutableDictionary<Guid, IPayloadEvent> received,
             IImmutableDictionary<Guid, int> pending)
         {
@@ -18,10 +18,16 @@ namespace OpenSpark.ApiGateway.StateData
             Pending = pending;
         }
 
-        public MultiQueryState(IDictionary<Guid, int> pending)
+        public MultiQueryStateData(IImmutableDictionary<Guid, int> pending)
         {
             Received = ImmutableDictionary<Guid, IPayloadEvent>.Empty;
-            Pending = pending.ToImmutableDictionary();
+            Pending = pending;
+        }
+
+        public MultiQueryStateData(IImmutableDictionary<Guid, IPayloadEvent> received)
+        {
+            Received = received;
+            Pending = ImmutableDictionary<Guid, int>.Empty;
         }
     }
 }

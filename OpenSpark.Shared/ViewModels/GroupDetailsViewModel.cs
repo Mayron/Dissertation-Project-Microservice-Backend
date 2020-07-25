@@ -8,5 +8,6 @@
         public string Name { get; set; }
         public string Visibility { get; set; }
         public int TotalMembers { get; set; }
+        public bool IsMember { get; set; }
     }
 }

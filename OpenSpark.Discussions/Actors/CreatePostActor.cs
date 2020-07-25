@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using Akka.Actor;
+﻿using Akka.Actor;
 using Akka.Routing;
 using OpenSpark.Domain;
 using OpenSpark.Shared.Commands.Posts;
 using OpenSpark.Shared.Events.CreatePost;
 using OpenSpark.Shared.RavenDb;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenSpark.Discussions.Actors
 {
@@ -28,7 +29,25 @@ namespace OpenSpark.Discussions.Actors
                     Comments = new List<Comment>()
                 };
 
-                session.Store(post);
+                var groupPosts = session.Query<GroupPosts>()
+                    .FirstOrDefault(d => d.GroupId == command.GroupId);
+
+                if (groupPosts != null)
+                {
+                    groupPosts.Posts.Add(post);
+                }
+                else
+                {
+                    groupPosts = new GroupPosts
+                    {
+                        GroupId = command.GroupId,
+                        Posts = new List<Post> { post },
+                        IsPrivate = command.GroupVisibility == VisibilityStatus.Private,
+                    };
+
+                    session.Store(groupPosts);
+                }
+
                 session.SaveChanges();
 
                 Sender.Tell(new PostCreatedEvent

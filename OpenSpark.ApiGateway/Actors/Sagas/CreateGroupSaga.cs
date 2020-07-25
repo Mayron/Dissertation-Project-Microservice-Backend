@@ -42,7 +42,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             _actorSystemService = actorSystemService;
             _firestoreService = firestoreService;
 
-            StartWith(SagaState.Idle, IdleStateData.Instance);
+            StartWith(SagaState.Idle, IdleSagaStateData.Instance);
 
             When(SagaState.Idle, HandleIdleEvents);
             When(SagaState.CreatingGroup, HandleCreatingGroupEvents);

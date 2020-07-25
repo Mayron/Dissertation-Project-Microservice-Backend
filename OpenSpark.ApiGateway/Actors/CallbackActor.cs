@@ -3,7 +3,6 @@ using System.Collections.Immutable;
 using System.Linq;
 using Akka.Actor;
 using OpenSpark.ApiGateway.Services;
-using OpenSpark.Shared.Commands;
 using OpenSpark.Shared.Commands.Sagas;
 using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.Events.Sagas;
@@ -15,11 +14,9 @@ namespace OpenSpark.ApiGateway.Actors
     /// </summary>
     public class CallbackActor : ReceiveActor
     {
-        private IImmutableDictionary<Guid, IActorRef> _subscriptions;
-
         public CallbackActor(IEventEmitterService eventEmitter)
         {
-            _subscriptions = ImmutableDictionary<Guid, IActorRef>.Empty;
+            var subscriptions = ImmutableDictionary<Guid, IActorRef>.Empty;
 
             Receive<PayloadEvent>(@event =>
             {
@@ -35,7 +32,7 @@ namespace OpenSpark.ApiGateway.Actors
                     $"SagaSubscription-{transactionId}");
 
                 Context.Watch(subscriptionActor);
-                _subscriptions = _subscriptions.Add(transactionId, subscriptionActor);
+                subscriptions = subscriptions.Add(transactionId, subscriptionActor);
                 Sender.Tell(true);
             });
 
@@ -43,32 +40,32 @@ namespace OpenSpark.ApiGateway.Actors
             {
                 Context.Unwatch(terminated.ActorRef);
 
-                _subscriptions = _subscriptions.Where(v => 
+                subscriptions = subscriptions.Where(v => 
                     !v.Value.Equals(terminated.ActorRef)).ToImmutableDictionary();
             });
 
             // Client wants to subscribe
             Receive<SubscribeToSagaTransactionCommand>(command =>
             {
-                if (!_subscriptions.ContainsKey(command.TransactionId))
+                if (!subscriptions.ContainsKey(command.TransactionId))
                 {
                     Console.WriteLine($"Failed to subscribe to transaction: Unable to find subscription for transaction: {command.TransactionId}");
                     return;
                 }
 
-                _subscriptions[command.TransactionId].Tell(command);
+                subscriptions[command.TransactionId].Tell(command);
             });
 
             // Saga emitted an event for the client
             Receive<SagaFinishedEvent>(@event =>
             {
-                if (!_subscriptions.ContainsKey(@event.TransactionId))
+                if (!subscriptions.ContainsKey(@event.TransactionId))
                 {
                     Console.WriteLine($"Failed to send saga message to client: Unable to find subscription for transaction: {@event.TransactionId}");
                     return;
                 }
 
-                _subscriptions[@event.TransactionId].Tell(@event);
+                subscriptions[@event.TransactionId].Tell(@event);
             });
         }
     }

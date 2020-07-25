@@ -1,82 +1,106 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Akka.Actor;
+using Newtonsoft.Json;
 using OpenSpark.ApiGateway.Builders;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.ApiGateway.StateData;
+using OpenSpark.Domain;
 using OpenSpark.Shared.Events.Payloads;
-using OpenSpark.Shared.Queries;
 
 namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
 {
-    public class MultiQueryParallelHandler : UntypedActor
+    public class MultiQueryParallelHandler : FSM<string, MultiQueryStateData>
     {
-        private readonly ICancelable _queryTimeoutTimer;
-        private readonly IImmutableList<QueryContext> _queries;
+        protected IActorSystemService ActorSystemService { get; }
+        protected Guid MultiQueryId { get; }
+        protected User User { get; }
+
+        protected const string InitialState = "InitialState";
+
         private readonly IActorRef _aggregator;
-        private readonly IActorSystemService _actorSystemService;
-        private readonly Guid _multiQueryId;
+        private readonly ICancelable _queryTimeoutTimer;
+        private readonly Stack<string> _states = new Stack<string>();
+
+        // This is only used for PreStart to fire off initial queries
+        private readonly IImmutableList<QueryContext> _preStartQueries;
 
         private sealed class MultiQueryTimeout
         {
             public static MultiQueryTimeout Instance { get; } = new MultiQueryTimeout();
 
-            private MultiQueryTimeout() {}
+            private MultiQueryTimeout()
+            {
+            }
         }
 
-        public MultiQueryParallelHandler(MultiQueryContext multiQueryContext, IActorRef aggregator, IActorSystemService actorSystemService)
+        public MultiQueryParallelHandler(
+            MultiQueryContext context, 
+            IActorRef aggregator, 
+            IActorSystemService actorSystemService)
         {
-            _multiQueryId = multiQueryContext.Id;
+            MultiQueryId = context.Id;
+            User = context.User;
 
             _queryTimeoutTimer = Context.System.Scheduler
-                .ScheduleTellOnceCancelable(multiQueryContext.TimeoutInSeconds, Self, MultiQueryTimeout.Instance, Self);
+                .ScheduleTellOnceCancelable(
+                    context.TimeoutInSeconds * 1000,
+                    Self, MultiQueryTimeout.Instance, Self);
 
-            _queries = multiQueryContext.Queries.ToImmutableList();
+            _preStartQueries = context.Queries.ToImmutableList();
             _aggregator = aggregator;
-            _actorSystemService = actorSystemService;
+            ActorSystemService = actorSystemService;
 
-            var pending = multiQueryContext.Queries.ToDictionary(
-                queryContext => queryContext.Query.MetaData.QueryId,
-                queryContext => queryContext.RemoteSystemId);
+            var pending = GetPendingQueries(context.Queries);
 
-            Become(WaitingForReplies(new MultiQueryState(pending)));
+            StartWith(InitialState, new MultiQueryStateData(pending));
+            WhenUnhandled(WaitingForReplies);
         }
 
-        private UntypedReceive WaitingForReplies(MultiQueryState state)
+        private State<string, MultiQueryStateData> WaitingForReplies(Event<MultiQueryStateData> fsmEvent)
         {
-            return message =>
+            switch (fsmEvent.FsmEvent)
             {
-                Console.WriteLine($"Message reply received: {message}");
+                case PayloadEvent @event when @event.MetaData.MultiQueryId == MultiQueryId:
+                    ReceivedEvent(@event.MetaData.QueryId, @event);
+                    break;
 
-                switch (message)
-                {
-                    case PayloadEvent @event when @event.MetaData.MultiQueryId == _multiQueryId:
-                        ReceivedEvent(@event.MetaData.QueryId, @event, state);
-                        break;
+                case MultiQueryTimeout _:
+                    Console.WriteLine("Multi-Query timed out");
+                    Context.Stop(Self);
+                    break;
 
-                    case MultiQueryTimeout _:
-                        Console.WriteLine("Multi-Query timed out");
-                        Context.Stop(Self);
-                        break;
+                case PayloadEvent @event:
+                    Console.WriteLine($"Invalid MultiQueryId for PayloadEvent. Expected {MultiQueryId}, but received {@event.MetaData.MultiQueryId}");
+                    break;
 
-                    default:
-                        throw new Exception($"Unknown message type: {message}");
-                }
-            };
+                default:
+                    Console.WriteLine($"Unknown message type: {fsmEvent.FsmEvent.GetType().Name} - {JsonConvert.SerializeObject(fsmEvent.FsmEvent)}");
+                    break;
+            }
+
+            return null;
         }
 
-        private void ReceivedEvent(Guid queryId, IPayloadEvent @event, MultiQueryState state)
+        private void ReceivedEvent(Guid queryId, IPayloadEvent @event)
         {
-            var nextPendingState = state.Pending.Remove(queryId);
-            var nextReceivedState = state.Received.Add(queryId, @event);
+            var nextPendingState = StateData.Pending.Remove(queryId);
+            var nextReceivedState = StateData.Received.Add(queryId, @event);
 
             if (nextPendingState.Count == 0)
             {
-                // no more pending states - tell the multi-query target actor we're finished
+                // no more pending states - move to next state or stop if no next state
+                if (_states.Count > 0)
+                {
+                    GoTo(_states.Pop()).Using(new MultiQueryStateData(nextReceivedState));
+                    return;
+                }
+
                 _aggregator.Tell(new MultiPayloadEvent
                 {
-                    MultiQueryId = _multiQueryId,
+                    MultiQueryId = MultiQueryId,
                     Payloads = nextReceivedState.Values.ToList()
                 });
 
@@ -84,14 +108,13 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
                 return;
             }
 
-            // Move to next state
-            Become(WaitingForReplies(new MultiQueryState(nextReceivedState, nextPendingState)));
+            Stay().Using(new MultiQueryStateData(nextReceivedState, nextPendingState));
         }
 
         protected override void PreStart()
         {
-            foreach (var queryContext in _queries)
-                _actorSystemService.SendRemoteQuery(queryContext, Self);
+            foreach (var queryContext in _preStartQueries)
+                ActorSystemService.SendRemoteQuery(queryContext, Self);
         }
 
         protected override void PostStop()
@@ -99,9 +122,11 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
             _queryTimeoutTimer.Cancel();
         }
 
-        protected override void OnReceive(object message)
-        {
-            // Block all messages until actor has started and moved to initial state
-        }
+        protected static IImmutableDictionary<Guid, int> GetPendingQueries(IEnumerable<QueryContext> queries) =>
+            queries.ToImmutableDictionary(
+                queryContext => queryContext.Query.MetaData.QueryId,
+                queryContext => queryContext.RemoteSystemId);
+
+        protected void SetNextState(string nextState) => _states.Push(nextState);
     }
 }

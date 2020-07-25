@@ -6,7 +6,6 @@ using OpenSpark.ApiGateway.Services;
 using OpenSpark.Domain;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Queries;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using OpenSpark.ApiGateway.Actors.MultiQueryHandlers;
@@ -58,8 +57,8 @@ namespace OpenSpark.ApiGateway.Handlers
 
                 var context = _builder.CreateMultiQueryContext<MultiQueryParallelHandler, GroupConnectionsListAggregator>()
                     .SetClientCallback(query.Callback, query.ConnectionId)
-                    .AddQuery(new UserGroupsQuery {OwnedGroups = true}, RemoteSystem.Groups)
-                    .AddQuery(new ProjectDetailsQuery {ProjectId = query.ProjectId}, RemoteSystem.Projects)
+                    .AddQuery(new UserGroupsQuery { OwnedGroups = true }, RemoteSystem.Groups)
+                    .AddQuery(new ProjectDetailsQuery { ProjectId = query.ProjectId }, RemoteSystem.Projects)
                     .Build();
 
                 _actorSystemService.SendMultiQuery(context);

@@ -1,25 +1,19 @@
 ﻿using MediatR;
 using OpenSpark.ApiGateway.Services;
-using OpenSpark.Shared.Commands.Sagas;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
-    public class SubscribeToTransaction
+    public class Disconnected
     {
         public class Query : IRequest
         {
             public string ConnectionId { get; }
-            public Guid TransactionId { get; }
-            public string Callback { get; }
 
-            public Query(string connectionId, Guid transactionId, string callback)
+            public Query(string connectionId)
             {
                 ConnectionId = connectionId;
-                TransactionId = transactionId;
-                Callback = callback;
             }
         }
 
@@ -34,15 +28,7 @@ namespace OpenSpark.ApiGateway.Handlers
 
             public Task<Unit> Handle(Query query, CancellationToken cancellationToken)
             {
-                var command = new SubscribeToSagaTransactionCommand
-                {
-                    TransactionId = query.TransactionId,
-                    ConnectionId = query.ConnectionId,
-                    Callback = query.Callback
-                };
-
-                _actorSystemService.SubscribeToSaga(command);
-
+                _actorSystemService.PublishDisconnection(query.ConnectionId);
                 return Unit.Task;
             }
         }

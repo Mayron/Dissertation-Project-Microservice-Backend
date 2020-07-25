@@ -1,13 +1,14 @@
 ﻿using Akka.Actor;
+using Akka.Routing;
 using OpenSpark.Domain;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.Queries;
 using OpenSpark.Shared.ViewModels;
+using Raven.Client.Documents.Linq;
 using System.Collections.Generic;
 using System.Linq;
-using Akka.Routing;
-using Group = OpenSpark.Domain.Group;
+using Group = Akka.Routing.Group;
 
 namespace OpenSpark.Projects.Actors
 {
@@ -33,13 +34,12 @@ namespace OpenSpark.Projects.Actors
             var linkedProjects = session.Query<Project>()
                 .Where(p => p.LinkedGroups.Contains(ravenGroupId))
                 .OrderByDescending(p => p.Subscribers.Count)
-                .Select(p => new
+                .Select(p => new NamedEntityViewModel
                 {
-                    p.Id,
-                    p.Name
+                    Id = p.Id,
+                    Name = p.Name
                 })
                 .Take(query.TakeAmount)
-                .Cast<INamedEntity>()
                 .ToList();
 
             Sender.Tell(new PayloadEvent(query) { Payload = linkedProjects });
@@ -112,7 +112,7 @@ namespace OpenSpark.Projects.Actors
 
             if (project.Visibility == VisibilityStatus.Private)
             {
-                if (!project.TeamMembers.Contains(query.User.AuthUserId))
+                if (query.User == null || !project.TeamMembers.Contains(query.User.AuthUserId))
                 {
                     Sender.Tell(new PayloadEvent(query)
                     {
@@ -129,18 +129,22 @@ namespace OpenSpark.Projects.Actors
                 return;
             }
 
+            var subscribed = query.User != null && query.User.Projects.Contains(query.ProjectId);
+            var isOwner = query.User != null && project.OwnerUserId == query.User.AuthUserId;
+
             Sender.Tell(new PayloadEvent(query)
             {
                 Payload = new ProjectDetailsViewModel
                 {
-                    ConnectedGroupId = project.ConnectedGroupId,
+                    ConnectedGroupId = project.ConnectedGroupId.ConvertToEntityId(),
                     About = project.About,
                     ProjectId = query.ProjectId,
                     Name = project.Name,
                     Visibility = project.Visibility,
                     TotalSubscribers = project.Subscribers.Count,
-                    Subscribed = query.User.Projects.Contains(query.ProjectId),
-                    LastUpdated = project.LastUpdated.ConvertToHumanFriendlyFormat(),
+                    Subscribed = subscribed,
+                    IsOwner = isOwner,
+                    LastUpdated = project.LastUpdated.ToUniversalTime().Ticks.ToString(),
                     TotalDownloads = project.TotalDownloads,
                 }
             });

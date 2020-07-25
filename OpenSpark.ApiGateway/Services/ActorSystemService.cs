@@ -12,6 +12,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using OpenSpark.Shared.Events;
 
 namespace OpenSpark.ApiGateway.Services
 {
@@ -34,6 +35,8 @@ namespace OpenSpark.ApiGateway.Services
         void SendSagaSucceededMessage(Guid transactionId, string message, IDictionary<string, string> args = null);
 
         void SubscribeToSaga(SubscribeToSagaTransactionCommand command);
+
+        void PublishDisconnection(string queryConnectionId);
     }
 
     public class ActorSystemService : IActorSystemService
@@ -105,6 +108,16 @@ namespace OpenSpark.ApiGateway.Services
         }
 
         public void SubscribeToSaga(SubscribeToSagaTransactionCommand command) => _callbackHandler.Tell(command);
+
+        public void PublishDisconnection(string connectionId)
+        {
+            var remotePath = GetRemotePath(RemoteSystem.Discussions);
+            var managerActorRef = _localSystem.ActorSelection(remotePath);
+            managerActorRef.Tell(new DisconnectedEvent
+            {
+                ConnectionId = connectionId
+            });
+        }
 
         public void SendErrorToClient(string clientCallbackMethod, string connectionId, string errorMessage) =>
             _callbackHandler.Tell(new PayloadEvent

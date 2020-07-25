@@ -1,5 +1,4 @@
-﻿using System;
-using OpenSpark.Domain;
+﻿using OpenSpark.Domain;
 
 namespace OpenSpark.Shared.Commands.Posts
 {
@@ -9,5 +8,6 @@ namespace OpenSpark.Shared.Commands.Posts
         public string Body { get; set; }
         public string GroupId { get; set; }
         public User User { get; set; }
+        public string GroupVisibility { get; set; }
     }
 }

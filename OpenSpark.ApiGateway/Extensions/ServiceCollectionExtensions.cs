@@ -8,8 +8,8 @@ namespace OpenSpark.ApiGateway.Extensions
     {
         public static void AddApplicationServices(this IServiceCollection services)
         {
-            // Scoped
-            services.AddScoped<IMessageContextBuilderService, MessageContextBuilderService>();
+            // Transient
+            services.AddTransient<IMessageContextBuilderService, MessageContextBuilderService>();
 
             // Singletons
             services.AddSingleton<IFirestoreService, FirestoreService>();

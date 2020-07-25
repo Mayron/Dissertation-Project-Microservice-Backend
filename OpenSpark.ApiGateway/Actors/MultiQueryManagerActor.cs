@@ -13,18 +13,21 @@ namespace OpenSpark.ApiGateway.Actors
     {
         private readonly IActorSystemService _actorSystemService;
         private readonly IActorRef _callbackActor;
+        private readonly IFirestoreService _firestoreService;
 
-        public MultiQueryManagerActor(IActorSystemService actorSystemService, IActorRef callbackActor)
+        public MultiQueryManagerActor(
+            IActorSystemService actorSystemService, 
+            IActorRef callbackActor,
+            IFirestoreService firestoreService)
         {
             _actorSystemService = actorSystemService;
             _callbackActor = callbackActor;
+            _firestoreService = firestoreService;
 
             Receive<MultiQueryContext>(multiQuery =>
             {
-                multiQuery.Id = Guid.NewGuid();
-
                 var target = CreateAggregator(multiQuery);
-                var handler = CreateHandler(multiQuery, target);
+                CreateHandler(multiQuery, target);
             });
 
             Receive<MultiPayloadEvent>(@event => { });
@@ -44,19 +47,26 @@ namespace OpenSpark.ApiGateway.Actors
             };
         }
 
-        private IActorRef CreateHandler(MultiQueryContext multiQueryContext, IActorRef aggregator)
+        private void CreateHandler(MultiQueryContext context, IActorRef aggregator)
         {
-            var actorName = $"{multiQueryContext.Handler}-{multiQueryContext.Id}";
+            var actorName = $"{context.Handler}-{context.Id}";
 
-            return multiQueryContext.Handler switch
+            // creating the handler will auto trigger queries to fire
+            switch (context.Handler)
             {
-                nameof(MultiQueryParallelHandler) =>
-                // creating this will auto trigger queries to fire
-                Context.ActorOf(Props.Create(() =>
-                        new MultiQueryParallelHandler(multiQueryContext, aggregator, _actorSystemService)), actorName),
+                case nameof(MultiQueryParallelHandler):
+                    Context.ActorOf(Props.Create(() =>
+                        new MultiQueryParallelHandler(context, aggregator, _actorSystemService)), actorName);
+                    break;
 
-                _ => throw new Exception($"Failed to find handler: {multiQueryContext.Aggregator}"),
-            };
+                case nameof(GetPostsMultiQueryHandler):
+                    Context.ActorOf(Props.Create(() =>
+                            new GetPostsMultiQueryHandler(context, aggregator, _actorSystemService, _firestoreService)), actorName);
+                    break;
+
+                default:
+                    throw new Exception($"Failed to find handler: {context.Handler}");
+            }
         }
     }
 }

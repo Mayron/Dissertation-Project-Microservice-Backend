@@ -5,12 +5,10 @@ using OpenSpark.ApiGateway.Extensions;
 using OpenSpark.ApiGateway.InputModels;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Domain;
-using OpenSpark.Shared.Commands.SagaExecutionCommands;
+using OpenSpark.Shared.Commands.Sagas;
 using OpenSpark.Shared.ViewModels;
-using System;
 using System.Threading;
 using System.Threading.Tasks;
-using OpenSpark.Shared.Commands.Sagas;
 
 namespace OpenSpark.ApiGateway.Handlers
 {

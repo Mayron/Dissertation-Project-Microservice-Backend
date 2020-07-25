@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using OpenSpark.Domain;
 using OpenSpark.Shared.Queries;
 
@@ -31,7 +32,7 @@ namespace OpenSpark.ApiGateway.Builders
             _handler = typeof(TH).Name;
             _aggregator = typeof(TA).Name;
             _queries = new List<QueryContext>();
-            _timeout = 8; // default timeout in seconds
+            _timeout = 15; // default timeout in seconds
         }
 
         public IMultiQueryContextBuilder SetClientCallback(string clientCallbackMethod, string connectionId)
@@ -43,12 +44,6 @@ namespace OpenSpark.ApiGateway.Builders
 
         public IMultiQueryContextBuilder AddQuery(IQuery query, int remoteSystemId)
         {
-            query.MetaData = new QueryMetaData
-            {
-                MultiQueryId = _multiQueryId,
-                QueryId = Guid.NewGuid()
-            };
-
             _queries.Add(new QueryContext
             {
                 Query = query,
@@ -68,8 +63,16 @@ namespace OpenSpark.ApiGateway.Builders
         {
             var createdAt = DateTime.Now;
 
-            foreach (var query in _queries)
-                query.Query.MetaData.CreatedAt = createdAt;
+            foreach (var query in _queries.Select(context => context.Query))
+            {
+                query.User = _user;
+                query.MetaData = new QueryMetaData
+                {
+                    MultiQueryId = _multiQueryId,
+                    QueryId = Guid.NewGuid(),
+                    CreatedAt = createdAt
+                };
+            }
 
             return new MultiQueryContext
             {

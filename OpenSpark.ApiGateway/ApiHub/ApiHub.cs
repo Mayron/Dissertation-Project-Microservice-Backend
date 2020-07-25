@@ -1,5 +1,6 @@
 ﻿// ReSharper disable UnusedMember.Global
 using System;
+using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -30,6 +31,14 @@ namespace OpenSpark.ApiGateway.ApiHub
             {
                 _mediator.Send(new SubscribeToTransaction.Query(Context.ConnectionId, transactionId, callback));
             }
+        }
+
+        public override Task OnDisconnectedAsync(Exception exception)
+        {
+            // Notify all subscription actors that user with ConnectionId has disconnected
+            _mediator.Send(new Disconnected.Query(Context.ConnectionId));
+
+            return base.OnDisconnectedAsync(exception);
         }
     }
 }

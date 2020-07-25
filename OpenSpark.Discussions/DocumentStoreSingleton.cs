@@ -19,7 +19,7 @@ namespace OpenSpark.Discussions
 
             const string databaseName = "OpenSpark.Discussions";
             const string url = "http://127.0.0.1:8080/";
-            var indexAssembly = Assembly.GetAssembly(typeof(GetGroupPosts));
+            var indexAssembly = Assembly.GetAssembly(typeof(GetGroupPostsIndex));
 
             return RavenDbDocumentStoreFactory.CreateDocumentStore(databaseName, url, indexAssembly);
         }

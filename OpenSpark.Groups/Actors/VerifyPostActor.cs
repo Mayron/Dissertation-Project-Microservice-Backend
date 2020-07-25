@@ -56,7 +56,8 @@ namespace OpenSpark.Groups.Actors
             if (verified)
                 Sender.Tell(new UserVerifiedEvent
                 {
-                    GroupName = group.Name
+                    GroupName = group.Name,
+                    GroupVisibility = group.Visibility
                 });
             else
                 Sender.Tell(new UserVerificationFailedEvent());

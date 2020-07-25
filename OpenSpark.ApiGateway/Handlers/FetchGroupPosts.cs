@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using OpenSpark.ApiGateway.Actors.MultiQueryHandlers;
+using OpenSpark.ApiGateway.Actors.PayloadAggregators;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Queries;
@@ -7,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
-    public class FetchGroupDetails
+    public class FetchGroupPosts
     {
         public class Query : IRequest<Unit>
         {
@@ -36,12 +38,14 @@ namespace OpenSpark.ApiGateway.Handlers
 
             public Task<Unit> Handle(Query query, CancellationToken cancellationToken)
             {
-                var context = _builder.CreateQueryContext(new GroupDetailsQuery { GroupId = query.GroupId })
+                var remoteQuery = new GroupPostsQuery { GroupId = query.GroupId };
+
+                var context = _builder.CreateMultiQueryContext<GetPostsMultiQueryHandler, GetPostsAggregator>()
                     .SetClientCallback(query.Callback, query.ConnectionId)
-                    .ForRemoteSystem(RemoteSystem.Groups)
+                    .AddQuery(remoteQuery, RemoteSystem.Discussions)
                     .Build();
 
-                _actorSystemService.SendRemoteQuery(context);
+                _actorSystemService.SendMultiQuery(context);
 
                 return Unit.Task;
             }

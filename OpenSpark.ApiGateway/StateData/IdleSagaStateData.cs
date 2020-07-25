@@ -2,9 +2,9 @@
 
 namespace OpenSpark.ApiGateway.StateData
 {
-    public class IdleStateData : ISagaStateData
+    public class IdleSagaStateData : ISagaStateData
     {
-        public static IdleStateData Instance = new IdleStateData();
+        public static IdleSagaStateData Instance = new IdleSagaStateData();
         public Guid TransactionId { get; set; } = Guid.Empty;
     }
 }

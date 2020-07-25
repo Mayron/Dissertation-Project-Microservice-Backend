@@ -57,9 +57,18 @@ namespace OpenSpark.Groups.Actors
 
             if (query.RetrieveGroupNameOnly)
             {
-                Sender.Tell(new PayloadEvent(query) { Payload = result.Name });
+                Sender.Tell(new PayloadEvent(query) { 
+                    Payload = new NamedEntityViewModel
+                    {
+                        Id = query.GroupId,
+                        Name = result.Name
+                    }
+                });
+
                 return;
             }
+
+            var isMember = query.User != null && query.User.Groups.Contains(query.GroupId);
 
             Sender.Tell(new PayloadEvent(query)
             {
@@ -70,7 +79,8 @@ namespace OpenSpark.Groups.Actors
                     GroupId = result.GroupId.ConvertToEntityId(),
                     Name = result.Name,
                     Visibility = result.Visibility,
-                    TotalMembers = result.TotalMembers
+                    TotalMembers = result.TotalMembers,
+                    IsMember = isMember,
                 }
             });
         }
@@ -78,20 +88,28 @@ namespace OpenSpark.Groups.Actors
         private void HandleUserGroupsQuery(UserGroupsQuery query)
         {
             using var session = DocumentStoreSingleton.Store.OpenSession();
-            List<Group> groups;
+            List<Group> groups = new List<Group>();
 
             if (query.OwnedGroups)
             {
-                groups = session.Query<Group>()
-                    .Where(g => g.OwnerUserId == query.User.AuthUserId)
-                    .OrderByDescending(g => g.Members.Count)
-                    .Select(g => new Group
-                    {
-                        Id = g.Id,
-                        Name = g.Name,
-                        Visibility = g.Visibility
-                    })
-                    .ToList();
+                try
+                {
+                    groups = session.Query<Group>()
+                        .Where(g => g.OwnerUserId == query.User.AuthUserId)
+                        .OrderByDescending(g => g.Members.Count)
+                        .Select(g => new Group
+                        {
+                            Id = g.Id,
+                            Name = g.Name,
+                            Visibility = g.Visibility
+                        })
+                        .ToList();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+
             }
             else if (query.Memberships)
             {

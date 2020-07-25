@@ -39,7 +39,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
         {
             _actorSystemService = actorSystemService;
 
-            StartWith(SagaState.Idle, IdleStateData.Instance);
+            StartWith(SagaState.Idle, IdleSagaStateData.Instance);
 
             When(SagaState.Idle, HandleIdleEvents);
             When(SagaState.ValidatingTargetGroup, HandleValidatingTargetGroupEvent);

@@ -38,7 +38,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
         {
             _actorSystemService = actorSystemService;
 
-            StartWith(SagaState.Idle, IdleStateData.Instance);
+            StartWith(SagaState.Idle, IdleSagaStateData.Instance);
 
             When(SagaState.Idle, HandleIdleEvents);
             When(SagaState.VerifyingUser, HandleVerifyingUserEvents); // TimeSpan.FromSeconds(5)
@@ -96,6 +96,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                             Body = data.Body,
                             User = data.User,
                             GroupId = data.GroupId,
+                            GroupVisibility = @event.GroupVisibility
                         });
 
                     data.GroupName = @event.GroupName;
