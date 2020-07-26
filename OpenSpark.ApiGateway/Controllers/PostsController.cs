@@ -33,5 +33,19 @@ namespace OpenSpark.ApiGateway.Controllers
 
             return BadRequest(result.Message);
         }
+
+        [HttpPost("comment")]
+        public async Task<ActionResult<string>> Comment(CommentInputModel model)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState.Values.SelectMany(v => v.Errors));
+
+            var result = await _mediator.Send(new CreateComment.Query(model));
+
+            if (result.IsValid)
+                return Accepted(result);
+
+            return BadRequest(result.Message);
+        }
     }
 }

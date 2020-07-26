@@ -1,5 +1,6 @@
 ﻿// ReSharper disable UnusedMember.Global
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -21,8 +22,11 @@ namespace OpenSpark.ApiGateway.ApiHub
         /// Makes a request to the actor model to send the client with the specified connection ID new news feed posts.
         /// Posts are sent later asynchronously from a message hub event.
         /// </summary>
-        public void FetchNewsFeed(string callback) =>
-            _mediator.Send(new FetchNewsFeed.Query(Context.ConnectionId, callback));
+        public void FetchNewsFeed(string callback, List<string> seen) =>
+            _mediator.Send(new FetchNewsFeed.Query(Context.ConnectionId, callback, seen));
+
+        public void FetchComments(string callback, string postId) =>
+            _mediator.Send(new FetchComments.Query(Context.ConnectionId, callback, postId));
 
         [Authorize]
         public void Subscribe(string callback, string token)

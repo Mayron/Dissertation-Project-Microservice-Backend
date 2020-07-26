@@ -4,7 +4,9 @@ using Microsoft.Extensions.Configuration;
 using OpenSpark.ApiGateway.Actors;
 using OpenSpark.ApiGateway.Builders;
 using OpenSpark.Shared;
+using OpenSpark.Shared.Commands;
 using OpenSpark.Shared.Commands.Sagas;
+using OpenSpark.Shared.Events;
 using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.Events.Sagas;
 using OpenSpark.Shared.Queries;
@@ -12,7 +14,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using OpenSpark.Shared.Events;
 
 namespace OpenSpark.ApiGateway.Services
 {
@@ -26,7 +27,9 @@ namespace OpenSpark.ApiGateway.Services
 
         void SendErrorToClient(string clientCallbackMethod, string connectionId, string errorMessage);
 
-        void SendRemoteQuery(QueryContext context, IActorRef callback = null);
+        void SendRemoteQuery(QueryContext context, IActorRef sender = null);
+
+        void SendRemoteCommand(ICommand command, int remoteSystemId);
 
         void SendRemoteSagaMessage(int remoteSystemId, IActorRef sagaActor, IMessage message);
 
@@ -48,6 +51,7 @@ namespace OpenSpark.ApiGateway.Services
         private readonly string _projectsRemotePath;
         private readonly string _groupsRemotePath;
         private readonly string _discussionsRemotePath;
+        private readonly IEventEmitterService _eventEmitter;
 
         public ActorSystemService(
             IConfiguration configuration,
@@ -57,7 +61,9 @@ namespace OpenSpark.ApiGateway.Services
             // Create local WebApiSystem
             var configString = File.ReadAllText("webapi-system.conf");
             var config = ConfigurationFactory.ParseString(configString);
+
             _localSystem = ActorSystem.Create("WebApiSystem", config);
+            _eventEmitter = eventEmitter;
 
             // Create local actors for the system
             _callbackHandler = _localSystem.ActorOf(
@@ -79,13 +85,24 @@ namespace OpenSpark.ApiGateway.Services
         /// Sends a query with metadata to a remote actor system.
         /// </summary>
         /// <param name="context">Contains information needed to send the query to the correct endpoint with metadata.</param>
-        /// <param name="callback">By default, the callback will be CallbackActor but a
+        /// <param name="sender">By default, the sender will be CallbackActor but a
         /// Saga or MultiQueryHandler may need to set this to itself.</param>
-        public void SendRemoteQuery(QueryContext context, IActorRef callback = null)
+        public void SendRemoteQuery(QueryContext context, IActorRef sender = null)
         {
             var remotePath = GetRemotePath(context.RemoteSystemId);
+
+            if (context.OnPayloadReceived != null)
+                _eventEmitter.RegisterCallback(context.Query.MetaData.QueryId, context.OnPayloadReceived);
+
             var managerActorRef = _localSystem.ActorSelection(remotePath);
-            managerActorRef.Tell(context.Query, callback ?? _callbackHandler);
+            managerActorRef.Tell(context.Query, sender ?? _callbackHandler);
+        }
+
+        public void SendRemoteCommand(ICommand command, int remoteSystemId)
+        {
+            var remotePath = GetRemotePath(remoteSystemId);
+            var managerActorRef = _localSystem.ActorSelection(remotePath);
+            managerActorRef.Tell(command);
         }
 
         public void SendRemoteSagaMessage(int remoteSystemId, IActorRef sagaActor, IMessage message)
@@ -101,7 +118,7 @@ namespace OpenSpark.ApiGateway.Services
         public async Task RegisterAndExecuteSagaAsync(SagaContext context)
         {
             // Register saga before sending
-            await _callbackHandler.Ask<bool>(context.TransactionId);
+            await _callbackHandler.Ask<bool>(context);
 
             // Send request to execute saga
             _sagaManager.Tell(context);

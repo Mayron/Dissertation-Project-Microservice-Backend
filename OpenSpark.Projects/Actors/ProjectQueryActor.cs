@@ -144,7 +144,7 @@ namespace OpenSpark.Projects.Actors
                     TotalSubscribers = project.Subscribers.Count,
                     Subscribed = subscribed,
                     IsOwner = isOwner,
-                    LastUpdated = project.LastUpdated.ToUniversalTime().Ticks.ToString(),
+                    LastUpdated = project.LastUpdated.ToTimeAgoFormat(),
                     TotalDownloads = project.TotalDownloads,
                 }
             });

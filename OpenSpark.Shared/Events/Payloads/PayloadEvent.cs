@@ -8,10 +8,10 @@ namespace OpenSpark.Shared.Events.Payloads
         public object Payload { get; set; }
         public string[] Errors { get; set; }
 
-        public void Deconstruct(out string connectionId, out string callback, out object eventData)
+        public void Deconstruct(out string connectionId, out string clientSideMethod, out object eventData)
         {
             connectionId = MetaData.ConnectionId;
-            callback = MetaData.Callback;
+            clientSideMethod = MetaData.Callback;
             eventData = new { errors = Errors, payload = Payload };
         }
 

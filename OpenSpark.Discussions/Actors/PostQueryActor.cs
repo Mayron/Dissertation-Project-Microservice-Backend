@@ -7,53 +7,77 @@ using OpenSpark.Shared.ViewModels;
 using Raven.Client.Documents.Linq;
 using System.Collections.Generic;
 using System.Linq;
+using OpenSpark.Domain;
 
 namespace OpenSpark.Discussions.Actors
 {
     public class PostQueryActor : ReceiveActor
     {
         private const int TakeAmountPerQuery = 10;
-        private readonly List<string> _viewed;
 
         public PostQueryActor()
         {
-            _viewed = new List<string>(TakeAmountPerQuery);
-
             Receive<NewsFeedQuery>(query =>
             {
+                var exclude = query.Seen.Select(s => s.ConvertToRavenId<Post>()).ToList();
+
                 var posts = query.User == null
-                    ? GetNonPrivateGroupPosts()
-                    : GetAllGroupPosts(query.User.Groups);
+                    ? GetNonPrivateGroupPosts(exclude)
+                    : GetAllGroupPosts(query.User.Groups, exclude);
 
                 Sender.Tell(new PayloadEvent(query) { Payload = MapRequests(posts) });
             });
 
             Receive<GroupPostsQuery>(query =>
             {
-                IList<GetGroupPostsIndex.Result> posts;
-
-                if (query.User != null && query.User.Groups.Contains(query.GroupId))
+                if (string.IsNullOrWhiteSpace(query.PostId))
                 {
-                    posts = GetAllGroupPosts(new[] { query.GroupId });
+                    IList<GetGroupPostsIndex.Result> posts;
+                    var exclude = query.Seen.Select(s => s.ConvertToRavenId<Post>()).ToList();
+
+                    if (query.User != null && query.User.Groups.Contains(query.GroupId))
+                    {
+                        posts = GetAllGroupPosts(new[] { query.GroupId }, exclude);
+                    }
+                    else
+                    {
+                        posts = GetNonPrivateGroupPosts(exclude, query.GroupId);
+                    }
+
+                    Sender.Tell(new PayloadEvent(query) { Payload = MapRequests(posts) });
                 }
                 else
                 {
-                    posts = GetNonPrivateGroupPosts(query.GroupId);
+                    // select only 1 post with id
+                    var posts = GetGroupPost(query.GroupId, query.PostId);
+                    Sender.Tell(new PayloadEvent(query) { Payload = MapRequests(posts) });
                 }
-
-                Sender.Tell(new PayloadEvent(query) { Payload = MapRequests(posts) });
             });
+        }
+
+        private static IEnumerable<GetGroupPostsIndex.Result> GetGroupPost(string groupId, string postId)
+        {
+            var ravenPostId = postId.ConvertToRavenId<Post>();
+
+            using var session = DocumentStoreSingleton.Store.OpenSession();
+
+            var result = session.Query<GetGroupPostsIndex.Result, GetGroupPostsIndex>()
+                .Where(d => d.GroupId == groupId && d.PostId == ravenPostId);
+
+            return SortResults(result);
         }
 
         /// <summary>
         /// Gets the relevant posts for the given authenticated user.
         /// </summary>
-        private IList<GetGroupPostsIndex.Result> GetAllGroupPosts(IEnumerable<string> groups)
+        private static IList<GetGroupPostsIndex.Result> GetAllGroupPosts(
+            IEnumerable<string> groups, 
+            IReadOnlyCollection<string> exclude)
         {
             using var session = DocumentStoreSingleton.Store.OpenSession();
 
             var result = session.Query<GetGroupPostsIndex.Result, GetGroupPostsIndex>()
-                .Where(d => d.GroupId.In(groups) && !d.PostId.In(_viewed));
+                .Where(d => d.GroupId.In(groups) && !d.PostId.In(exclude));
 
             return SortResults(result);
         }
@@ -61,7 +85,9 @@ namespace OpenSpark.Discussions.Actors
         /// <summary>
         /// Gets the most popular posts for the connected, unauthenticated user.
         /// </summary>
-        private IList<GetGroupPostsIndex.Result> GetNonPrivateGroupPosts(string groupId = null)
+        private static IList<GetGroupPostsIndex.Result> GetNonPrivateGroupPosts(
+            IReadOnlyCollection<string> exclude, 
+            string groupId = null)
         {
             using var session = DocumentStoreSingleton.Store.OpenSession();
             IRavenQueryable<GetGroupPostsIndex.Result> query;
@@ -69,18 +95,18 @@ namespace OpenSpark.Discussions.Actors
             if (groupId == null)
             {
                 query = session.Query<GetGroupPostsIndex.Result, GetGroupPostsIndex>()
-                    .Where(d => !d.IsPrivate && !d.PostId.In(_viewed));
+                    .Where(d => !d.IsPrivate && !d.PostId.In(exclude));
             }
             else
             {
                 query = session.Query<GetGroupPostsIndex.Result, GetGroupPostsIndex>()
-                    .Where(d => d.GroupId == groupId && !d.IsPrivate && !d.PostId.In(_viewed));
+                    .Where(d => d.GroupId == groupId && !d.IsPrivate && !d.PostId.In(exclude));
             }
 
             return SortResults(query);
         }
 
-        private IList<PostViewModel> MapRequests(IEnumerable<GetGroupPostsIndex.Result> results)
+        private static IList<PostViewModel> MapRequests(IEnumerable<GetGroupPostsIndex.Result> results)
         {
             var posts = results.Select(r => new PostViewModel
             {
@@ -89,12 +115,11 @@ namespace OpenSpark.Discussions.Actors
                 TotalComments = r.TotalComments,
                 Votes = r.Votes,
                 Body = r.Body,
-                When = r.CreatedAt.ToUniversalTime().ToLongDateString(),
+                When = r.CreatedAt.ToTimeAgoFormat(),
                 Title = r.Title,
-                PostId = r.PostId
+                PostId = r.PostId.ConvertToEntityId()
             }).ToList();
 
-            foreach (var post in posts) _viewed.Add(post.PostId);
             return posts;
         }
 

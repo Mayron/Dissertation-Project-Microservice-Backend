@@ -4,6 +4,7 @@ using OpenSpark.Shared.Events;
 using OpenSpark.Shared.Queries;
 using System.Collections.Generic;
 using System.Linq;
+using OpenSpark.Shared.Commands;
 
 namespace OpenSpark.Discussions.Actors
 {
@@ -15,9 +16,14 @@ namespace OpenSpark.Discussions.Actors
         {
             _postQueryActors = new Dictionary<string, IActorRef>();
             var createPostPool = Context.ActorOf(CreatePostActor.Props, "CreatePostPool");
+            var commentsPool = Context.ActorOf(CommentsActor.Props, "CommentsPool");
 
+            // Pools
             Receive<CreatePostCommand>(command => createPostPool.Forward(command));
+            Receive<CreateCommentCommand>(command => commentsPool.Forward(command));
+            Receive<CommentsQuery>(query => commentsPool.Forward(query));
 
+            // PostQuery queries
             Receive<NewsFeedQuery>(ForwardByConnectionId);
             Receive<GroupPostsQuery>(ForwardByConnectionId);
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using OpenSpark.Domain;
+using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.Queries;
 
 namespace OpenSpark.ApiGateway.Builders
@@ -9,6 +10,7 @@ namespace OpenSpark.ApiGateway.Builders
         IQueryContextBuilder ForRemoteSystem(int remoteSystemId);
         IQueryContextBuilder SetClientCallback(string connectionId, string clientCallbackMethod);
         IQueryContextBuilder SetMultiQueryId(Guid id);
+        IQueryContextBuilder OnPayloadReceived(Action<PayloadEvent> onPayloadReceived);
         QueryContext Build();
     }
 
@@ -20,6 +22,7 @@ namespace OpenSpark.ApiGateway.Builders
         private string _clientCallbackMethod;
         private readonly IQuery _query;
         private Guid _multiQueryId;
+        private Action<PayloadEvent> _onPayloadReceived;
 
         internal QueryContextBuilder(IQuery query, User user)
         {
@@ -46,6 +49,12 @@ namespace OpenSpark.ApiGateway.Builders
             return this;
         }
 
+        public IQueryContextBuilder OnPayloadReceived(Action<PayloadEvent> onPayloadReceived)
+        {
+            _onPayloadReceived = onPayloadReceived;
+            return this;
+        }
+
         public QueryContext Build()
         {
             _query.User = _user;
@@ -61,6 +70,7 @@ namespace OpenSpark.ApiGateway.Builders
             return new QueryContext
             {
                 Query = _query,
+                OnPayloadReceived = _onPayloadReceived,
                 RemoteSystemId = _remoteSystemId,
             };
         }

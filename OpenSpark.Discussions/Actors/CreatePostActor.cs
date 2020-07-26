@@ -12,6 +12,10 @@ namespace OpenSpark.Discussions.Actors
 {
     public class CreatePostActor : ReceiveActor
     {
+        public static Props Props { get; } = Props.Create<CreatePostActor>()
+            .WithRouter(new RoundRobinPool(5,
+                new DefaultResizer(1, 10)));
+
         public CreatePostActor()
         {
             Receive<CreatePostCommand>(command =>
@@ -48,6 +52,7 @@ namespace OpenSpark.Discussions.Actors
                     session.Store(groupPosts);
                 }
 
+                session.Store(groupPosts);
                 session.SaveChanges();
 
                 Sender.Tell(new PostCreatedEvent
@@ -56,9 +61,5 @@ namespace OpenSpark.Discussions.Actors
                 });
             });
         }
-
-        public static Props Props { get; } = Props.Create<CreatePostActor>()
-            .WithRouter(new RoundRobinPool(5,
-                new DefaultResizer(1, 10)));
     }
 }

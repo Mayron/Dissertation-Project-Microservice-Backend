@@ -10,21 +10,21 @@ using System.Threading.Tasks;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
-    public class FetchGroupPosts
+    public class FetchGroupPost
     {
         public class Query : IRequest<Unit>
         {
             public string GroupId { get; }
-            public List<string> Seen { get; }
+            public string PostId { get; }
             public string ConnectionId { get; }
             public string Callback { get; }
 
-            public Query(string connectionId, string callback, string groupId, List<string> seen)
+            public Query(string connectionId, string callback, string groupId, string postId)
             {
                 ConnectionId = connectionId;
                 Callback = callback;
                 GroupId = groupId;
-                Seen = seen;
+                PostId = postId;
             }
         }
 
@@ -44,7 +44,8 @@ namespace OpenSpark.ApiGateway.Handlers
                 var remoteQuery = new GroupPostsQuery
                 {
                     GroupId = query.GroupId,
-                    Seen = query.Seen
+                    PostId = query.PostId,
+                    Seen = new List<string>(0)
                 };
 
                 var context = _builder.CreateMultiQueryContext<GetPostsMultiQueryHandler, GetPostsAggregator>()

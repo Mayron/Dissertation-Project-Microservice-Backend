@@ -41,12 +41,12 @@ namespace OpenSpark.Discussions.Indexes
                 };
 
             Reduce = results => from result in results
-                group result by new { result.GroupId, result.IsPrivate } into g
+                group result by new { result.PostId } into g
                 select new
                 {
-                    g.Key.GroupId, 
-                    g.Key.IsPrivate,
-                    g.FirstOrDefault().PostId,
+                    g.Key.PostId,
+                    g.FirstOrDefault().IsPrivate,
+                    g.FirstOrDefault().GroupId,
                     g.FirstOrDefault().Title,
                     g.FirstOrDefault().Body,
                     g.FirstOrDefault().AuthorUserId,

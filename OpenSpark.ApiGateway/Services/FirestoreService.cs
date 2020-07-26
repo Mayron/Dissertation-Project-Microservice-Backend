@@ -12,6 +12,7 @@ namespace OpenSpark.ApiGateway.Services
 {
     public interface IFirestoreService
     {
+        Task<User> GetUserAsync(string authId);
         Task<User> GetUserAsync(string authId, CancellationToken cancellationToken);
         Task<bool> AddUserToGroupsAsync(User user, params Group[] groups);
         Task<bool> RemoveUserFromGroupAsync(User user, string groupId);
@@ -31,6 +32,8 @@ namespace OpenSpark.ApiGateway.Services
             var path = AppDomain.CurrentDomain.BaseDirectory + @"openspark-1e4bc-firebase-adminsdk-as86c-e46fdfc058.json";
             Environment.SetEnvironmentVariable(credentialsEnvName, path);
         }
+
+        public async Task<User> GetUserAsync(string authId) => await GetUserAsync(authId, CancellationToken.None);
 
         public async Task<User> GetUserAsync(string authId, CancellationToken cancellationToken)
         {

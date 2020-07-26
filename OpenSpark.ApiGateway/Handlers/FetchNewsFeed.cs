@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using System.Collections.Generic;
+using MediatR;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Queries;
@@ -15,11 +16,13 @@ namespace OpenSpark.ApiGateway.Handlers
         {
             public string ConnectionId { get; }
             public string Callback { get; }
+            public List<string> Seen { get; }
 
-            public Query(string connectionId, string callback)
+            public Query(string connectionId, string callback, List<string> seen)
             {
                 ConnectionId = connectionId;
                 Callback = callback;
+                Seen = seen;
             }
         }
 
@@ -38,7 +41,7 @@ namespace OpenSpark.ApiGateway.Handlers
             {
                 var context = _builder.CreateMultiQueryContext<GetPostsMultiQueryHandler, GetPostsAggregator>()
                     .SetClientCallback(query.Callback, query.ConnectionId)
-                    .AddQuery(new NewsFeedQuery(), RemoteSystem.Discussions)
+                    .AddQuery(new NewsFeedQuery { Seen = query.Seen }, RemoteSystem.Discussions)
                     .Build();
 
                 _actorSystemService.SendMultiQuery(context);

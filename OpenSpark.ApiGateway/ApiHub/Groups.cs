@@ -1,5 +1,6 @@
 ﻿// ReSharper disable UnusedMember.Global
 
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 using OpenSpark.ApiGateway.Handlers;
 
@@ -27,7 +28,10 @@ namespace OpenSpark.ApiGateway.ApiHub
         public void SearchGroups(string callback, string searchQuery) =>
             _mediator.Send(new SearchGroups.Query(Context.ConnectionId, callback, searchQuery));
 
-        public void FetchGroupPosts(string callback, string groupId) =>
-            _mediator.Send(new FetchGroupPosts.Query(Context.ConnectionId, callback, groupId));
+        public void FetchGroupPosts(string callback, string groupId, List<string> seen) =>
+            _mediator.Send(new FetchGroupPosts.Query(Context.ConnectionId, callback, groupId, seen));
+
+        public void FetchGroupPost(string callback, string groupId, string postId) =>
+            _mediator.Send(new FetchGroupPost.Query(Context.ConnectionId, callback, groupId, postId));
     }
 }

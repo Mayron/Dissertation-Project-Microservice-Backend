@@ -26,6 +26,7 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
 
         // This is only used for PreStart to fire off initial queries
         private readonly IImmutableList<QueryContext> _preStartQueries;
+        private bool _timedOut;
 
         private sealed class MultiQueryTimeout
         {
@@ -68,8 +69,8 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
 
                 case MultiQueryTimeout _:
                     Console.WriteLine("Multi-Query timed out");
-                    Context.Stop(Self);
-                    break;
+                    _timedOut = true;
+                    return Stop();
 
                 case PayloadEvent @event:
                     Console.WriteLine($"Invalid MultiQueryId for PayloadEvent. Expected {MultiQueryId}, but received {@event.MetaData.MultiQueryId}");
@@ -91,28 +92,36 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
             if (nextPendingState.Count != 0)
                 return Stay().Using(new MultiQueryStateData(nextReceivedState, nextPendingState));
 
+            var nextStateData = new MultiQueryStateData(nextReceivedState);
+
             // no more pending states - move to next state or stop if no next state
-            if (_states.Count > 0)
-                return GoTo(_states.Pop()).Using(new MultiQueryStateData(nextReceivedState));
-
-            _aggregator.Tell(new MultiPayloadEvent
-            {
-                MultiQueryId = MultiQueryId,
-                Payloads = nextReceivedState.Values.ToList()
-            });
-
-            return Stop();
+            return _states.Count > 0 
+                ? GoTo(_states.Pop()).Using(nextStateData) 
+                : Stop().Using(nextStateData);
         }
 
         protected override void PreStart()
         {
             foreach (var queryContext in _preStartQueries)
                 ActorSystemService.SendRemoteQuery(queryContext, Self);
+
+            base.PreStart();
         }
 
         protected override void PostStop()
         {
             _queryTimeoutTimer.Cancel();
+
+            if (!_timedOut)
+            {
+                _aggregator.Tell(new MultiPayloadEvent
+                {
+                    MultiQueryId = MultiQueryId,
+                    Payloads = StateData.Received.Values.ToList()
+                });
+            }
+
+            base.PostStop();
         }
 
         protected static IImmutableDictionary<Guid, int> GetPendingQueries(IEnumerable<QueryContext> queries) =>

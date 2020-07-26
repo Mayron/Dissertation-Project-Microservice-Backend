@@ -1,4 +1,5 @@
-﻿using OpenSpark.Domain;
+﻿using System.Collections.Generic;
+using OpenSpark.Domain;
 
 namespace OpenSpark.Shared.Queries
 {
@@ -6,5 +7,6 @@ namespace OpenSpark.Shared.Queries
     {
         public User User { get; set; }
         public QueryMetaData MetaData { get; set; }
+        public List<string> Seen { get; set; }
     }
 }

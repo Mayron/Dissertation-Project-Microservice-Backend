@@ -61,6 +61,8 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
                     authors[post.AuthorUserId] = author.DisplayName;
                 }
 
+                post.AuthorUserId = null; // do not send this to the client
+
                 // Create queries to get group names for unique groups only (don't send duplicate queries)
                 if (groupIds.Contains(post.GroupId)) continue;
 
@@ -85,6 +87,8 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
 
             // Wait for payload events
             var pending = GetPendingQueries(nextQueries);
+
+            if (pending.Count == 0) Context.Stop(Self);
 
             NextStateData.Pending = pending;
         }

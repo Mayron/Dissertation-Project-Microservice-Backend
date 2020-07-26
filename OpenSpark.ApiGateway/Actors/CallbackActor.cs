@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Immutable;
-using System.Linq;
-using Akka.Actor;
+﻿using Akka.Actor;
+using OpenSpark.ApiGateway.Builders;
 using OpenSpark.ApiGateway.Services;
+using OpenSpark.Shared;
 using OpenSpark.Shared.Commands.Sagas;
 using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.Events.Sagas;
+using System;
+using System.Collections.Generic;
 
 namespace OpenSpark.ApiGateway.Actors
 {
@@ -16,32 +17,26 @@ namespace OpenSpark.ApiGateway.Actors
     {
         public CallbackActor(IEventEmitterService eventEmitter)
         {
-            var subscriptions = ImmutableDictionary<Guid, IActorRef>.Empty;
+            var subscriptions = new Dictionary<Guid, IActorRef>();
 
-            Receive<PayloadEvent>(@event =>
-            {
-                var (connectionId, callback, eventData) = @event;
-                eventEmitter.BroadcastToClient(connectionId, callback, eventData);
-            });
+            Receive<PayloadEvent>(eventEmitter.BroadcastToClient);
 
-            // Register
-            Receive<Guid>(transactionId =>
+            // Register Saga transaction
+            Receive<SagaContext>(sagaContext =>
             {
                 var subscriptionActor = Context.ActorOf(Props.Create(() =>
-                        new SagaSubscriptionActor(eventEmitter, transactionId)),
-                    $"SagaSubscription-{transactionId}");
+                        new SagaSubscriptionActor(eventEmitter, sagaContext.TransactionId)),
+                    $"SagaSubscription-{sagaContext.TransactionId}");
 
                 Context.Watch(subscriptionActor);
-                subscriptions = subscriptions.Add(transactionId, subscriptionActor);
+                subscriptions.Add(sagaContext.TransactionId, subscriptionActor);
                 Sender.Tell(true);
             });
 
             Receive<Terminated>(terminated =>
             {
                 Context.Unwatch(terminated.ActorRef);
-
-                subscriptions = subscriptions.Where(v => 
-                    !v.Value.Equals(terminated.ActorRef)).ToImmutableDictionary();
+                subscriptions.RemoveAll(v => !v.Value.Equals(terminated.ActorRef));
             });
 
             // Client wants to subscribe
