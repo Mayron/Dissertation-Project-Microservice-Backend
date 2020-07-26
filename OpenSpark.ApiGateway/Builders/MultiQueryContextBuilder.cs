@@ -68,6 +68,10 @@ namespace OpenSpark.ApiGateway.Builders
                 query.User = _user;
                 query.MetaData = new QueryMetaData
                 {
+                    // Some remote managers rely on the connectionId as a key
+                    // so we need to treat it like a standard query (but the Sender will be different).
+                    ConnectionId = _connectionId,
+                    Callback = _clientCallbackMethod,
                     MultiQueryId = _multiQueryId,
                     QueryId = Guid.NewGuid(),
                     CreatedAt = createdAt

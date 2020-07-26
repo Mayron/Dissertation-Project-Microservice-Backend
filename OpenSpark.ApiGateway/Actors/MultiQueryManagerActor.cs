@@ -43,6 +43,9 @@ namespace OpenSpark.ApiGateway.Actors
                 Context.ActorOf(
                     Props.Create(() => new GroupConnectionsListAggregator(multiQueryContext, _callbackActor)), actorName),
 
+                nameof(GetPostsAggregator) =>
+                Context.ActorOf(Props.Create(() => new GetPostsAggregator(multiQueryContext, _callbackActor)), actorName),
+
                 _ => throw new Exception($"Failed to find aggregator: {multiQueryContext.Aggregator}"),
             };
         }

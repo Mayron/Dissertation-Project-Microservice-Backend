@@ -8,7 +8,7 @@ namespace OpenSpark.ApiGateway.StateData
     public class MultiQueryStateData
     {
         public IImmutableDictionary<Guid, IPayloadEvent> Received { get; }
-        public IImmutableDictionary<Guid, int> Pending { get; }
+        public IImmutableDictionary<Guid, int> Pending { get; set; }
 
         public MultiQueryStateData(
             IImmutableDictionary<Guid, IPayloadEvent> received,

@@ -76,22 +76,7 @@ namespace OpenSpark.ApiGateway.Actors.PayloadAggregators
                 };
             }
 
-            if (successful.Count == _context.Queries.Count)
-            {
-                var results = GetAggregatedPayload(successful);
-
-                return new PayloadEvent
-                {
-                    MetaData = new QueryMetaData
-                    {
-                        ConnectionId = _context.ConnectionId,
-                        Callback = _context.Callback,
-                    },
-                    Payload = results
-                };
-            }
-
-            Console.WriteLine($"Corrupt multi-query data. Expected {_context.Queries.Count} results but got {successful.Count} with no errors.");
+            var results = GetAggregatedPayload(successful);
 
             return new PayloadEvent
             {
@@ -100,7 +85,7 @@ namespace OpenSpark.ApiGateway.Actors.PayloadAggregators
                     ConnectionId = _context.ConnectionId,
                     Callback = _context.Callback,
                 },
-                Errors = new[] { "Oops! Something went wrong while retrieving data." }
+                Payload = results
             };
         }
 

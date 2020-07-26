@@ -4,6 +4,8 @@ using OpenSpark.Shared;
 using OpenSpark.Shared.Queries;
 using System.Threading;
 using System.Threading.Tasks;
+using OpenSpark.ApiGateway.Actors.MultiQueryHandlers;
+using OpenSpark.ApiGateway.Actors.PayloadAggregators;
 
 namespace OpenSpark.ApiGateway.Handlers
 {
@@ -34,12 +36,12 @@ namespace OpenSpark.ApiGateway.Handlers
 
             public Task<Unit> Handle(Query query, CancellationToken cancellationToken)
             {
-                var context = _builder.CreateQueryContext(new NewsFeedQuery())
+                var context = _builder.CreateMultiQueryContext<GetPostsMultiQueryHandler, GetPostsAggregator>()
                     .SetClientCallback(query.Callback, query.ConnectionId)
-                    .ForRemoteSystem(RemoteSystem.Discussions)
+                    .AddQuery(new NewsFeedQuery(), RemoteSystem.Discussions)
                     .Build();
 
-                _actorSystemService.SendRemoteQuery(context);
+                _actorSystemService.SendMultiQuery(context);
 
                 return Unit.Task;
             }

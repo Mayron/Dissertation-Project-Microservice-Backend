@@ -56,7 +56,7 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
             var pending = GetPendingQueries(context.Queries);
 
             StartWith(InitialState, new MultiQueryStateData(pending));
-            WhenUnhandled(WaitingForReplies);
+            When(InitialState, WaitingForReplies);
         }
 
         private State<string, MultiQueryStateData> WaitingForReplies(Event<MultiQueryStateData> fsmEvent)
@@ -64,8 +64,7 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
             switch (fsmEvent.FsmEvent)
             {
                 case PayloadEvent @event when @event.MetaData.MultiQueryId == MultiQueryId:
-                    ReceivedEvent(@event.MetaData.QueryId, @event);
-                    break;
+                    return ReceivedEvent(@event.MetaData.QueryId, @event);
 
                 case MultiQueryTimeout _:
                     Console.WriteLine("Multi-Query timed out");
@@ -84,31 +83,25 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
             return null;
         }
 
-        private void ReceivedEvent(Guid queryId, IPayloadEvent @event)
+        private State<string, MultiQueryStateData> ReceivedEvent(Guid queryId, IPayloadEvent @event)
         {
             var nextPendingState = StateData.Pending.Remove(queryId);
             var nextReceivedState = StateData.Received.Add(queryId, @event);
 
-            if (nextPendingState.Count == 0)
+            if (nextPendingState.Count != 0)
+                return Stay().Using(new MultiQueryStateData(nextReceivedState, nextPendingState));
+
+            // no more pending states - move to next state or stop if no next state
+            if (_states.Count > 0)
+                return GoTo(_states.Pop()).Using(new MultiQueryStateData(nextReceivedState));
+
+            _aggregator.Tell(new MultiPayloadEvent
             {
-                // no more pending states - move to next state or stop if no next state
-                if (_states.Count > 0)
-                {
-                    GoTo(_states.Pop()).Using(new MultiQueryStateData(nextReceivedState));
-                    return;
-                }
+                MultiQueryId = MultiQueryId,
+                Payloads = nextReceivedState.Values.ToList()
+            });
 
-                _aggregator.Tell(new MultiPayloadEvent
-                {
-                    MultiQueryId = MultiQueryId,
-                    Payloads = nextReceivedState.Values.ToList()
-                });
-
-                Context.Stop(Self);
-                return;
-            }
-
-            Stay().Using(new MultiQueryStateData(nextReceivedState, nextPendingState));
+            return Stop();
         }
 
         protected override void PreStart()
@@ -127,6 +120,11 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
                 queryContext => queryContext.Query.MetaData.QueryId,
                 queryContext => queryContext.RemoteSystemId);
 
-        protected void SetNextState(string nextState) => _states.Push(nextState);
+        protected void SetNextState(string nextState)
+        {
+            When(nextState, WaitingForReplies);
+            _states.Push(nextState);
+        }
+        
     }
 }

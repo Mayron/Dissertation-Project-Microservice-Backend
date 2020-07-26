@@ -65,7 +65,7 @@ namespace OpenSpark.ApiGateway.Services
 
             _multiQueryManager = _localSystem.ActorOf(
                 Props.Create(() => new MultiQueryManagerActor(
-                    this, _callbackHandler)), "MultiQueryManager");
+                    this, _callbackHandler, firestoreService)), "MultiQueryManager");
 
             _sagaManager = _localSystem.ActorOf(
                 Props.Create(() => new SagaManagerActor(this, firestoreService)), "SagaManager");
