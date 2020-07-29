@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using OpenSpark.Shared.Events.Payloads;
+using System;
 using System.Collections.Immutable;
-using OpenSpark.Shared.Events.Payloads;
 
 namespace OpenSpark.ApiGateway.StateData
 {

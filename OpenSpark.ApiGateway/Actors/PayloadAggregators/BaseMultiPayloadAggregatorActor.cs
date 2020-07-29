@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using Akka.Actor;
+﻿using Akka.Actor;
 using OpenSpark.ApiGateway.Builders;
+using OpenSpark.Shared;
 using OpenSpark.Shared.Events.Payloads;
-using OpenSpark.Shared.Queries;
+using System;
+using System.Collections.Generic;
 
 namespace OpenSpark.ApiGateway.Actors.PayloadAggregators
 {
@@ -32,7 +32,7 @@ namespace OpenSpark.ApiGateway.Actors.PayloadAggregators
             {
                 callback.Tell(new PayloadEvent
                 {
-                    MetaData = new QueryMetaData
+                    MetaData = new MetaData
                     {
                         ConnectionId = _context.ConnectionId,
                         Callback = _context.Callback,
@@ -67,7 +67,7 @@ namespace OpenSpark.ApiGateway.Actors.PayloadAggregators
             {
                 return new PayloadEvent
                 {
-                    MetaData = new QueryMetaData
+                    MetaData = new MetaData
                     {
                         ConnectionId = _context.ConnectionId,
                         Callback = _context.Callback,
@@ -80,7 +80,7 @@ namespace OpenSpark.ApiGateway.Actors.PayloadAggregators
 
             return new PayloadEvent
             {
-                MetaData = new QueryMetaData
+                MetaData = new MetaData
                 {
                     ConnectionId = _context.ConnectionId,
                     Callback = _context.Callback,

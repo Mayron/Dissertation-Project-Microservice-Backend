@@ -1,26 +1,25 @@
 ﻿using Akka.Actor;
-using OpenSpark.ApiGateway.Services;
-using OpenSpark.Shared.Events.Payloads;
-using OpenSpark.Shared.Queries;
-using System;
 using OpenSpark.ApiGateway.Actors.MultiQueryHandlers;
 using OpenSpark.ApiGateway.Actors.PayloadAggregators;
 using OpenSpark.ApiGateway.Builders;
+using OpenSpark.ApiGateway.Services;
+using OpenSpark.Shared.Events.Payloads;
+using System;
 
 namespace OpenSpark.ApiGateway.Actors
 {
     public class MultiQueryManagerActor : ReceiveActor
     {
-        private readonly IActorSystemService _actorSystemService;
+        private readonly IActorSystem _actorSystem;
         private readonly IActorRef _callbackActor;
         private readonly IFirestoreService _firestoreService;
 
         public MultiQueryManagerActor(
-            IActorSystemService actorSystemService, 
+            IActorSystem actorSystem,
             IActorRef callbackActor,
             IFirestoreService firestoreService)
         {
-            _actorSystemService = actorSystemService;
+            _actorSystem = actorSystem;
             _callbackActor = callbackActor;
             _firestoreService = firestoreService;
 
@@ -59,12 +58,12 @@ namespace OpenSpark.ApiGateway.Actors
             {
                 case nameof(MultiQueryParallelHandler):
                     Context.ActorOf(Props.Create(() =>
-                        new MultiQueryParallelHandler(context, aggregator, _actorSystemService)), actorName);
+                        new MultiQueryParallelHandler(context, aggregator, _actorSystem)), actorName);
                     break;
 
                 case nameof(GetPostsMultiQueryHandler):
                     Context.ActorOf(Props.Create(() =>
-                            new GetPostsMultiQueryHandler(context, aggregator, _actorSystemService, _firestoreService)), actorName);
+                            new GetPostsMultiQueryHandler(context, aggregator, _actorSystem, _firestoreService)), actorName);
                     break;
 
                 default:

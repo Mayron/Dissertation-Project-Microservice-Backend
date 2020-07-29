@@ -18,6 +18,13 @@ namespace OpenSpark.ApiGateway.InputModels
         public string CategoryId { get; set; }
 
         public List<string> Tags { get; set; }
+
         public List<string> Connected { get; set; }
+
+        [Required]
+        public string ConnectionId { get; set; }
+
+        [Required]
+        public string Callback { get; set; }
     }
 }

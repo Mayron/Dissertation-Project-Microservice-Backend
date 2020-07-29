@@ -8,9 +8,12 @@
         public string Title { get; set; }
         public string Body { get; set; }
         public string When { get; set; }
-        public int Votes { get; set; }
         public string GroupId { get; set; }
         public string AuthorDisplayName { get; set; }
         public string GroupName { get; set; }
+        public int UpVotes { get; set; }
+        public int DownVotes { get; set; }
+        public bool VotedUp { get; set; }
+        public bool VotedDown { get; set; }
     }
 }

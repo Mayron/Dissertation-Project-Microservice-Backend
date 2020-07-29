@@ -1,51 +1,27 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OpenSpark.ApiGateway.Handlers;
 using OpenSpark.ApiGateway.InputModels;
-using System.Linq;
 using System.Threading.Tasks;
+using OpenSpark.ApiGateway.Handlers.Commands;
 
 namespace OpenSpark.ApiGateway.Controllers
 {
-    [ApiController]
-    [Authorize]
     [Route("api/posts")]
-    public class PostsController : ControllerBase
+    public class PostsController : BaseController
     {
-        private readonly IMediator _mediator;
+        public PostsController(IMediator mediator) : base(mediator) {}
 
-        public PostsController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
-        
         [HttpPost]
-        public async Task<ActionResult<string>> Post(NewPostInputModel model)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState.Values.SelectMany(v => v.Errors));
-
-            var result = await _mediator.Send(new CreatePost.Query(model));
-
-            if (result.IsValid)
-                return Accepted(result);
-
-            return BadRequest(result.Message);
-        }
+        public async Task<ActionResult<string>> Post(NewPostInputModel model) =>
+            await HandleRequest(new CreatePost.Command(model));
 
         [HttpPost("comment")]
-        public async Task<ActionResult<string>> Comment(CommentInputModel model)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState.Values.SelectMany(v => v.Errors));
+        public async Task<ActionResult<string>> Comment(CommentInputModel model) =>
+            await HandleRequest(new CreateComment.Command(model));
 
-            var result = await _mediator.Send(new CreateComment.Query(model));
-
-            if (result.IsValid)
-                return Accepted(result);
-
-            return BadRequest(result.Message);
-        }
+        [HttpPost("comment/vote")]
+        public async Task<ActionResult<string>> Vote(ChangeVoteInputModel model) =>
+            await HandleRequest(new ChangeVote.Command(model));
     }
 }

@@ -10,9 +10,16 @@ namespace OpenSpark.ApiGateway.InputModels
         public string Name { get; set; }
 
         public string About { get; set; }
+
         public List<string> Tags { get; set; }
 
         [RegularExpression("Public|Private|Unlisted", ErrorMessage = "Invalid visibility value selected.")]
         public string Visibility { get; set; }
+
+        [Required]
+        public string ConnectionId { get; set; }
+
+        [Required]
+        public string Callback { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Akka.Actor;
+﻿using System;
+using Akka.Actor;
 using Akka.Routing;
 using OpenSpark.Domain;
 using OpenSpark.Shared;
@@ -8,6 +9,7 @@ using OpenSpark.Shared.ViewModels;
 using Raven.Client.Documents.Linq;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 using Group = Akka.Routing.Group;
 
 namespace OpenSpark.Projects.Actors

@@ -6,5 +6,6 @@ namespace OpenSpark.Shared.Commands.Groups
     {
         public string GroupId { get; set; }
         public User User { get; set; }
+        public MetaData MetaData { get; set; }
     }
 }

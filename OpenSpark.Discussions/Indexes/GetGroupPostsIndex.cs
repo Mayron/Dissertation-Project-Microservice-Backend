@@ -1,8 +1,8 @@
 ﻿using OpenSpark.Domain;
 using Raven.Client.Documents.Indexes;
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using Akka.Actor;
 
 namespace OpenSpark.Discussions.Indexes
 {
@@ -18,7 +18,7 @@ namespace OpenSpark.Discussions.Indexes
             public string AuthorUserId { get; set; }
             public DateTime CreatedAt { get; set; }
             public int TotalComments { get; set; }
-            public int Votes { get; set; }
+            public List<Vote> Votes { get; set; }
         }
 
         public GetGroupPostsIndex()
@@ -41,19 +41,19 @@ namespace OpenSpark.Discussions.Indexes
                 };
 
             Reduce = results => from result in results
-                group result by new { result.PostId } into g
-                select new
-                {
-                    g.Key.PostId,
-                    g.FirstOrDefault().IsPrivate,
-                    g.FirstOrDefault().GroupId,
-                    g.FirstOrDefault().Title,
-                    g.FirstOrDefault().Body,
-                    g.FirstOrDefault().AuthorUserId,
-                    g.FirstOrDefault().CreatedAt,
-                    g.FirstOrDefault().TotalComments,
-                    g.FirstOrDefault().Votes
-                };
+                                group result by new { result.PostId } into g
+                                select new
+                                {
+                                    g.Key.PostId,
+                                    g.FirstOrDefault().IsPrivate,
+                                    g.FirstOrDefault().GroupId,
+                                    g.FirstOrDefault().Title,
+                                    g.FirstOrDefault().Body,
+                                    g.FirstOrDefault().AuthorUserId,
+                                    g.FirstOrDefault().CreatedAt,
+                                    g.FirstOrDefault().TotalComments,
+                                    g.FirstOrDefault().Votes
+                                };
         }
     }
 }

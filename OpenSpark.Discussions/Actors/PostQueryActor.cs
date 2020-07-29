@@ -25,7 +25,7 @@ namespace OpenSpark.Discussions.Actors
                     ? GetNonPrivateGroupPosts(exclude)
                     : GetAllGroupPosts(query.User.Groups, exclude);
 
-                Sender.Tell(new PayloadEvent(query) { Payload = MapRequests(posts) });
+                Sender.Tell(new PayloadEvent(query) { Payload = MapRequests(posts, query.User) });
             });
 
             Receive<GroupPostsQuery>(query =>
@@ -44,13 +44,13 @@ namespace OpenSpark.Discussions.Actors
                         posts = GetNonPrivateGroupPosts(exclude, query.GroupId);
                     }
 
-                    Sender.Tell(new PayloadEvent(query) { Payload = MapRequests(posts) });
+                    Sender.Tell(new PayloadEvent(query) { Payload = MapRequests(posts, query.User) });
                 }
                 else
                 {
                     // select only 1 post with id
                     var posts = GetGroupPost(query.GroupId, query.PostId);
-                    Sender.Tell(new PayloadEvent(query) { Payload = MapRequests(posts) });
+                    Sender.Tell(new PayloadEvent(query) { Payload = MapRequests(posts, query.User) });
                 }
             });
         }
@@ -106,18 +106,21 @@ namespace OpenSpark.Discussions.Actors
             return SortResults(query);
         }
 
-        private static IList<PostViewModel> MapRequests(IEnumerable<GetGroupPostsIndex.Result> results)
+        private static IList<PostViewModel> MapRequests(IEnumerable<GetGroupPostsIndex.Result> results, User user)
         {
             var posts = results.Select(r => new PostViewModel
             {
                 GroupId = r.GroupId,
                 AuthorUserId = r.AuthorUserId,
                 TotalComments = r.TotalComments,
-                Votes = r.Votes,
                 Body = r.Body,
                 When = r.CreatedAt.ToTimeAgoFormat(),
                 Title = r.Title,
-                PostId = r.PostId.ConvertToEntityId()
+                PostId = r.PostId.ConvertToEntityId(),
+                UpVotes = r.Votes.Count(v => v.Up),
+                DownVotes = r.Votes.Count(v => v.Down),
+                VotedUp = user != null && r.Votes.Any(v => v.UserId == user.AuthUserId && v.Up),
+                VotedDown = user != null && r.Votes.Any(v => v.UserId == user.AuthUserId && v.Down)
             }).ToList();
 
             return posts;

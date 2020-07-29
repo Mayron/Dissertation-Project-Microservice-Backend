@@ -7,9 +7,14 @@ namespace OpenSpark.ApiGateway.Extensions
     {
         public static User GetFirebaseUser(this IHttpContextAccessor contextAccessor)
         {
+            return contextAccessor.HttpContext.GetFirebaseUser();
+        }
+
+        public static User GetFirebaseUser(this HttpContext context)
+        {
             // User item is set by FirebaseUserMiddleware
-            if (!contextAccessor.HttpContext.Items.ContainsKey("User")) return null;
-            return (User)contextAccessor.HttpContext.Items["User"];
+            if (!context.Items.ContainsKey("User")) return null;
+            return (User)context.Items["User"];
         }
     }
 }

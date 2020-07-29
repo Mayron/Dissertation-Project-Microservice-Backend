@@ -1,10 +1,6 @@
-﻿using System;
-
-namespace OpenSpark.Shared.Commands.SagaExecutionCommands
+﻿namespace OpenSpark.Shared.Commands.Sagas
 {
     public interface ISagaExecutionCommand : ICommand
     {
-        Guid TransactionId { get; set; }
-        DateTime CreatedAt { get; set; }
     }
 }

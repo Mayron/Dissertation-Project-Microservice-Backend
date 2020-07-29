@@ -1,55 +1,24 @@
 ﻿using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using OpenSpark.ApiGateway.Handlers;
+using OpenSpark.ApiGateway.Handlers.Commands;
 using OpenSpark.ApiGateway.InputModels;
-using OpenSpark.Shared.ViewModels;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace OpenSpark.ApiGateway.Controllers
 {
-    [ApiController]
-    [Authorize]
     [Route("api/projects")]
-    public class ProjectsController : ControllerBase
+    public class ProjectsController : BaseController
     {
-        private readonly IMediator _mediator;
-
-        public ProjectsController(IMediator mediator)
+        public ProjectsController(IMediator mediator) : base(mediator)
         {
-            _mediator = mediator;
         }
 
-        /// <summary>
-        /// POST /api/projects/create
-        /// </summary>
         [HttpPost("create")]
-        public async Task<ActionResult<ValidationResult>> Create(NewProjectInputModel model)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState.Values.SelectMany(v => v.Errors));
-
-            var result = await _mediator.Send(new CreateProject.Command(model));
-
-            if (result.IsValid)
-                return Accepted(result);
-
-            return BadRequest(result);
-        }
+        public async Task<ActionResult<string>> Create(NewProjectInputModel model) =>
+            await HandleRequest(new CreateProject.Command(model));
 
         [HttpPost("connect")]
-        public async Task<ActionResult<ValidationResult>> Connect(ConnectProjectInputModel model)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState.Values.SelectMany(v => v.Errors));
-
-            var result = await _mediator.Send(new ConnectProject.Command(model));
-
-            if (result.IsValid)
-                return Accepted(result);
-
-            return BadRequest(result);
-        }
+        public async Task<ActionResult<string>> Connect(ConnectProjectInputModel model) =>
+            await HandleRequest(new ConnectProject.Command(model));
     }
 }

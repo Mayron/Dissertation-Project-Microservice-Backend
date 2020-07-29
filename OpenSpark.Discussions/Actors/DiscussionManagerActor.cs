@@ -1,10 +1,10 @@
 ﻿using Akka.Actor;
-using OpenSpark.Shared.Commands.Posts;
 using OpenSpark.Shared.Events;
 using OpenSpark.Shared.Queries;
 using System.Collections.Generic;
 using System.Linq;
 using OpenSpark.Shared.Commands;
+using OpenSpark.Shared.Commands.Discussions;
 
 namespace OpenSpark.Discussions.Actors
 {
@@ -22,6 +22,7 @@ namespace OpenSpark.Discussions.Actors
             Receive<CreatePostCommand>(command => createPostPool.Forward(command));
             Receive<CreateCommentCommand>(command => commentsPool.Forward(command));
             Receive<CommentsQuery>(query => commentsPool.Forward(query));
+            Receive<ChangeVoteCommand>(command => commentsPool.Forward(command));
 
             // PostQuery queries
             Receive<NewsFeedQuery>(ForwardByConnectionId);

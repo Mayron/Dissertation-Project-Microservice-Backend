@@ -1,20 +1,19 @@
 ﻿using Akka.Actor;
 using OpenSpark.ApiGateway.Services;
-using OpenSpark.Shared;
-using OpenSpark.Shared.Commands.Projects;
-using OpenSpark.Shared.Commands.SagaExecutionCommands;
-using System;
-using System.Collections.Generic;
 using OpenSpark.ApiGateway.StateData;
 using OpenSpark.Domain;
+using OpenSpark.Shared;
+using OpenSpark.Shared.Commands.Projects;
+using OpenSpark.Shared.Commands.Sagas;
 using OpenSpark.Shared.Events.CreatePost;
 using OpenSpark.Shared.Events.CreateProject;
+using System;
 
 namespace OpenSpark.ApiGateway.Actors.Sagas
 {
     public class CreateProjectSaga : FSM<CreateProjectSaga.SagaState, ISagaStateData>
     {
-        private readonly IActorSystemService _actorSystemService;
+        private readonly IActorSystem _actorSystem;
         private readonly IFirestoreService _firestoreService;
 
         public enum SagaState
@@ -27,12 +26,13 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
         private class ProcessingStateData : ISagaStateData
         {
             public Guid TransactionId { get; set; }
+            public MetaData MetaData { get; set; }
             public User User { get; set; }
         }
 
-        public CreateProjectSaga(IActorSystemService actorSystemService, IFirestoreService firestoreService)
+        public CreateProjectSaga(IActorSystem actorSystem, IFirestoreService firestoreService)
         {
-            _actorSystemService = actorSystemService;
+            _actorSystem = actorSystem;
             _firestoreService = firestoreService;
 
             StartWith(SagaState.Idle, IdleSagaStateData.Instance);
@@ -46,22 +46,26 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
         {
             if (fsmEvent.FsmEvent is ExecuteCreateProjectSagaCommand command)
             {
+                var nextCommand = new CreateProjectCommand
+                {
+                    User = command.User,
+                    Name = command.Name,
+                    About = command.About,
+                    Tags = command.Tags,
+                    Visibility = command.Visibility
+                };
+
+                var transactionId = command.MetaData.ParentId;
+
                 // Send command to Groups context to create new group
-                _actorSystemService.SendRemoteSagaMessage(RemoteSystem.Projects, Self,
-                    new CreateProjectCommand
-                    {
-                        User = command.User,
-                        Name = command.Name,
-                        About = command.About,
-                        Tags = command.Tags,
-                        Visibility = command.Visibility
-                    });
+                _actorSystem.SendSagaMessage(nextCommand, RemoteSystem.Projects, transactionId, Self);
 
                 // go to next state
                 return GoTo(SagaState.CreatingProject).Using(new ProcessingStateData
                 {
-                    TransactionId = command.TransactionId,
+                    TransactionId = transactionId,
                     User = command.User,
+                    MetaData = command.MetaData
                 });
             }
 
@@ -80,13 +84,14 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
 
             Console.WriteLine($"Rolling back {nameof(CreatePostSaga)}.");
 
-            _actorSystemService.SendRemoteSagaMessage(RemoteSystem.Projects, Self,
-                new DeleteProjectCommand
-                {
-                    ProjectId = @event.Project.Id
-                });
+            var nextCommand = new DeleteProjectCommand
+            {
+                ProjectId = @event.Project.Id
+            };
 
-            _actorSystemService.SendSagaFailedMessage(StateData.TransactionId,
+            _actorSystem.SendSagaMessage(nextCommand, RemoteSystem.Projects, StateData.TransactionId, Self);
+
+            _actorSystem.SendErrorToClient(StateData.MetaData,
                 "Oops! Something went wrong while trying to create your project.");
 
             return GoTo(SagaState.RollingBack);
@@ -102,13 +107,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
 
         private State<SagaState, ISagaStateData> FinishSuccessfully(string ravenId)
         {
-            _actorSystemService.SendSagaSucceededMessage(StateData.TransactionId,
-                "Your project is ready to use!",
-                new Dictionary<string, string>
-                {
-                    ["projectId"] = ravenId.ConvertToEntityId()
-                });
-
+            _actorSystem.SendPayloadToClient(StateData.MetaData, ravenId.ConvertToEntityId());
             return Stop();
         }
     }

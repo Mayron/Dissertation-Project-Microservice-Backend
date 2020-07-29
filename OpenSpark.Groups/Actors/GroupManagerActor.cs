@@ -1,10 +1,10 @@
 ﻿using Akka.Actor;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Commands.Groups;
-using OpenSpark.Shared.Commands.Posts;
 using OpenSpark.Shared.Queries;
 using System.Collections.Immutable;
 using System.Linq;
+using OpenSpark.Shared.Commands.Discussions;
 
 namespace OpenSpark.Groups.Actors
 {

@@ -1,4 +1,5 @@
 ﻿using System;
+using OpenSpark.Shared;
 
 namespace OpenSpark.ApiGateway.StateData
 {
@@ -6,5 +7,6 @@ namespace OpenSpark.ApiGateway.StateData
     {
         public static IdleSagaStateData Instance = new IdleSagaStateData();
         public Guid TransactionId { get; set; } = Guid.Empty;
+        public MetaData MetaData { get; set; }
     }
 }

@@ -1,11 +1,13 @@
 ﻿using OpenSpark.Domain;
-using OpenSpark.Shared.Commands.SagaExecutionCommands;
+using OpenSpark.Shared;
+using OpenSpark.Shared.Commands.Sagas;
 using System;
 
 namespace OpenSpark.ApiGateway.Builders
 {
     public interface ISagaContextBuilder
     {
+        ISagaContextBuilder SetClientCallback(string connectionId, string clientCallbackMethod);
         SagaContext Build();
     }
 
@@ -13,6 +15,8 @@ namespace OpenSpark.ApiGateway.Builders
     {
         private readonly User _user;
         private readonly ISagaExecutionCommand _command;
+        private string _clientCallbackMethod;
+        private string _connectionId;
 
         internal SagaContextBuilder(ISagaExecutionCommand command, User user)
         {
@@ -20,17 +24,32 @@ namespace OpenSpark.ApiGateway.Builders
             _user = user;
         }
 
+        public ISagaContextBuilder SetClientCallback(string connectionId, string clientCallbackMethod)
+        {
+            _clientCallbackMethod = clientCallbackMethod;
+            _connectionId = connectionId;
+            return this;
+        }
+
         public SagaContext Build()
         {
             var transactionId = Guid.NewGuid();
-            _command.TransactionId = transactionId;
+
+            _command.MetaData = new MetaData
+            {
+                ParentId = transactionId,
+                CreatedAt = DateTime.Now,
+                Id = Guid.NewGuid(),
+                ConnectionId = _connectionId,
+                Callback = _clientCallbackMethod
+            };
+
             _command.User = _user;
-            _command.CreatedAt = DateTime.Now;
 
             return new SagaContext
             {
                 Command = _command,
-                TransactionId = transactionId,
+                Id = transactionId,
                 SagaName = typeof(T).Name
             };
         }

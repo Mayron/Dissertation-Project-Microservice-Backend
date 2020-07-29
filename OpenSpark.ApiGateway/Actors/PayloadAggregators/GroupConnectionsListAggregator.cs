@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Akka.Actor;
+﻿using Akka.Actor;
 using OpenSpark.ApiGateway.Builders;
 using OpenSpark.Shared;
-using OpenSpark.Shared.Queries;
 using OpenSpark.Shared.ViewModels;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenSpark.ApiGateway.Actors.PayloadAggregators
 {

@@ -10,14 +10,14 @@ namespace OpenSpark.ApiGateway.Actors
 {
     public class SagaManagerActor : UntypedActor
     {
-        private readonly IActorSystemService _actorSystemService;
+        private readonly IActorSystem _actorSystem;
         private readonly IFirestoreService _firestoreService;
         private IImmutableDictionary<Guid, IActorRef> _children;
 
-        public SagaManagerActor(IActorSystemService actorSystemService,
+        public SagaManagerActor(IActorSystem actorSystem,
             IFirestoreService firestoreService)
         {
-            _actorSystemService = actorSystemService;
+            _actorSystem = actorSystem;
             _firestoreService = firestoreService;
             _children = ImmutableDictionary<Guid, IActorRef>.Empty;
         }
@@ -40,37 +40,37 @@ namespace OpenSpark.ApiGateway.Actors
 
         public IActorRef GetChildActorRef(SagaContext context)
         {
-            if (_children.ContainsKey(context.TransactionId))
-                return _children[context.TransactionId];
+            if (_children.ContainsKey(context.Id))
+                return _children[context.Id];
 
             var sagaActorRef = Context.Watch(CreateSagaActor(context));
 
-            _children = _children.Add(context.TransactionId, sagaActorRef);
+            _children = _children.Add(context.Id, sagaActorRef);
 
             return sagaActorRef;
         }
 
         private IActorRef CreateSagaActor(SagaContext command)
         {
-            var actorName = $"{command.SagaName}-{command.TransactionId}";
+            var actorName = $"{command.SagaName}-{command.Id}";
 
             return command.SagaName switch
             {
                 nameof(CreatePostSaga) =>
                 Context.ActorOf(
-                    Props.Create(() => new CreatePostSaga(_actorSystemService)), actorName),
+                    Props.Create(() => new CreatePostSaga(_actorSystem)), actorName),
 
                 nameof(CreateGroupSaga) =>
                 Context.ActorOf(
-                    Props.Create(() => new CreateGroupSaga(_actorSystemService, _firestoreService)), actorName),
+                    Props.Create(() => new CreateGroupSaga(_actorSystem, _firestoreService)), actorName),
 
                 nameof(CreateProjectSaga) =>
                 Context.ActorOf(
-                    Props.Create(() => new CreateProjectSaga(_actorSystemService, _firestoreService)), actorName),
+                    Props.Create(() => new CreateProjectSaga(_actorSystem, _firestoreService)), actorName),
 
                 nameof(ConnectProjectSaga) =>
                 Context.ActorOf(
-                    Props.Create(() => new ConnectProjectSaga(_actorSystemService)), actorName),
+                    Props.Create(() => new ConnectProjectSaga(_actorSystem)), actorName),
 
                 _ => throw new Exception($"Failed to find SagaActor: {command.SagaName}"),
             };

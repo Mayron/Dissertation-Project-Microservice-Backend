@@ -1,12 +1,13 @@
 ﻿using Akka.Actor;
 using Akka.Routing;
 using OpenSpark.Domain;
-using OpenSpark.Shared.Commands.Posts;
 using OpenSpark.Shared.Events.CreatePost;
 using OpenSpark.Shared.RavenDb;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenSpark.Shared;
+using OpenSpark.Shared.Commands.Discussions;
 
 namespace OpenSpark.Discussions.Actors
 {
@@ -22,13 +23,22 @@ namespace OpenSpark.Discussions.Actors
             {
                 using var session = DocumentStoreSingleton.Store.OpenSession();
 
+                var votes = new List<Vote>
+                {
+                    new Vote
+                    {
+                        UserId = command.User.AuthUserId,
+                        Up = true
+                    }
+                };
+
                 var post = new Post
                 {
                     Id = session.GenerateRavenId<Post>(),
                     Title = command.Title,
                     Body = command.Body,
                     CreatedAt = DateTime.Now,
-                    Votes = 1,
+                    Votes = votes,
                     AuthorUserId = command.User.AuthUserId,
                     Comments = new List<Comment>()
                 };
@@ -57,7 +67,7 @@ namespace OpenSpark.Discussions.Actors
 
                 Sender.Tell(new PostCreatedEvent
                 {
-                    PostId = post.Id
+                    PostId = post.Id.ConvertToEntityId()
                 });
             });
         }

@@ -6,6 +6,8 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using OpenSpark.ApiGateway.Handlers;
+using OpenSpark.ApiGateway.Handlers.Commands;
+using OpenSpark.ApiGateway.Handlers.Queries;
 
 namespace OpenSpark.ApiGateway.ApiHub
 {
@@ -28,19 +30,10 @@ namespace OpenSpark.ApiGateway.ApiHub
         public void FetchComments(string callback, string postId) =>
             _mediator.Send(new FetchComments.Query(Context.ConnectionId, callback, postId));
 
-        [Authorize]
-        public void Subscribe(string callback, string token)
-        {
-            if (Guid.TryParse(token, out var transactionId))
-            {
-                _mediator.Send(new SubscribeToTransaction.Query(Context.ConnectionId, transactionId, callback));
-            }
-        }
-
         public override Task OnDisconnectedAsync(Exception exception)
         {
             // Notify all subscription actors that user with ConnectionId has disconnected
-            _mediator.Send(new Disconnected.Query(Context.ConnectionId));
+            _mediator.Send(new Disconnect.Command(Context.ConnectionId));
 
             return base.OnDisconnectedAsync(exception);
         }

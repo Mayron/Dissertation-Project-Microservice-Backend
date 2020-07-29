@@ -6,5 +6,6 @@ namespace OpenSpark.Shared
     {
         // Can be null if user is not authenticated
         User User { get; set; }
+        MetaData MetaData { get; set; }
     }
 }

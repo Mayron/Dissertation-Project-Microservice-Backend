@@ -1,14 +1,12 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using Akka.Actor;
+﻿using Akka.Actor;
 using OpenSpark.ApiGateway.Builders;
 using OpenSpark.ApiGateway.Services;
-using OpenSpark.ApiGateway.StateData;
-using OpenSpark.Domain;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Queries;
 using OpenSpark.Shared.ViewModels;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 
 namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
 {
@@ -21,8 +19,8 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
         public GetPostsMultiQueryHandler(
             MultiQueryContext context,
             IActorRef aggregator,
-            IActorSystemService actorSystemService,
-            IFirestoreService firestoreService) : base(context, aggregator, actorSystemService)
+            IActorSystem actorSystem,
+            IFirestoreService firestoreService) : base(context, aggregator, actorSystem)
         {
             _firestoreService = firestoreService;
 
@@ -83,7 +81,7 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
 
             // Execute group name queries
             foreach (var queryContext in nextQueries)
-                ActorSystemService.SendRemoteQuery(queryContext, Self);
+                ActorSystem.SendQuery(queryContext, Self);
 
             // Wait for payload events
             var pending = GetPendingQueries(nextQueries);

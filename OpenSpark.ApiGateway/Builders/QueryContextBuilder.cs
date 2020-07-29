@@ -1,5 +1,6 @@
 ﻿using System;
 using OpenSpark.Domain;
+using OpenSpark.Shared;
 using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.Queries;
 
@@ -58,13 +59,13 @@ namespace OpenSpark.ApiGateway.Builders
         public QueryContext Build()
         {
             _query.User = _user;
-            _query.MetaData = new QueryMetaData
+            _query.MetaData = new MetaData
             {
-                MultiQueryId = _multiQueryId,
+                ParentId = _multiQueryId,
                 ConnectionId = _connectionId,
                 Callback = _clientCallbackMethod,
                 CreatedAt = DateTime.Now,
-                QueryId = Guid.NewGuid()
+                Id = Guid.NewGuid()
             };
 
             return new QueryContext

@@ -9,7 +9,7 @@ namespace OpenSpark.Domain
         public string Title { get; set; }
         public string Body { get; set; }
         public string AuthorUserId { get; set; }
-        public int Votes { get; set; }
+        public List<Vote> Votes { get; set; }
         public List<Comment> Comments { get; set; }
         public DateTime CreatedAt { get; set; }
     }

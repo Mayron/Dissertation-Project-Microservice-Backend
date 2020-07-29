@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Akka.Actor;
+﻿using Akka.Actor;
 using Akka.Routing;
 using OpenSpark.Domain;
 using OpenSpark.Shared;
-using OpenSpark.Shared.Commands;
+using OpenSpark.Shared.Commands.Discussions;
 using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.Queries;
 using OpenSpark.Shared.RavenDb;
 using OpenSpark.Shared.ViewModels;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenSpark.Discussions.Actors
 {
@@ -27,17 +25,28 @@ namespace OpenSpark.Discussions.Actors
             {
                 using var session = DocumentStoreSingleton.Store.OpenSession();
 
-                session.Store(new Comment
+                var votes = new List<Vote>
+                {
+                    new Vote
+                    {
+                        UserId = command.User.AuthUserId,
+                        Up = true
+                    }
+                };
+
+                var comment = new Comment
                 {
                     Id = session.GenerateRavenId<Comment>(),
                     CreatedAt = DateTime.Now,
                     AuthorUserId = command.User.AuthUserId,
-                    Votes = 1,
+                    Votes = votes,
                     Body = command.Body,
                     PostId = command.PostId.ConvertToRavenId<Post>()
-                });
+                };
 
+                session.Store(comment);
                 session.SaveChanges();
+                Sender.Tell(comment.Id.ConvertToEntityId());
             });
 
             Receive<CommentsQuery>(query =>
@@ -55,17 +64,67 @@ namespace OpenSpark.Discussions.Actors
                 {
                     Payload = comments.Select(c => new CommentViewModel
                     {
-                        When = c.CreatedAt.ToTimeAgoFormat(),
+                        CreatedAt = c.CreatedAt.ToTimeAgoFormat(),
                         CommentId = c.Id.ConvertToEntityId(),
                         PostId = c.PostId.ConvertToEntityId(),
                         Body = c.Body,
                         AuthorUserId = c.AuthorUserId,
-                        Votes = c.Votes
+                        UpVotes = c.Votes.Count(v => v.Up),
+                        DownVotes = c.Votes.Count(v => v.Down),
+                        VotedUp = c.Votes.Any(v => v.UserId == query.User.AuthUserId && v.Up),
+                        VotedDown = c.Votes.Any(v => v.UserId == query.User.AuthUserId && v.Down)
                     }).ToList()
                 };
 
                 Sender.Tell(payload);
             });
+
+            Receive<ChangeVoteCommand>(command =>
+            {
+                using var session = DocumentStoreSingleton.Store.OpenSession();
+
+                var ravenPostId = command.PostId.ConvertToRavenId<Post>();
+
+                if (string.IsNullOrWhiteSpace(command.CommentId))
+                {
+                    // changing post vote
+                    var post = session.Load<Post>(ravenPostId);
+                    if (post == null) return;
+
+                    post.Votes.RemoveAll(v => v.UserId == command.User.AuthUserId);
+
+                    var newVote = GetNewVote(command.Amount, command.User.AuthUserId);
+                    if (newVote != null) post.Votes.Add(newVote);
+
+                    session.Store(post);
+                }
+                else
+                {
+                    var ravenCommentId = command.CommentId.ConvertToRavenId<Post>();
+
+                    // changing comment vote
+                    var comment = session.Query<Post>()
+                        .Where(p => p.Id == ravenPostId)
+                        .Select(p => p.Comments.FirstOrDefault(c => c.Id == ravenCommentId))
+                        .FirstOrDefault();
+
+                    if (comment == null) return;
+
+                    var newVote = GetNewVote(command.Amount, command.User.AuthUserId);
+                    if (newVote != null) comment.Votes.Add(newVote);
+
+                    session.Store(comment);
+                }
+
+                session.SaveChanges();
+            });
         }
+
+        private Vote GetNewVote(int amount, string voter) => amount switch
+        {
+            1 => new Vote { UserId = voter, Up = true },
+            -1 => new Vote { UserId = voter, Up = true },
+            _ => null
+        };
     }
 }

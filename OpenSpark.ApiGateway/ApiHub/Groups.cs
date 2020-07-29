@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authorization;
 using OpenSpark.ApiGateway.Handlers;
+using OpenSpark.ApiGateway.Handlers.Queries;
 
 namespace OpenSpark.ApiGateway.ApiHub
 {

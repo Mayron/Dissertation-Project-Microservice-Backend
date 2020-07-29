@@ -1,10 +1,8 @@
-﻿using OpenSpark.Shared.Queries;
-
-namespace OpenSpark.Shared.Events.Payloads
+﻿namespace OpenSpark.Shared.Events.Payloads
 {
     public class PayloadEvent : IPayloadEvent
     {
-        public QueryMetaData MetaData { get; set; }
+        public MetaData MetaData { get; set; }
         public object Payload { get; set; }
         public string[] Errors { get; set; }
 
@@ -19,6 +17,6 @@ namespace OpenSpark.Shared.Events.Payloads
         {
         }
 
-        public PayloadEvent(IQuery query) => MetaData = query.MetaData;
+        public PayloadEvent(IMessage message) => MetaData = message.MetaData;
     }
 }

@@ -1,6 +1,5 @@
-﻿using System;
+﻿using OpenSpark.Domain;
 using System.Collections.Generic;
-using OpenSpark.Domain;
 
 namespace OpenSpark.Shared.Commands.Projects
 {
@@ -11,5 +10,6 @@ namespace OpenSpark.Shared.Commands.Projects
         public string About { get; set; }
         public User User { get; set; }
         public string Visibility { get; set; }
+        public MetaData MetaData { get; set; }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using OpenSpark.ApiGateway.Builders;
 using OpenSpark.ApiGateway.Services;
-using ActorSystemService = OpenSpark.ApiGateway.Services.ActorSystemService;
 
 namespace OpenSpark.ApiGateway.Extensions
 {
@@ -9,12 +9,12 @@ namespace OpenSpark.ApiGateway.Extensions
         public static void AddApplicationServices(this IServiceCollection services)
         {
             // Transient
-            services.AddTransient<IMessageContextBuilderService, MessageContextBuilderService>();
+            services.AddTransient<IMessageContextBuilder, MessageContextBuilder>();
 
             // Singletons
             services.AddSingleton<IFirestoreService, FirestoreService>();
-            services.AddSingleton<IEventEmitterService, EventEmitterService>();
-            services.AddSingleton<IActorSystemService, ActorSystemService>();
+            services.AddSingleton<IEventEmitter, EventEmitter>();
+            services.AddSingleton<IActorSystem, ActorSystem>();
         }
     }
 }

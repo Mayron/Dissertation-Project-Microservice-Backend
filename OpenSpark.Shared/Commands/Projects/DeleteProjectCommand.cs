@@ -1,5 +1,4 @@
-﻿using System;
-using OpenSpark.Domain;
+﻿using OpenSpark.Domain;
 
 namespace OpenSpark.Shared.Commands.Projects
 {
@@ -7,5 +6,6 @@ namespace OpenSpark.Shared.Commands.Projects
     {
         public string ProjectId { get; set; }
         public User User { get; set; }
+        public MetaData MetaData { get; set; }
     }
 }

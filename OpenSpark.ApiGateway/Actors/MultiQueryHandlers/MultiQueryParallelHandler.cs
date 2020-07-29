@@ -14,7 +14,7 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
 {
     public class MultiQueryParallelHandler : FSM<string, MultiQueryStateData>
     {
-        protected IActorSystemService ActorSystemService { get; }
+        protected IActorSystem ActorSystem { get; }
         protected Guid MultiQueryId { get; }
         protected User User { get; }
 
@@ -40,7 +40,7 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
         public MultiQueryParallelHandler(
             MultiQueryContext context, 
             IActorRef aggregator, 
-            IActorSystemService actorSystemService)
+            IActorSystem actorSystem)
         {
             MultiQueryId = context.Id;
             User = context.User;
@@ -52,7 +52,7 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
 
             _preStartQueries = context.Queries.ToImmutableList();
             _aggregator = aggregator;
-            ActorSystemService = actorSystemService;
+            ActorSystem = actorSystem;
 
             var pending = GetPendingQueries(context.Queries);
 
@@ -64,8 +64,8 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
         {
             switch (fsmEvent.FsmEvent)
             {
-                case PayloadEvent @event when @event.MetaData.MultiQueryId == MultiQueryId:
-                    return ReceivedEvent(@event.MetaData.QueryId, @event);
+                case PayloadEvent @event when @event.MetaData.ParentId == MultiQueryId:
+                    return ReceivedEvent(@event.MetaData.Id, @event);
 
                 case MultiQueryTimeout _:
                     Console.WriteLine("Multi-Query timed out");
@@ -73,7 +73,7 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
                     return Stop();
 
                 case PayloadEvent @event:
-                    Console.WriteLine($"Invalid MultiQueryId for PayloadEvent. Expected {MultiQueryId}, but received {@event.MetaData.MultiQueryId}");
+                    Console.WriteLine($"Invalid MultiQueryId for PayloadEvent. Expected {MultiQueryId}, but received {@event.MetaData.ParentId}");
                     break;
 
                 default:
@@ -103,7 +103,7 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
         protected override void PreStart()
         {
             foreach (var queryContext in _preStartQueries)
-                ActorSystemService.SendRemoteQuery(queryContext, Self);
+                ActorSystem.SendQuery(queryContext, Self);
 
             base.PreStart();
         }
@@ -126,7 +126,7 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
 
         protected static IImmutableDictionary<Guid, int> GetPendingQueries(IEnumerable<QueryContext> queries) =>
             queries.ToImmutableDictionary(
-                queryContext => queryContext.Query.MetaData.QueryId,
+                queryContext => queryContext.Query.MetaData.Id,
                 queryContext => queryContext.RemoteSystemId);
 
         protected void SetNextState(string nextState)

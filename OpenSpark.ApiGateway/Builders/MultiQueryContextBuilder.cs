@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using OpenSpark.Domain;
+using OpenSpark.Shared;
 using OpenSpark.Shared.Queries;
 
 namespace OpenSpark.ApiGateway.Builders
@@ -66,14 +67,14 @@ namespace OpenSpark.ApiGateway.Builders
             foreach (var query in _queries.Select(context => context.Query))
             {
                 query.User = _user;
-                query.MetaData = new QueryMetaData
+                query.MetaData = new MetaData
                 {
                     // Some remote managers rely on the connectionId as a key
                     // so we need to treat it like a standard query (but the Sender will be different).
                     ConnectionId = _connectionId,
                     Callback = _clientCallbackMethod,
-                    MultiQueryId = _multiQueryId,
-                    QueryId = Guid.NewGuid(),
+                    ParentId = _multiQueryId,
+                    Id = Guid.NewGuid(),
                     CreatedAt = createdAt
                 };
             }

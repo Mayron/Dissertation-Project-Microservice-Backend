@@ -8,6 +8,6 @@ namespace OpenSpark.Shared.Queries
         public string PostId { get; set; }
         public List<string> Seen { get; set; }
         public User User { get; set; }
-        public QueryMetaData MetaData { get; set; }
+        public MetaData MetaData { get; set; }
     }
 }
