@@ -1,7 +1,7 @@
-﻿using OpenSpark.Domain;
-using OpenSpark.Shared;
+﻿using OpenSpark.Shared;
 using OpenSpark.Shared.Commands.Sagas;
 using System;
+using OpenSpark.Shared.Domain;
 
 namespace OpenSpark.ApiGateway.Builders
 {

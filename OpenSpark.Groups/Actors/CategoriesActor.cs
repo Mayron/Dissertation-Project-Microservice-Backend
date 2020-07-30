@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Akka.Actor;
-using OpenSpark.Domain;
+using OpenSpark.Groups.Domain;
 using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.Queries;
 

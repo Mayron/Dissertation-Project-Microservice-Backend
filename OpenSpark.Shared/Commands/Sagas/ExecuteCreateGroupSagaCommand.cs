@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using OpenSpark.Domain;
+using OpenSpark.Shared.Domain;
 
 namespace OpenSpark.Shared.Commands.Sagas
 {

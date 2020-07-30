@@ -1,10 +1,10 @@
 ﻿using Akka.Actor;
-using OpenSpark.Domain;
 using OpenSpark.Shared.Commands.Projects;
 using OpenSpark.Shared.RavenDb;
 using System;
 using System.Collections.Generic;
 using Akka.Routing;
+using OpenSpark.Projects.Domain;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Events;
 using OpenSpark.Shared.Events.CreateProject;
@@ -54,7 +54,7 @@ namespace OpenSpark.Projects.Actors
 
                 Sender.Tell(new ProjectCreatedEvent
                 {
-                    Project = project
+                    ProjectId = project.Id.ConvertToClientId()
                 });
             });
         }

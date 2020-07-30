@@ -1,5 +1,4 @@
 ﻿using Akka.Actor;
-using OpenSpark.Domain;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Commands.Groups;
 using OpenSpark.Shared.Events;
@@ -8,7 +7,8 @@ using OpenSpark.Shared.RavenDb;
 using System;
 using System.Collections.Generic;
 using Akka.Routing;
-using Group = OpenSpark.Domain.Group;
+using OpenSpark.Groups.Domain;
+using Group = OpenSpark.Groups.Domain.Group;
 
 namespace OpenSpark.Groups.Actors
 {
@@ -52,7 +52,7 @@ namespace OpenSpark.Groups.Actors
                     CategoryId = command.CategoryId,
                     Tags = command.Tags,
                     Visibility = VisibilityHelper.GetCleanVisibility(command.Visibility),
-                    Roles = RolesHelper.GetDefaultGroupRoles(),
+                    Roles = GroupRolesHelper.GetDefaultGroupRoles(),
                     BannedUsers = new List<string>(),
                     CreatedAt = DateTime.Now,
                 };
@@ -63,7 +63,8 @@ namespace OpenSpark.Groups.Actors
 
                 Sender.Tell(new GroupCreatedEvent
                 {
-                    Group = group
+                    GroupId = group.Id.ConvertToClientId(),
+                    GroupVisibility = group.Visibility
                 });
             });
         }

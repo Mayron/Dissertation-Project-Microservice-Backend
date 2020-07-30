@@ -1242,16 +1242,6 @@
         "runtime": {
           "lib/netstandard1.3/System.Xml.XDocument.dll": {}
         }
-      },
-      "OpenSpark.Domain/1.0.0": {
-        "type": "project",
-        "framework": ".NETCoreApp,Version=v5.0",
-        "compile": {
-          "bin/placeholder/OpenSpark.Domain.dll": {}
-        },
-        "runtime": {
-          "bin/placeholder/OpenSpark.Domain.dll": {}
-        }
       }
     }
   },
@@ -4756,16 +4746,10 @@
         "system.xml.xdocument.4.3.0.nupkg.sha512",
         "system.xml.xdocument.nuspec"
       ]
-    },
-    "OpenSpark.Domain/1.0.0": {
-      "type": "project",
-      "path": "../OpenSpark.Domain/OpenSpark.Domain.csproj",
-      "msbuildProject": "../OpenSpark.Domain/OpenSpark.Domain.csproj"
     }
   },
   "projectFileDependencyGroups": {
     ".NETCoreApp,Version=v5.0": [
-      "OpenSpark.Domain >= 1.0.0",
       "RavenDB.Client >= 4.2.103",
       "Slugify.Core >= 2.3.0"
     ]
@@ -4799,11 +4783,7 @@
       },
       "frameworks": {
         "net5.0": {
-          "projectReferences": {
-            "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Domain\\OpenSpark.Domain.csproj": {
-              "projectPath": "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Domain\\OpenSpark.Domain.csproj"
-            }
-          }
+          "projectReferences": {}
         }
       },
       "warningProperties": {

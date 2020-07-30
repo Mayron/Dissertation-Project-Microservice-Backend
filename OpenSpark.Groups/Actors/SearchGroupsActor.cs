@@ -1,5 +1,4 @@
 ﻿using Akka.Actor;
-using OpenSpark.Domain;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.Queries;
@@ -7,7 +6,8 @@ using Raven.Client.Documents;
 using Raven.Client.Documents.Linq;
 using System.Linq;
 using Akka.Routing;
-using Group = OpenSpark.Domain.Group;
+using OpenSpark.Shared.Domain;
+using Group = OpenSpark.Groups.Domain.Group;
 
 namespace OpenSpark.Groups.Actors
 {
@@ -47,7 +47,7 @@ namespace OpenSpark.Groups.Actors
                         Name = g.Name
                     }).ToList();
 
-                foreach (var g in groups) g.Id = g.Id.ConvertToEntityId();
+                foreach (var g in groups) g.Id = g.Id.ConvertToClientId();
 
                 Sender.Tell(new PayloadEvent(query)
                 {

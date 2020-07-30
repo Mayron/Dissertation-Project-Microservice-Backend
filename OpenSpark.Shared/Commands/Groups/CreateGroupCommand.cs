@@ -1,5 +1,5 @@
-﻿using OpenSpark.Domain;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using OpenSpark.Shared.Domain;
 
 namespace OpenSpark.Shared.Commands.Groups
 {

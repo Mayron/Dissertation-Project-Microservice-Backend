@@ -1,6 +1,6 @@
-﻿using OpenSpark.Domain;
-using Raven.Client.Documents.Indexes;
+﻿using Raven.Client.Documents.Indexes;
 using System.Linq;
+using OpenSpark.Groups.Domain;
 
 namespace OpenSpark.Groups.Indexes
 {

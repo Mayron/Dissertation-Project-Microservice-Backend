@@ -7,8 +7,8 @@ using OpenSpark.ApiGateway.Builders;
 using OpenSpark.ApiGateway.Extensions;
 using OpenSpark.ApiGateway.InputModels;
 using OpenSpark.ApiGateway.Services;
-using OpenSpark.Domain;
 using OpenSpark.Shared.Commands.Sagas;
+using OpenSpark.Shared.Domain;
 using OpenSpark.Shared.ViewModels;
 
 namespace OpenSpark.ApiGateway.Handlers.Commands

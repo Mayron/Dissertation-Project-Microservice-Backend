@@ -29,6 +29,23 @@
             public const string ModeratorRole = "922FE103-5131-4F56-9C74-4F7A3C2A754F";
         }
 
+        public static class TeamPermissions
+        {
+            public const string CanCloseIssues = "CanCloseIssues";
+            public const string CanEditIssueTags = "CanEditIssueTags";
+            public const string CanUploadFiles = "CanUploadFiles";
+            public const string CanApproveFiles = "CanApproveFiles";
+            public const string CanCreateChatChannels = "CanCreateChatChannels";
+            public const string CanListProjectOnGroups = "CanListProjectOnGroups";
+            public const string CanPublishOpportunities = "CanPublishOpportunities";
+            public const string CanManageKnowledgeBase = "CanManageKnowledgeBase";
+            public const string CanManageProjectPages = "CanManageProjectPages";
+            public const string CanViewTeamSettings = "CanViewTeamSettings";
+            public const string CanEditTeamSettings = "CanEditTeamSettings";
+            public const string CanReadChatChannels = "CanEditTeamSettings";
+            public const string CanWriteChatChannels = "CanEditTeamSettings";
+        }
+
         public static class UserMessages
         {
             public const string GroupNameTaken = "Sorry, that group name has already been taken. Please choose a different name.";

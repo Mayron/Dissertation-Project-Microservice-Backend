@@ -9,8 +9,4 @@
     <PackageReference Include="Slugify.Core" Version="2.3.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\OpenSpark.Domain\OpenSpark.Domain.csproj" />
-  </ItemGroup>
-
 </Project>

@@ -1,6 +1,6 @@
-﻿using OpenSpark.Domain;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using OpenSpark.Shared.Domain;
 
 namespace OpenSpark.ApiGateway.Builders
 {

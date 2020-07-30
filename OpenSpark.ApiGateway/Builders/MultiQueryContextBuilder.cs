@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using OpenSpark.Domain;
 using OpenSpark.Shared;
+using OpenSpark.Shared.Domain;
 using OpenSpark.Shared.Queries;
 
 namespace OpenSpark.ApiGateway.Builders

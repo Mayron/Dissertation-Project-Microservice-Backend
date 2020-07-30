@@ -16,11 +16,11 @@ namespace OpenSpark.ApiGateway.Handlers.Queries
             public string ConnectionId { get; }
             public string Callback { get; }
 
-            public Query(string projectId, string connectionId, string callback)
+            public Query(string connectionId, string callback, string projectId)
             {
-                ProjectId = projectId;
                 ConnectionId = connectionId;
                 Callback = callback;
+                ProjectId = projectId;
             }
         }
 

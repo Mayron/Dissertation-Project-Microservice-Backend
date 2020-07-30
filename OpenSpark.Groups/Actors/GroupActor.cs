@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using OpenSpark.Domain;
 using OpenSpark.Shared.Events.Payloads;
 
 namespace OpenSpark.Groups.Actors

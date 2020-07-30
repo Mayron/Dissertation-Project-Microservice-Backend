@@ -1,13 +1,14 @@
 ﻿using Akka.Actor;
 using Akka.Routing;
-using OpenSpark.Domain;
 using OpenSpark.Shared.Events.CreatePost;
 using OpenSpark.Shared.RavenDb;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenSpark.Discussions.Domain;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Commands.Discussions;
+using OpenSpark.Shared.Domain;
 
 namespace OpenSpark.Discussions.Actors
 {
@@ -67,7 +68,7 @@ namespace OpenSpark.Discussions.Actors
 
                 Sender.Tell(new PostCreatedEvent
                 {
-                    PostId = post.Id.ConvertToEntityId()
+                    PostId = post.Id.ConvertToClientId()
                 });
             });
         }

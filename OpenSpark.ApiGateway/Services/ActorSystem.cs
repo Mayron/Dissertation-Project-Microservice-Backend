@@ -43,6 +43,7 @@ namespace OpenSpark.ApiGateway.Services
     {
         private readonly IActorRef _callbackHandler;
         private readonly string _discussionsRemotePath;
+        private readonly string _teamsRemotePath;
         private readonly IEventEmitter _eventEmitter;
         private readonly string _groupsRemotePath;
         private readonly Akka.Actor.ActorSystem _localSystem;
@@ -76,6 +77,7 @@ namespace OpenSpark.ApiGateway.Services
             _projectsRemotePath = $"{configuration["akka:ProjectsRemoteUrl"]}/ProjectManager";
             _groupsRemotePath = $"{configuration["akka:GroupsRemoteUrl"]}/GroupManager";
             _discussionsRemotePath = $"{configuration["akka:DiscussionsRemoteUrl"]}/DiscussionManager";
+            _teamsRemotePath = $"{configuration["akka:TeamsRemoteUrl"]}/TeamManager";
         }
 
         public void ExecuteCommand(CommandContext context, IActorRef sender = null)
@@ -164,6 +166,7 @@ namespace OpenSpark.ApiGateway.Services
                 RemoteSystem.Projects => _projectsRemotePath,
                 RemoteSystem.Groups => _groupsRemotePath,
                 RemoteSystem.Discussions => _discussionsRemotePath,
+                RemoteSystem.Teams => _teamsRemotePath,
                 _ => throw new Exception($"Invalid remote system ID: {remoteSystemId}")
             };
         }

@@ -1,5 +1,4 @@
 ﻿using Akka.Actor;
-using OpenSpark.Domain;
 using OpenSpark.Groups.Indexes;
 using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.Queries;
@@ -8,9 +7,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Akka.Routing;
+using OpenSpark.Groups.Domain;
 using OpenSpark.Shared;
+using OpenSpark.Shared.Domain;
 using Raven.Client.Documents;
-using Group = OpenSpark.Domain.Group;
+using Group = OpenSpark.Groups.Domain.Group;
 
 namespace OpenSpark.Groups.Actors
 {
@@ -76,7 +77,7 @@ namespace OpenSpark.Groups.Actors
                 {
                     About = result.About,
                     CategoryName = category?.Name ?? "Unknown",
-                    GroupId = result.GroupId.ConvertToEntityId(),
+                    GroupId = result.GroupId.ConvertToClientId(),
                     Name = result.Name,
                     Visibility = result.Visibility,
                     TotalMembers = result.TotalMembers,
@@ -148,7 +149,7 @@ namespace OpenSpark.Groups.Actors
                 Payload = groups.Select(g => new UserGroupsViewModel
                 {
                     Name = g.Name,
-                    Id = g.Id.ConvertToEntityId(),
+                    Id = g.Id.ConvertToClientId(),
                     Visibility = g.Visibility
                 }).ToList()
             });

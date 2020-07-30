@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using OpenSpark.ApiGateway.Extensions;
-using OpenSpark.Domain;
 using OpenSpark.Shared.Commands;
 using OpenSpark.Shared.Commands.Sagas;
+using OpenSpark.Shared.Domain;
 using OpenSpark.Shared.Queries;
 
 namespace OpenSpark.ApiGateway.Builders

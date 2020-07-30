@@ -1,13 +1,13 @@
 ﻿using Akka.Actor;
 using Akka.Routing;
-using OpenSpark.Domain;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Events;
 using OpenSpark.Shared.Events.CreatePost;
 using System;
 using System.Linq;
 using OpenSpark.Shared.Commands.Discussions;
-using Group = OpenSpark.Domain.Group;
+using OpenSpark.Shared.Domain;
+using Group = OpenSpark.Groups.Domain.Group;
 
 namespace OpenSpark.Groups.Actors
 {

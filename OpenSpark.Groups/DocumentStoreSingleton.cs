@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-using OpenSpark.Domain;
+using OpenSpark.Groups.Domain;
 using OpenSpark.Groups.Indexes;
 using OpenSpark.Shared;
 using OpenSpark.Shared.RavenDb;

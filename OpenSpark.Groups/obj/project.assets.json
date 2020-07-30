@@ -1836,21 +1836,10 @@
           "lib/netstandard1.3/System.Xml.XDocument.dll": {}
         }
       },
-      "OpenSpark.Domain/1.0.0": {
-        "type": "project",
-        "framework": ".NETCoreApp,Version=v5.0",
-        "compile": {
-          "bin/placeholder/OpenSpark.Domain.dll": {}
-        },
-        "runtime": {
-          "bin/placeholder/OpenSpark.Domain.dll": {}
-        }
-      },
       "OpenSpark.Shared/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v5.0",
         "dependencies": {
-          "OpenSpark.Domain": "1.0.0",
           "RavenDB.Client": "4.2.103",
           "Slugify.Core": "2.3.0"
         },
@@ -6385,11 +6374,6 @@
         "system.xml.xdocument.nuspec"
       ]
     },
-    "OpenSpark.Domain/1.0.0": {
-      "type": "project",
-      "path": "../OpenSpark.Domain/OpenSpark.Domain.csproj",
-      "msbuildProject": "../OpenSpark.Domain/OpenSpark.Domain.csproj"
-    },
     "OpenSpark.Shared/1.0.0": {
       "type": "project",
       "path": "../OpenSpark.Shared/OpenSpark.Shared.csproj",
@@ -6400,7 +6384,6 @@
     ".NETCoreApp,Version=v5.0": [
       "Akka >= 1.4.8",
       "Akka.Remote >= 1.4.8",
-      "OpenSpark.Domain >= 1.0.0",
       "OpenSpark.Shared >= 1.0.0",
       "RavenDB.Client >= 4.2.103"
     ]
@@ -6435,9 +6418,6 @@
       "frameworks": {
         "net5.0": {
           "projectReferences": {
-            "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Domain\\OpenSpark.Domain.csproj": {
-              "projectPath": "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Domain\\OpenSpark.Domain.csproj"
-            },
             "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Shared\\OpenSpark.Shared.csproj": {
               "projectPath": "S:\\Users\\MJR_4\\University\\Masters Project\\Codebase\\openspark-api\\OpenSpark.Shared\\OpenSpark.Shared.csproj"
             }

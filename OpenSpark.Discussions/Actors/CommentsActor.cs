@@ -1,6 +1,5 @@
 ﻿using Akka.Actor;
 using Akka.Routing;
-using OpenSpark.Domain;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Commands.Discussions;
 using OpenSpark.Shared.Events.Payloads;
@@ -10,6 +9,7 @@ using OpenSpark.Shared.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenSpark.Discussions.Domain;
 
 namespace OpenSpark.Discussions.Actors
 {
@@ -46,7 +46,7 @@ namespace OpenSpark.Discussions.Actors
 
                 session.Store(comment);
                 session.SaveChanges();
-                Sender.Tell(comment.Id.ConvertToEntityId());
+                Sender.Tell(comment.Id.ConvertToClientId());
             });
 
             Receive<CommentsQuery>(query =>
@@ -65,8 +65,8 @@ namespace OpenSpark.Discussions.Actors
                     Payload = comments.Select(c => new CommentViewModel
                     {
                         CreatedAt = c.CreatedAt.ToTimeAgoFormat(),
-                        CommentId = c.Id.ConvertToEntityId(),
-                        PostId = c.PostId.ConvertToEntityId(),
+                        CommentId = c.Id.ConvertToClientId(),
+                        PostId = c.PostId.ConvertToClientId(),
                         Body = c.Body,
                         AuthorUserId = c.AuthorUserId,
                         UpVotes = c.Votes.Count(v => v.Up),

@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 using OpenSpark.ApiGateway.Builders;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.ApiGateway.StateData;
-using OpenSpark.Domain;
+using OpenSpark.Shared.Domain;
 using OpenSpark.Shared.Events.Payloads;
 
 namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers

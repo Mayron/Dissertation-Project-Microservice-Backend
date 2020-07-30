@@ -1,6 +1,6 @@
 ﻿using System;
-using OpenSpark.Domain;
 using OpenSpark.Shared;
+using OpenSpark.Shared.Domain;
 using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.Queries;
 

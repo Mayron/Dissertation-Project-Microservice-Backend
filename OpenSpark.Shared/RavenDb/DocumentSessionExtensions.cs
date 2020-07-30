@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Text;
-using OpenSpark.Domain;
+using OpenSpark.Shared.Domain;
 using Raven.Client.Documents.Session;
 using Slugify;
 

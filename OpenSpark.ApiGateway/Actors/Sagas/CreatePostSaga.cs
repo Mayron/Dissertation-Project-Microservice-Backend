@@ -1,13 +1,13 @@
 ﻿using Akka.Actor;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.ApiGateway.StateData;
-using OpenSpark.Domain;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Commands.Discussions;
 using OpenSpark.Shared.Commands.Sagas;
 using OpenSpark.Shared.Events;
 using OpenSpark.Shared.Events.CreatePost;
 using System;
+using OpenSpark.Shared.Domain;
 
 namespace OpenSpark.ApiGateway.Actors.Sagas
 {

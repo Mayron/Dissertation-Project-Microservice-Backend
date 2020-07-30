@@ -1,5 +1,5 @@
 ﻿using System;
-using OpenSpark.Domain;
+using OpenSpark.Shared.Domain;
 
 namespace OpenSpark.Shared
 {

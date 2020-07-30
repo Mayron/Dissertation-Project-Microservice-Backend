@@ -1,7 +1,7 @@
 ﻿using Akka.Actor;
-using OpenSpark.Domain;
 using OpenSpark.Shared.Commands.Groups;
 using System;
+using OpenSpark.Groups.Domain;
 using OpenSpark.Shared.Events.CreateGroup;
 
 namespace OpenSpark.Groups.Actors

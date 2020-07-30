@@ -1,5 +1,5 @@
-﻿using OpenSpark.Domain;
-using System.Linq;
+﻿using System.Linq;
+using OpenSpark.Groups.Domain;
 
 namespace OpenSpark.Groups
 {

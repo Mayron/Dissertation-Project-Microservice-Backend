@@ -1,9 +1,9 @@
 ﻿using Akka.Actor;
-using OpenSpark.Domain;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Commands.Projects;
 using OpenSpark.Shared.Events.ConnectProject;
 using System;
+using OpenSpark.Projects.Domain;
 
 namespace OpenSpark.Projects.Actors
 {
@@ -26,7 +26,7 @@ namespace OpenSpark.Projects.Actors
                 var isValid = IsVisibilityStatusValid(command, project.Visibility);
                 if (!isValid) return;
 
-                var ravenGroupId = command.GroupId.ConvertToRavenId<Group>();
+                var ravenGroupId = command.GroupId;
 
                 project.ConnectedGroupId = ravenGroupId;
                 project.LinkedGroups.Add(ravenGroupId); // displayed on group page

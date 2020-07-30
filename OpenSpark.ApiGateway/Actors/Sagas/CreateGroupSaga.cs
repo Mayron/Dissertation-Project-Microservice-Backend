@@ -100,28 +100,28 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                 return null;
 
             // Update user on firestore
-            var success = _firestoreService.AddUserToGroupsAsync(data.Command.User, @event.Group).Result;
+            var success = _firestoreService.AddUserToGroupsAsync(data.Command.User, @event.GroupId).Result;
 
             if (success)
             {
-                if (data.Command.Connecting.Count <= 0) return FinishSuccessfully(@event.Group.Id);
+                if (data.Command.Connecting.Count <= 0) return FinishSuccessfully(@event.GroupId);
 
                 var command = new ConnectAllProjectsCommand
                 {
-                    GroupId = @event.Group.Id,
+                    GroupId = @event.GroupId,
                     ProjectIds = data.Command.Connecting,
-                    GroupVisibility = @event.Group.Visibility
+                    GroupVisibility = @event.GroupVisibility
                 };
 
                 _actorSystem.SendSagaMessage(command, RemoteSystem.Projects, data.TransactionId, Self);
 
-                data.GroupId = @event.Group.Id;
+                data.GroupId = @event.GroupId;
                 return GoTo(SagaState.UpdateConnectedProjects);
             }
 
             Console.WriteLine($"Rolling back {nameof(CreateGroupSaga)}.");
 
-            var deleteCommand = new DeleteGroupCommand { GroupId = @event.Group.Id };
+            var deleteCommand = new DeleteGroupCommand { GroupId = @event.GroupId };
             _actorSystem.SendSagaMessage(deleteCommand, RemoteSystem.Groups, data.TransactionId, Self);
 
             _actorSystem.SendErrorToClient(data.MetaData,
@@ -168,7 +168,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             {
                 SuccessfulConnections = data.SuccessfulConnections,
                 FailedConnections = data.FailedConnections,
-                GroupId = groupId.ConvertToEntityId()
+                GroupId = groupId.ConvertToClientId()
             };
 
             _actorSystem.SendPayloadToClient(data.MetaData, viewModel);

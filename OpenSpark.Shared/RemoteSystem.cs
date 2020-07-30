@@ -5,5 +5,6 @@
         public const int Projects = 0;
         public const int Groups = 1;
         public const int Discussions = 2;
+        public const int Teams = 3;
     }
 }

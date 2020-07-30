@@ -1,10 +1,10 @@
 ﻿using System;
-using OpenSpark.Domain;
 
 namespace OpenSpark.Shared.Events.CreateGroup
 {
     public class GroupCreatedEvent
     {
-        public Group Group { get; set; }
+        public string GroupId { get; set; }
+        public string GroupVisibility { get; set; }
     }
 }

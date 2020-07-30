@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Http;
 using OpenSpark.ApiGateway.Builders;
 using OpenSpark.ApiGateway.Extensions;
 using OpenSpark.ApiGateway.Services;
-using OpenSpark.Domain;
 using OpenSpark.Shared;
+using OpenSpark.Shared.Domain;
 using OpenSpark.Shared.Queries;
 
 namespace OpenSpark.ApiGateway.Handlers.Queries

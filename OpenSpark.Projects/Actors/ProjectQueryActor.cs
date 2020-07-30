@@ -1,7 +1,5 @@
-﻿using System;
-using Akka.Actor;
+﻿using Akka.Actor;
 using Akka.Routing;
-using OpenSpark.Domain;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.Queries;
@@ -9,7 +7,8 @@ using OpenSpark.Shared.ViewModels;
 using Raven.Client.Documents.Linq;
 using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json;
+using OpenSpark.Projects.Domain;
+using OpenSpark.Shared.Domain;
 using Group = Akka.Routing.Group;
 
 namespace OpenSpark.Projects.Actors
@@ -43,6 +42,9 @@ namespace OpenSpark.Projects.Actors
                 })
                 .Take(query.TakeAmount)
                 .ToList();
+
+            foreach (var project in linkedProjects)
+                project.Id = project.Id.ConvertToClientId();
 
             Sender.Tell(new PayloadEvent(query) { Payload = linkedProjects });
         }
@@ -89,7 +91,7 @@ namespace OpenSpark.Projects.Actors
                 Payload = projects.Select(p => new UserGroupsViewModel
                 {
                     Name = p.Name,
-                    Id = p.Id.ConvertToEntityId()
+                    Id = p.Id.ConvertToClientId()
                 }).ToList()
             });
         }
@@ -138,7 +140,7 @@ namespace OpenSpark.Projects.Actors
             {
                 Payload = new ProjectDetailsViewModel
                 {
-                    ConnectedGroupId = project.ConnectedGroupId.ConvertToEntityId(),
+                    ConnectedGroupId = project.ConnectedGroupId?.ConvertToClientId(),
                     About = project.About,
                     ProjectId = query.ProjectId,
                     Name = project.Name,

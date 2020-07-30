@@ -1,22 +1,25 @@
 ﻿using Google.Cloud.Firestore;
 using Microsoft.Extensions.Configuration;
-using OpenSpark.Domain;
+using OpenSpark.Shared.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using OpenSpark.Shared;
 
 namespace OpenSpark.ApiGateway.Services
 {
     public interface IFirestoreService
     {
         Task<User> GetUserAsync(string authId);
+
         Task<User> GetUserAsync(string authId, CancellationToken cancellationToken);
-        Task<bool> AddUserToGroupsAsync(User user, params Group[] groups);
+
+        Task<bool> AddUserToGroupsAsync(User user, params string[] groupIds);
+
         Task<bool> RemoveUserFromGroupAsync(User user, string groupId);
-        Task<bool> AddUserToProjectsAsync(User user, params Project[] projects);
+
+        Task<bool> AddUserToProjectsAsync(User user, params string[] projectIds);
     }
 
     public class FirestoreService : IFirestoreService
@@ -68,10 +71,10 @@ namespace OpenSpark.ApiGateway.Services
             return null;
         }
 
-        public async Task<bool> AddUserToGroupsAsync(User user, params Group[] groups)
+        public async Task<bool> AddUserToGroupsAsync(User user, params string[] groupIds)
         {
-            var groupIds = groups.Select(g => (object)g.Id.ConvertToEntityId()).ToArray();
-            return await UpdateUserArrayField(user, "groups", groupIds);
+            var groupIdsArray = groupIds.Select(g => (object)g).ToArray();
+            return await UpdateUserArrayField(user, "groups", groupIdsArray);
         }
 
         public async Task<bool> RemoveUserFromGroupAsync(User user, string groupId)
@@ -94,10 +97,10 @@ namespace OpenSpark.ApiGateway.Services
             return false;
         }
 
-        public async Task<bool> AddUserToProjectsAsync(User user, params Project[] projects)
+        public async Task<bool> AddUserToProjectsAsync(User user, params string[] projectIds)
         {
-            var projectIds = projects.Select(g => (object)g.Id.ConvertToEntityId()).ToArray();
-            return await UpdateUserArrayField(user, "projects", projectIds);
+            var projectIdsArray = projectIds.Select(g => (object)g).ToArray();
+            return await UpdateUserArrayField(user, "projects", projectIdsArray);
         }
 
         private static async Task<bool> UpdateUserArrayField(User user, string fieldName, object[] values)

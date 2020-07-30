@@ -1,7 +1,6 @@
 ﻿// ReSharper disable UnusedMember.Global
 
 using Microsoft.AspNetCore.Authorization;
-using OpenSpark.ApiGateway.Handlers;
 using OpenSpark.ApiGateway.Handlers.Queries;
 
 namespace OpenSpark.ApiGateway.ApiHub
@@ -9,7 +8,7 @@ namespace OpenSpark.ApiGateway.ApiHub
     public partial class ApiHub
     {
         public void FetchProject(string callback, string projectId) =>
-            _mediator.Send(new FetchProjectDetails.Query(projectId, Context.ConnectionId, callback));
+            _mediator.Send(new FetchProjectDetails.Query(Context.ConnectionId, callback, projectId));
 
         [Authorize]
         public void FetchUserProjects(string callback) =>

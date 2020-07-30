@@ -1,17 +1,21 @@
 ﻿using Akka.Actor;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.ApiGateway.StateData;
-using OpenSpark.Domain;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Commands.Projects;
 using OpenSpark.Shared.Commands.Sagas;
 using OpenSpark.Shared.Events.CreatePost;
 using OpenSpark.Shared.Events.CreateProject;
 using System;
+using System.Collections.Generic;
+using OpenSpark.Shared.Commands.Teams;
+using OpenSpark.Shared.Domain;
+using OpenSpark.Shared.Events.Payloads;
+using OpenSpark.Shared.ViewModels;
 
 namespace OpenSpark.ApiGateway.Actors.Sagas
 {
-    public class CreateProjectSaga : FSM<CreateProjectSaga.SagaState, ISagaStateData>
+    public class CreateProjectSaga : FSM<CreateProjectSaga.SagaState, CreateProjectSaga.CreateProjectStateData>
     {
         private readonly IActorSystem _actorSystem;
         private readonly IFirestoreService _firestoreService;
@@ -20,14 +24,16 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
         {
             Idle,
             CreatingProject,
-            RollingBack
+            RollingBack,
+            CreatingTeams
         }
 
-        private class ProcessingStateData : ISagaStateData
+        public class CreateProjectStateData : ISagaStateData
         {
             public Guid TransactionId { get; set; }
             public MetaData MetaData { get; set; }
             public User User { get; set; }
+            public string ProjectId { get; set; }
         }
 
         public CreateProjectSaga(IActorSystem actorSystem, IFirestoreService firestoreService)
@@ -35,14 +41,15 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             _actorSystem = actorSystem;
             _firestoreService = firestoreService;
 
-            StartWith(SagaState.Idle, IdleSagaStateData.Instance);
+            StartWith(SagaState.Idle, new CreateProjectStateData());
 
             When(SagaState.Idle, HandleIdleEvents);
             When(SagaState.CreatingProject, HandleCreatingProjectEvents);
+            When(SagaState.CreatingTeams, HandleCreatingTeamsEvents);
             When(SagaState.RollingBack, HandleRollingBackEvents);
         }
 
-        private State<SagaState, ISagaStateData> HandleIdleEvents(Event<ISagaStateData> fsmEvent)
+        private State<SagaState, CreateProjectStateData> HandleIdleEvents(Event<CreateProjectStateData> fsmEvent)
         {
             if (fsmEvent.FsmEvent is ExecuteCreateProjectSagaCommand command)
             {
@@ -61,43 +68,54 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                 _actorSystem.SendSagaMessage(nextCommand, RemoteSystem.Projects, transactionId, Self);
 
                 // go to next state
-                return GoTo(SagaState.CreatingProject).Using(new ProcessingStateData
-                {
-                    TransactionId = transactionId,
-                    User = command.User,
-                    MetaData = command.MetaData
-                });
+                StateData.TransactionId = transactionId;
+                StateData.User = command.User;
+                StateData.MetaData = command.MetaData;
+
+                return GoTo(SagaState.CreatingProject);
             }
 
             return null;
         }
 
-        private State<SagaState, ISagaStateData> HandleCreatingProjectEvents(Event<ISagaStateData> fsmEvent)
+        private State<SagaState, CreateProjectStateData> HandleCreatingProjectEvents(Event<CreateProjectStateData> fsmEvent)
         {
-            if (!(fsmEvent.FsmEvent is ProjectCreatedEvent @event) || !(StateData is ProcessingStateData data))
+            if (!(fsmEvent.FsmEvent is ProjectCreatedEvent @event))
                 return null;
 
+            StateData.ProjectId = @event.ProjectId;
+
             // Update user on firestore
-            var success = _firestoreService.AddUserToProjectsAsync(data.User, @event.Project).Result;
+            var success = _firestoreService.AddUserToProjectsAsync(StateData.User, @event.ProjectId).Result;
 
-            if (success) return FinishSuccessfully(@event.Project.Id);
-
-            Console.WriteLine($"Rolling back {nameof(CreatePostSaga)}.");
-
-            var nextCommand = new DeleteProjectCommand
+            if (success)
             {
-                ProjectId = @event.Project.Id
-            };
+                var createDefaultTeamsCommand = new CreateDefaultTeamsCommand
+                {
+                    User = StateData.User,
+                    ProjectId = StateData.ProjectId
+                };
 
-            _actorSystem.SendSagaMessage(nextCommand, RemoteSystem.Projects, StateData.TransactionId, Self);
+                _actorSystem.SendSagaMessage(createDefaultTeamsCommand, RemoteSystem.Teams, StateData.TransactionId, Self);
+                return GoTo(SagaState.CreatingTeams);
+            }
 
-            _actorSystem.SendErrorToClient(StateData.MetaData,
-                "Oops! Something went wrong while trying to create your project.");
-
-            return GoTo(SagaState.RollingBack);
+            return Rollback();
         }
 
-        private State<SagaState, ISagaStateData> HandleRollingBackEvents(Event<ISagaStateData> fsmEvent)
+        private State<SagaState, CreateProjectStateData> HandleCreatingTeamsEvents(Event<CreateProjectStateData> fsmEvent)
+        {
+            if (!(fsmEvent.FsmEvent is PayloadEvent @event)) return null;
+
+            if (@event.Errors == null) return FinishSuccessfully(StateData.ProjectId);
+
+            foreach (var error in @event.Errors)
+                Console.WriteLine($"CreateProjectSaga error: {error}");
+
+            return Rollback();
+        }
+
+        private State<SagaState, CreateProjectStateData> HandleRollingBackEvents(Event<CreateProjectStateData> fsmEvent)
         {
             if (!(fsmEvent.FsmEvent is ProjectDeletedEvent)) return null;
 
@@ -105,9 +123,27 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             return Stop();
         }
 
-        private State<SagaState, ISagaStateData> FinishSuccessfully(string ravenId)
+        private State<SagaState, CreateProjectStateData> Rollback()
         {
-            _actorSystem.SendPayloadToClient(StateData.MetaData, ravenId.ConvertToEntityId());
+            Console.WriteLine($"Rolling back {nameof(CreatePostSaga)}.");
+
+            var deleteProjectCommand = new DeleteProjectCommand
+            {
+                User = StateData.User,
+                ProjectId = StateData.ProjectId
+            };
+
+            _actorSystem.SendSagaMessage(deleteProjectCommand, RemoteSystem.Projects, StateData.TransactionId, Self);
+
+            _actorSystem.SendErrorToClient(StateData.MetaData,
+                "Oops! Something went wrong while trying to create your project.");
+
+            return GoTo(SagaState.RollingBack);
+        }
+
+        private State<SagaState, CreateProjectStateData> FinishSuccessfully(string projectId)
+        {
+            _actorSystem.SendPayloadToClient(StateData.MetaData, projectId);
             return Stop();
         }
     }

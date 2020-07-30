@@ -7,7 +7,8 @@ using OpenSpark.Shared.ViewModels;
 using Raven.Client.Documents.Linq;
 using System.Collections.Generic;
 using System.Linq;
-using OpenSpark.Domain;
+using OpenSpark.Discussions.Domain;
+using OpenSpark.Shared.Domain;
 
 namespace OpenSpark.Discussions.Actors
 {
@@ -116,7 +117,7 @@ namespace OpenSpark.Discussions.Actors
                 Body = r.Body,
                 When = r.CreatedAt.ToTimeAgoFormat(),
                 Title = r.Title,
-                PostId = r.PostId.ConvertToEntityId(),
+                PostId = r.PostId.ConvertToClientId(),
                 UpVotes = r.Votes.Count(v => v.Up),
                 DownVotes = r.Votes.Count(v => v.Down),
                 VotedUp = user != null && r.Votes.Any(v => v.UserId == user.AuthUserId && v.Up),

@@ -1,8 +1,8 @@
-﻿using OpenSpark.Domain;
-using OpenSpark.Shared;
+﻿using OpenSpark.Shared;
 using OpenSpark.Shared.Commands;
 using OpenSpark.Shared.Events.Payloads;
 using System;
+using OpenSpark.Shared.Domain;
 
 namespace OpenSpark.ApiGateway.Builders
 {

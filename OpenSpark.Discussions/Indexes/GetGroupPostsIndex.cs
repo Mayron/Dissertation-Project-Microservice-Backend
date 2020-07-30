@@ -1,8 +1,8 @@
-﻿using OpenSpark.Domain;
-using Raven.Client.Documents.Indexes;
+﻿using Raven.Client.Documents.Indexes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenSpark.Discussions.Domain;
 
 namespace OpenSpark.Discussions.Indexes
 {

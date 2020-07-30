@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
-using OpenSpark.Domain;
+using OpenSpark.Shared.Domain;
 
 namespace OpenSpark.ApiGateway.Extensions
 {

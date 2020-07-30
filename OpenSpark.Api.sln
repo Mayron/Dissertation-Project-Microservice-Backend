@@ -5,15 +5,15 @@ VisualStudioVersion = 16.0.30223.230
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenSpark.ApiGateway", "OpenSpark.ApiGateway\OpenSpark.ApiGateway.csproj", "{700E5602-7022-4121-803D-6B9FABA84A2F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenSpark.Domain", "OpenSpark.Domain\OpenSpark.Domain.csproj", "{D875A2B2-4CEF-437E-AA04-571D5639D418}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenSpark.Discussions", "OpenSpark.Discussions\OpenSpark.Discussions.csproj", "{1D21B913-6393-488B-A154-FBFEA375041D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenSpark.Shared", "OpenSpark.Shared\OpenSpark.Shared.csproj", "{661331F8-F236-4720-BA8F-B62CF6E4F70B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenSpark.Groups", "OpenSpark.Groups\OpenSpark.Groups.csproj", "{7B95DC70-BF3F-4DA5-9A4E-3DE268E51FEA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenSpark.Projects", "OpenSpark.Projects\OpenSpark.Projects.csproj", "{FDC5A365-2BD6-46F3-9133-863C1377852D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OpenSpark.Projects", "OpenSpark.Projects\OpenSpark.Projects.csproj", "{FDC5A365-2BD6-46F3-9133-863C1377852D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenSpark.Teams", "OpenSpark.Teams\OpenSpark.Teams.csproj", "{570EDC4C-7C3C-4121-BF04-D3E7692C01A7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,10 +25,6 @@ Global
 		{700E5602-7022-4121-803D-6B9FABA84A2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{700E5602-7022-4121-803D-6B9FABA84A2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{700E5602-7022-4121-803D-6B9FABA84A2F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D875A2B2-4CEF-437E-AA04-571D5639D418}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D875A2B2-4CEF-437E-AA04-571D5639D418}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D875A2B2-4CEF-437E-AA04-571D5639D418}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D875A2B2-4CEF-437E-AA04-571D5639D418}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1D21B913-6393-488B-A154-FBFEA375041D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1D21B913-6393-488B-A154-FBFEA375041D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D21B913-6393-488B-A154-FBFEA375041D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -45,6 +41,10 @@ Global
 		{FDC5A365-2BD6-46F3-9133-863C1377852D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FDC5A365-2BD6-46F3-9133-863C1377852D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FDC5A365-2BD6-46F3-9133-863C1377852D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{570EDC4C-7C3C-4121-BF04-D3E7692C01A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{570EDC4C-7C3C-4121-BF04-D3E7692C01A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{570EDC4C-7C3C-4121-BF04-D3E7692C01A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{570EDC4C-7C3C-4121-BF04-D3E7692C01A7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
