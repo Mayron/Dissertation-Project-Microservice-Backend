@@ -4,14 +4,13 @@ using OpenSpark.ApiGateway.StateData;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Commands.Projects;
 using OpenSpark.Shared.Commands.Sagas;
-using OpenSpark.Shared.Events.CreatePost;
-using OpenSpark.Shared.Events.CreateProject;
-using System;
-using System.Collections.Generic;
 using OpenSpark.Shared.Commands.Teams;
 using OpenSpark.Shared.Domain;
+using OpenSpark.Shared.Events.CreatePost;
+using OpenSpark.Shared.Events.CreateProject;
 using OpenSpark.Shared.Events.Payloads;
-using OpenSpark.Shared.ViewModels;
+using System;
+using System.Threading;
 
 namespace OpenSpark.ApiGateway.Actors.Sagas
 {
@@ -86,7 +85,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             StateData.ProjectId = @event.ProjectId;
 
             // Update user on firestore
-            var success = _firestoreService.AddUserToProjectsAsync(StateData.User, @event.ProjectId).Result;
+            var success = _firestoreService.AddUserToProjectsAsync(StateData.User, CancellationToken.None, @event.ProjectId).Result;
 
             if (success)
             {

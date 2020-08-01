@@ -13,5 +13,7 @@ namespace OpenSpark.Shared.Domain
         public List<string> Projects { get; set; } = new List<string>();
         public List<string> Groups { get; set; } = new List<string>();
         public bool EmailVerified { get; set; }
+        public DateTime LastOnline { get; set; }
+        public bool IsOnline { get; set; }
     }
 }

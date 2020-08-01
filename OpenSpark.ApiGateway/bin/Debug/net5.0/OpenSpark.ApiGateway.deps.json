@@ -31,7 +31,6 @@
           "MediatR.Extensions.Microsoft.DependencyInjection": "8.0.1",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "3.1.5",
           "Microsoft.AspNetCore.SignalR": "1.1.0",
-          "OpenSpark.Domain": "1.0.0",
           "OpenSpark.Shared": "1.0.0",
           "Microsoft.AspNetCore.Antiforgery": "5.0.0.0",
           "Microsoft.AspNetCore.Authentication.Abstractions.Reference": "5.0.0.0",
@@ -1974,17 +1973,8 @@
           "System.Xml.ReaderWriter": "4.3.0"
         }
       },
-      "OpenSpark.Domain/1.0.0": {
-        "runtime": {
-          "OpenSpark.Domain.dll": {}
-        },
-        "compile": {
-          "OpenSpark.Domain.dll": {}
-        }
-      },
       "OpenSpark.Shared/1.0.0": {
         "dependencies": {
-          "OpenSpark.Domain": "1.0.0",
           "RavenDB.Client": "4.2.103",
           "Slugify.Core": "2.3.0"
         },
@@ -4870,11 +4860,6 @@
       "sha512": "sha512-5zJ0XDxAIg8iy+t4aMnQAu0MqVbqyvfoUVl1yDV61xdo3Vth45oA2FoY4pPkxYAH5f8ixpmTqXeEIya95x0aCQ==",
       "path": "system.xml.xdocument/4.3.0",
       "hashPath": "system.xml.xdocument.4.3.0.nupkg.sha512"
-    },
-    "OpenSpark.Domain/1.0.0": {
-      "type": "project",
-      "serviceable": false,
-      "sha512": ""
     },
     "OpenSpark.Shared/1.0.0": {
       "type": "project",

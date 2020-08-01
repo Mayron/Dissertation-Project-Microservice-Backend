@@ -1,6 +1,6 @@
 ﻿using OpenSpark.Shared.Domain;
 
-namespace OpenSpark.Shared.Queries
+namespace OpenSpark.Shared.Queries.Teams
 {
     public class TeamsQuery : IQuery
     {

@@ -1,26 +1,26 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using MediatR;
+﻿using MediatR;
 using OpenSpark.ApiGateway.Builders;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Shared;
-using OpenSpark.Shared.Queries;
+using OpenSpark.Shared.Queries.Teams;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace OpenSpark.ApiGateway.Handlers.Queries
+namespace OpenSpark.ApiGateway.Handlers.Queries.Teams
 {
-    public class FetchTeams
+    public class FetchTeamMembers
     {
         public class Query : IRequest<Unit>
         {
-            public string ProjectId { get; }
             public string ConnectionId { get; }
             public string Callback { get; }
+            public string TeamId { get; }
 
-            public Query(string connectionId, string callback, string projectId)
+            public Query(string connectionId, string callback, string teamId)
             {
                 ConnectionId = connectionId;
                 Callback = callback;
-                ProjectId = projectId;
+                TeamId = teamId;
             }
         }
 
@@ -37,7 +37,7 @@ namespace OpenSpark.ApiGateway.Handlers.Queries
 
             public Task<Unit> Handle(Query query, CancellationToken cancellationToken)
             {
-                var context = _builder.CreateQueryContext(new TeamsQuery { ProjectId = query.ProjectId })
+                var context = _builder.CreateQueryContext(new TeamPermissionsQuery { TeamId = query.TeamId })
                     .SetClientCallback(query.Callback, query.ConnectionId)
                     .ForRemoteSystem(RemoteSystem.Teams)
                     .Build();

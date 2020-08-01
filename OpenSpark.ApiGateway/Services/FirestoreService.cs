@@ -15,11 +15,13 @@ namespace OpenSpark.ApiGateway.Services
 
         Task<User> GetUserAsync(string authId, CancellationToken cancellationToken);
 
-        Task<bool> AddUserToGroupsAsync(User user, params string[] groupIds);
+        Task<bool> AddUserToGroupsAsync(User user, CancellationToken cancellationToken, params string[] groupIds);
 
-        Task<bool> RemoveUserFromGroupAsync(User user, string groupId);
+        Task<bool> RemoveUserFromGroupAsync(User user, CancellationToken cancellationToken, string groupId);
 
-        Task<bool> AddUserToProjectsAsync(User user, params string[] projectIds);
+        Task<bool> AddUserToProjectsAsync(User user, CancellationToken cancellationToken, params string[] projectIds);
+
+        Task<bool> UpdateUserField(User user, string fieldName, object value, CancellationToken cancellationToken);
     }
 
     public class FirestoreService : IFirestoreService
@@ -71,53 +73,41 @@ namespace OpenSpark.ApiGateway.Services
             return null;
         }
 
-        public async Task<bool> AddUserToGroupsAsync(User user, params string[] groupIds)
+        public async Task<bool> AddUserToGroupsAsync(User user, CancellationToken cancellationToken, params string[] groupIds)
         {
             var groupIdsArray = groupIds.Select(g => (object)g).ToArray();
-            return await UpdateUserArrayField(user, "groups", groupIdsArray);
+            return await UpdateUserField(user, "groups", FieldValue.ArrayUnion(groupIdsArray), cancellationToken);
         }
 
-        public async Task<bool> RemoveUserFromGroupAsync(User user, string groupId)
+        public async Task<bool> RemoveUserFromGroupAsync(User user, CancellationToken cancellationToken, string groupId)
         {
-            try
-            {
-                var (userRef, snapShot) = await GetUserReference(user.AuthUserId, CancellationToken.None);
-
-                if (snapShot != null && snapShot.Exists)
-                {
-                    await userRef.UpdateAsync("groups", FieldValue.ArrayRemove(groupId));
-                    return true;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Exception updating user groups: {ex}");
-            }
-
-            return false;
+            return await UpdateUserField(user, "groups", FieldValue.ArrayRemove(groupId), cancellationToken);
         }
 
-        public async Task<bool> AddUserToProjectsAsync(User user, params string[] projectIds)
+        public async Task<bool> AddUserToProjectsAsync(User user, CancellationToken cancellationToken, params string[] projectIds)
         {
             var projectIdsArray = projectIds.Select(g => (object)g).ToArray();
-            return await UpdateUserArrayField(user, "projects", projectIdsArray);
+            return await UpdateUserField(user, "projects", FieldValue.ArrayUnion(projectIdsArray), cancellationToken);
         }
 
-        private static async Task<bool> UpdateUserArrayField(User user, string fieldName, object[] values)
+        public async Task<bool> UpdateUserField(User user, string fieldName, object value, CancellationToken cancellationToken)
         {
             try
             {
-                var (userRef, snapShot) = await GetUserReference(user.AuthUserId, CancellationToken.None);
+                var (userRef, snapShot) = await GetUserReference(user.AuthUserId, cancellationToken);
 
                 if (snapShot != null && snapShot.Exists)
                 {
-                    await userRef.UpdateAsync(fieldName, FieldValue.ArrayUnion(values));
+                    if (value is DateTime dateTime)
+                        value = DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
+
+                    await userRef.UpdateAsync(fieldName, value, cancellationToken: cancellationToken);
                     return true;
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Exception updating user {fieldName}: {ex}");
+                Console.WriteLine($"Exception updating user field '{fieldName}': {ex}");
             }
 
             return false;

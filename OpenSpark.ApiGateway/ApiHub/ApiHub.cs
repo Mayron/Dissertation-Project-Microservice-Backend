@@ -30,6 +30,17 @@ namespace OpenSpark.ApiGateway.ApiHub
         public void FetchComments(string callback, string postId) =>
             _mediator.Send(new FetchComments.Query(Context.ConnectionId, callback, postId));
 
+        public override Task OnConnectedAsync()
+        {
+            if (Context.User.Identity.IsAuthenticated)
+            {
+                // Need to set them to online
+                _mediator.Send(new Connected.Command(Context.ConnectionId));
+            }
+
+            return base.OnConnectedAsync();
+        }
+
         public override Task OnDisconnectedAsync(Exception exception)
         {
             // Notify all subscription actors that user with ConnectionId has disconnected

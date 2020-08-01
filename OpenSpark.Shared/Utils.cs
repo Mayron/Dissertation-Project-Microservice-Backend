@@ -10,7 +10,8 @@ namespace OpenSpark.Shared
         // 11 character ID for use on the client side.
         public static string ConvertToClientId(this string ravenId) => ravenId.Split("/")[1];
 
-        public static string ConvertToRavenId<T>(this string entityId) => $"{typeof(T).Name.ToLower()}/{entityId}";
+        public static string ConvertToRavenId<T>(this string clientId) => $"{typeof(T).Name.ToLower()}/{clientId}";
+
 
         public static void RemoveAll<TK, TV>(this Dictionary<TK, TV> dictionary, Func<KeyValuePair<TK, TV>, bool> predicate)
         {

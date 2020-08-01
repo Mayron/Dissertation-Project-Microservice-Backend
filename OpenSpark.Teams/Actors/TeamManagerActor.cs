@@ -1,5 +1,5 @@
 ﻿using Akka.Actor;
-using OpenSpark.Shared.Commands.Teams;
+using OpenSpark.Shared.Commands;
 using OpenSpark.Shared.Queries;
 
 namespace OpenSpark.Teams.Actors
@@ -8,13 +8,12 @@ namespace OpenSpark.Teams.Actors
     {
         public TeamManagerActor()
         {
-            var teamQueryPool = Context.ActorOf(TeamQueryActor.Props, "TeamQueryPool");
-            var createTeamPool = Context.ActorOf(CreateTeamActor.Props, "CreateTeamPool");
+            var queryPool = Context.ActorOf(TeamQueryActor.Props, "TeamQueryPool");
+            var commandPool = Context.ActorOf(TeamCommandPool.Props, "TeamCommandPool");
 
             // Pools
-            Receive<TeamsQuery>(command => teamQueryPool.Forward(command));
-            Receive<CreateTeamCommand>(command => createTeamPool.Forward(command));
-            Receive<CreateDefaultTeamsCommand>(command => createTeamPool.Forward(command));
+            Receive<IQuery>(command => queryPool.Forward(command));
+            Receive<ICommand>(command => commandPool.Forward(command));
         }
     }
 }

@@ -9,8 +9,8 @@ namespace OpenSpark.Teams.Domain
         public string ProjectId { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public List<Member> Members { get; set; }
+        public List<string> Members { get; set; }
         public string Color { get; set; }
-        public HashSet<string> PermissionIds { get; set; }
+        public HashSet<string> Permissions { get; set; }
     }
 }

@@ -10,6 +10,7 @@ using OpenSpark.Shared.Events.ConnectProject;
 using OpenSpark.Shared.Events.CreateGroup;
 using OpenSpark.Shared.ViewModels;
 using System;
+using System.Threading;
 
 namespace OpenSpark.ApiGateway.Actors.Sagas
 {
@@ -100,7 +101,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                 return null;
 
             // Update user on firestore
-            var success = _firestoreService.AddUserToGroupsAsync(data.Command.User, @event.GroupId).Result;
+            var success = _firestoreService.AddUserToGroupsAsync(data.Command.User, CancellationToken.None, @event.GroupId).Result;
 
             if (success)
             {
@@ -168,7 +169,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             {
                 SuccessfulConnections = data.SuccessfulConnections,
                 FailedConnections = data.FailedConnections,
-                GroupId = groupId.ConvertToClientId()
+                GroupId = groupId
             };
 
             _actorSystem.SendPayloadToClient(data.MetaData, viewModel);

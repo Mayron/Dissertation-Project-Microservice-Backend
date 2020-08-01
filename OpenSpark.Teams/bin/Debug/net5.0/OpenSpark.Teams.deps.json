@@ -1148,14 +1148,6 @@
         "runtime": {
           "OpenSpark.Shared.dll": {}
         }
-      },
-      "OpenSpark.Domain/1.0.0.0": {
-        "runtime": {
-          "OpenSpark.Domain.dll": {
-            "assemblyVersion": "1.0.0.0",
-            "fileVersion": "1.0.0.0"
-          }
-        }
       }
     }
   },
@@ -1965,11 +1957,6 @@
     },
     "OpenSpark.Shared/1.0.0": {
       "type": "project",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "OpenSpark.Domain/1.0.0.0": {
-      "type": "reference",
       "serviceable": false,
       "sha512": ""
     }
