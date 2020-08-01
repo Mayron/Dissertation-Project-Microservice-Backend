@@ -42,8 +42,8 @@
             public const string CanManageProjectPages = "CanManageProjectPages";
             public const string CanViewTeamSettings = "CanViewTeamSettings";
             public const string CanEditTeamSettings = "CanEditTeamSettings";
-            public const string CanReadChatChannels = "CanEditTeamSettings";
-            public const string CanWriteChatChannels = "CanEditTeamSettings";
+            public const string CanReadChatChannels = "CanReadChatChannels";
+            public const string CanWriteChatChannels = "CanWriteChatChannels";
         }
 
         public static class UserMessages

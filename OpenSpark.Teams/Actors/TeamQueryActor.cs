@@ -59,7 +59,8 @@ namespace OpenSpark.Teams.Actors
 
                     var memberViewModel = new TeamMemberViewModel
                     {
-                        UserId = member.Id.ConvertToClientId(),
+                        UserId = member.UserAuthId,
+                        MemberId = member.Id.ConvertToClientId(),
                         Contributions = member.Contributions,
                         Teams = string.Join(", ", teamNames)
                     };

@@ -2,18 +2,16 @@
 
 namespace OpenSpark.ApiGateway.InputModels
 {
-    public class CommentInputModel
+    public class ChangePermissionInputModel
     {
         [Required]
-        public string Body { get; set; }
+        public string TeamId { get; set; }
 
+        public bool Enabled { get; set; }
         [Required]
-        [StringLength(11, MinimumLength = 11, ErrorMessage = "Invalid post id")]
-        public string PostId { get; set; }
-
+        public string Permission { get; set; }
         [Required]
         public string ConnectionId { get; set; }
-
         [Required]
         public string Callback { get; set; }
     }

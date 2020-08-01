@@ -140,7 +140,7 @@ namespace OpenSpark.Projects.Actors
             {
                 Payload = new ProjectDetailsViewModel
                 {
-                    ConnectedGroupId = project.ConnectedGroupId?.ConvertToClientId(),
+                    ConnectedGroupId = project.ConnectedGroupId,
                     About = project.About,
                     ProjectId = query.ProjectId,
                     Name = project.Name,

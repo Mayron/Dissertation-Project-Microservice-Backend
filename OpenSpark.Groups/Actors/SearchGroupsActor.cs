@@ -1,4 +1,5 @@
-﻿using Akka.Actor;
+﻿using System.Collections.Generic;
+using Akka.Actor;
 using OpenSpark.Shared;
 using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.Queries;
@@ -47,11 +48,12 @@ namespace OpenSpark.Groups.Actors
                         Name = g.Name
                     }).ToList();
 
-                foreach (var g in groups) g.Id = g.Id.ConvertToClientId();
+                var groupViewModels = new List<NamedEntity>(groups.Count);
+                groupViewModels.AddRange(groups.Select(g => new NamedEntity { Id = g.Id.ConvertToClientId(), Name = g.Name }));
 
                 Sender.Tell(new PayloadEvent(query)
                 {
-                    Payload = groups
+                    Payload = groupViewModels
                 });
             });
         }

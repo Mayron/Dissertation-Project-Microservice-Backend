@@ -5,6 +5,22 @@ namespace OpenSpark.Teams
 {
     public static class TeamPermissionsHelper
     {
+        public static string[] AllPermissions = {
+            AppConstants.TeamPermissions.CanCloseIssues,
+            AppConstants.TeamPermissions.CanEditIssueTags,
+            AppConstants.TeamPermissions.CanUploadFiles,
+            AppConstants.TeamPermissions.CanApproveFiles,
+            AppConstants.TeamPermissions.CanCreateChatChannels,
+            AppConstants.TeamPermissions.CanListProjectOnGroups,
+            AppConstants.TeamPermissions.CanPublishOpportunities,
+            AppConstants.TeamPermissions.CanManageKnowledgeBase,
+            AppConstants.TeamPermissions.CanManageProjectPages,
+            AppConstants.TeamPermissions.CanViewTeamSettings,
+            AppConstants.TeamPermissions.CanEditTeamSettings,
+            AppConstants.TeamPermissions.CanReadChatChannels,
+            AppConstants.TeamPermissions.CanWriteChatChannels,
+    };
+
         public static HashSet<string> GetDefaultNewTeamPermissions()
         {
             return new HashSet<string>

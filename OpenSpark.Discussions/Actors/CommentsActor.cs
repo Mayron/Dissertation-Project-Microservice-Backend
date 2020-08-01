@@ -46,7 +46,11 @@ namespace OpenSpark.Discussions.Actors
 
                 session.Store(comment);
                 session.SaveChanges();
-                Sender.Tell(comment.Id.ConvertToClientId());
+
+                Sender.Tell(new PayloadEvent(command)
+                {
+                    Payload = comment.Id.ConvertToClientId()
+                });
             });
 
             Receive<CommentsQuery>(query =>
@@ -120,7 +124,7 @@ namespace OpenSpark.Discussions.Actors
             });
         }
 
-        private Vote GetNewVote(int amount, string voter) => amount switch
+        private static Vote GetNewVote(int amount, string voter) => amount switch
         {
             1 => new Vote { UserId = voter, Up = true },
             -1 => new Vote { UserId = voter, Up = true },

@@ -9,7 +9,7 @@ namespace OpenSpark.Teams.Actors
         public TeamManagerActor()
         {
             var queryPool = Context.ActorOf(TeamQueryActor.Props, "TeamQueryPool");
-            var commandPool = Context.ActorOf(TeamCommandPool.Props, "TeamCommandPool");
+            var commandPool = Context.ActorOf(TeamCommandActor.Props, "TeamCommandPool");
 
             // Pools
             Receive<IQuery>(command => queryPool.Forward(command));

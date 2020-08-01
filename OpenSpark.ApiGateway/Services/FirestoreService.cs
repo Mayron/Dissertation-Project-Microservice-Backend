@@ -52,6 +52,8 @@ namespace OpenSpark.ApiGateway.Services
                     {
                         CreatedAt = snapShot.GetValue<Timestamp>("createdAt").ToDateTime(),
                         DisplayName = snapShot.GetValue<string>("displayName"),
+                        LastOnline = snapShot.GetValue<Timestamp>("lastOnline").ToDateTime(),
+                        IsOnline = snapShot.GetValue<bool>("isOnline"),
                         Email = snapShot.GetValue<string>("email"),
                         AuthUserId = authId,
                     };

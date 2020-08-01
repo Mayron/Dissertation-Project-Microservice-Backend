@@ -6,16 +6,17 @@ using OpenSpark.Shared.Events.Payloads;
 using OpenSpark.Shared.RavenDb;
 using OpenSpark.Teams.Domain;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace OpenSpark.Teams.Actors
 {
-    internal class TeamCommandPool : ReceiveActor
+    internal class TeamCommandActor : ReceiveActor
     {
-        public static Props Props { get; } = Props.Create<TeamCommandPool>()
+        public static Props Props { get; } = Props.Create<TeamCommandActor>()
             .WithRouter(new RoundRobinPool(2,
                 new DefaultResizer(1, 5)));
 
-        public TeamCommandPool()
+        public TeamCommandActor()
         {
             Receive<CreateTeamCommand>(command =>
             {
@@ -53,7 +54,6 @@ namespace OpenSpark.Teams.Actors
             Receive<CreateDefaultTeamsCommand>(command =>
             {
                 using var session = DocumentStoreSingleton.Store.OpenSession();
-                var ravenMemberId = session.GenerateRavenId<Member>();
 
                 var adminsTeam = new Team
                 {
@@ -61,7 +61,7 @@ namespace OpenSpark.Teams.Actors
                     Name = "Admins",
                     ProjectId = command.ProjectId,
                     Permissions = TeamPermissionsHelper.GetDefaultAdminPermissions(),
-                    Members = new List<string> { ravenMemberId },
+                    Members = new List<string> { session.GenerateRavenId<Member>() },
                     Description = "Members in this team have full access to all aspects of the project, including editing team permissions.",
                     Color = "#FF4F00"
                 };
@@ -72,7 +72,7 @@ namespace OpenSpark.Teams.Actors
                     Name = "Moderators",
                     ProjectId = command.ProjectId,
                     Permissions = TeamPermissionsHelper.GetDefaultModeratorPermissions(),
-                    Members = new List<string> { ravenMemberId },
+                    Members = new List<string> { session.GenerateRavenId<Member>() },
                     Description = "Members in this team can manage issues.",
                     Color = "#F51A1A"
                 };
@@ -82,7 +82,7 @@ namespace OpenSpark.Teams.Actors
 
                 var adminMember = new Member
                 {
-                    Id = ravenMemberId,
+                    Id = adminsTeam.Members.First(),
                     TeamId = adminsTeam.Id,
                     UserAuthId = command.User.AuthUserId
                 };
@@ -91,13 +91,48 @@ namespace OpenSpark.Teams.Actors
 
                 var moderatorMember = new Member
                 {
-                    Id = ravenMemberId,
+                    Id = moderatorsTeam.Members.First(),
                     TeamId = moderatorsTeam.Id,
                     UserAuthId = command.User.AuthUserId
                 };
 
                 session.Store(moderatorMember);
 
+                session.SaveChanges();
+
+                Sender.Tell(new PayloadEvent(command) { Payload = true });
+            });
+
+            Receive<ChangePermissionCommand>(command =>
+            {
+                if (!TeamPermissionsHelper.AllPermissions.Contains(command.Permission))
+                {
+                    Sender.Tell(new PayloadEvent(command) { Errors = new []{ "Invalid permission" } });
+                    return;
+                }
+
+                using var session = DocumentStoreSingleton.Store.OpenSession();
+
+                var ravenTeamId = command.TeamId.ConvertToRavenId<Team>();
+                var team = session.Load<Team>(ravenTeamId);
+
+                if (team == null)
+                {
+                    Sender.Tell(new PayloadEvent(command) { Errors = new[] { "Team unavailable" } });
+                    return;
+                }
+
+                if (command.Enabled)
+                {
+                    team.Permissions.Add(command.Permission);
+                }
+                else
+                {
+                    var permissions = team.Permissions.Where(p => !p.Equals(command.Permission)).ToHashSet();
+                    team.Permissions = permissions;
+                }
+
+                session.Store(team);
                 session.SaveChanges();
 
                 Sender.Tell(new PayloadEvent(command) { Payload = true });

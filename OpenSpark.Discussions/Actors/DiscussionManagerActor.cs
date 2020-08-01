@@ -1,10 +1,9 @@
 ﻿using Akka.Actor;
+using OpenSpark.Shared.Commands.Discussions;
 using OpenSpark.Shared.Events;
 using OpenSpark.Shared.Queries;
 using System.Collections.Generic;
 using System.Linq;
-using OpenSpark.Shared.Commands;
-using OpenSpark.Shared.Commands.Discussions;
 
 namespace OpenSpark.Discussions.Actors
 {

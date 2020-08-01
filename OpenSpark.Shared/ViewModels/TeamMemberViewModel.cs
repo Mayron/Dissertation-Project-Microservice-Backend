@@ -7,5 +7,6 @@
         public string Teams { get; set; }
         public string LastOnline { get; set; }
         public int Contributions { get; set; }
+        public string MemberId { get; set; }
     }
 }
