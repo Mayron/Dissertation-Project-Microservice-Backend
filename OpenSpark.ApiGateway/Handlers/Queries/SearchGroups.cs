@@ -27,17 +27,17 @@ namespace OpenSpark.ApiGateway.Handlers.Queries
         public class Handler : IRequestHandler<Query, Unit>
         {
             private readonly IActorSystem _actorSystem;
-            private readonly IMessageContextBuilder _builder;
+            private readonly IMessageContextBuilderFactory _builderFactory;
 
-            public Handler(IActorSystem actorSystem, IMessageContextBuilder builder)
+            public Handler(IActorSystem actorSystem, IMessageContextBuilderFactory builder)
             {
                 _actorSystem = actorSystem;
-                _builder = builder;
+                _builderFactory = builder;
             }
 
             public Task<Unit> Handle(Query query, CancellationToken cancellationToken)
             {
-                var context = _builder.CreateQueryContext(new SearchGroupsQuery { SearchQuery = query.SearchQuery })
+                var context = _builderFactory.CreateQueryContext(new SearchGroupsQuery { SearchQuery = query.SearchQuery })
                     .SetClientCallback(query.Callback, query.ConnectionId)
                     .ForRemoteSystem(RemoteSystem.Groups)
                     .Build();

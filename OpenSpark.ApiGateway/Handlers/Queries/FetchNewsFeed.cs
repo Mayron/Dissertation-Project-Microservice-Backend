@@ -30,17 +30,17 @@ namespace OpenSpark.ApiGateway.Handlers.Queries
         public class Handler : IRequestHandler<Query>
         {
             private readonly IActorSystem _actorSystem;
-            private readonly IMessageContextBuilder _builder;
+            private readonly IMessageContextBuilderFactory _builderFactory;
 
-            public Handler(IActorSystem actorSystem, IMessageContextBuilder builder)
+            public Handler(IActorSystem actorSystem, IMessageContextBuilderFactory builder)
             {
                 _actorSystem = actorSystem;
-                _builder = builder;
+                _builderFactory = builder;
             }
 
             public Task<Unit> Handle(Query query, CancellationToken cancellationToken)
             {
-                var context = _builder.CreateMultiQueryContext<GetPostsMultiQueryHandler, GetPostsAggregator>()
+                var context = _builderFactory.CreateMultiQueryContext<GetPostsMultiQueryHandler, GetPostsAggregator>()
                     .SetClientCallback(query.Callback, query.ConnectionId)
                     .AddQuery(new NewsFeedQuery { Seen = query.Seen }, RemoteSystem.Discussions)
                     .Build();

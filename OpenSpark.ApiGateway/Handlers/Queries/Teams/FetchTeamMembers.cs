@@ -31,19 +31,19 @@ namespace OpenSpark.ApiGateway.Handlers.Queries.Teams
         public class Handler : IRequestHandler<Query, Unit>
         {
             private readonly IActorSystem _actorSystem;
-            private readonly IMessageContextBuilder _builder;
+            private readonly IMessageContextBuilderFactory _builderFactory;
             private readonly IFirestoreService _firestoreService;
 
-            public Handler(IActorSystem actorSystem, IMessageContextBuilder builder, IFirestoreService firestoreService)
+            public Handler(IActorSystem actorSystem, IMessageContextBuilderFactory builder, IFirestoreService firestoreService)
             {
                 _actorSystem = actorSystem;
-                _builder = builder;
+                _builderFactory = builder;
                 _firestoreService = firestoreService;
             }
 
             public Task<Unit> Handle(Query query, CancellationToken cancellationToken)
             {
-                var context = _builder.CreateQueryContext(new TeamMembersQuery { TeamId = query.TeamId })
+                var context = _builderFactory.CreateQueryContext(new TeamMembersQuery { TeamId = query.TeamId })
                     .SetClientCallback(query.Callback, query.ConnectionId)
                     .OnPayloadReceived(OnPayloadReceived)
                     .ForRemoteSystem(RemoteSystem.Teams)

@@ -25,12 +25,12 @@ namespace OpenSpark.ApiGateway.Handlers.Commands
         public class Handler : IRequestHandler<Command, ValidationResult>
         {
             private readonly IActorSystem _actorSystem;
-            private readonly IMessageContextBuilder _builder;
+            private readonly IMessageContextBuilderFactory _builderFactory;
 
-            public Handler(IActorSystem actorSystem, IMessageContextBuilder builder)
+            public Handler(IActorSystem actorSystem, IMessageContextBuilderFactory builder)
             {
                 _actorSystem = actorSystem;
-                _builder = builder;
+                _builderFactory = builder;
             }
 
             public Task<ValidationResult> Handle(Command command, CancellationToken cancellationToken)
@@ -43,7 +43,7 @@ namespace OpenSpark.ApiGateway.Handlers.Commands
                 };
 
                 // Does not use a connectionId/client callback (fire and forget) 
-                var context = _builder.CreateCommandContext(remoteCommand)
+                var context = _builderFactory.CreateCommandContext(remoteCommand)
                     .ForRemoteSystem(RemoteSystem.Discussions)
                     .Build();
 

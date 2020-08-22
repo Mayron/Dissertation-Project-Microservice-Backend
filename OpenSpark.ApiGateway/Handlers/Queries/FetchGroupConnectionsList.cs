@@ -32,13 +32,13 @@ namespace OpenSpark.ApiGateway.Handlers.Queries
         public class Handler : IRequestHandler<Query, Unit>
         {
             private readonly IActorSystem _actorSystem;
-            private readonly IMessageContextBuilder _builder;
+            private readonly IMessageContextBuilderFactory _builderFactory;
             private readonly User _user;
 
-            public Handler(IActorSystem actorSystem, IHttpContextAccessor context, IMessageContextBuilder builder)
+            public Handler(IActorSystem actorSystem, IHttpContextAccessor context, IMessageContextBuilderFactory builder)
             {
                 _actorSystem = actorSystem;
-                _builder = builder;
+                _builderFactory = builder;
                 _user = context.GetFirebaseUser();
             }
 
@@ -58,7 +58,8 @@ namespace OpenSpark.ApiGateway.Handlers.Queries
                     return Unit.Task;
                 }
 
-                var context = _builder.CreateMultiQueryContext<MultiQueryParallelHandler, GroupConnectionsListAggregator>()
+                var context = _builderFactory
+                    .CreateMultiQueryContext<MultiQueryParallelHandler, GroupConnectionsListAggregator>()
                     .SetClientCallback(query.Callback, query.ConnectionId)
                     .AddQuery(new UserGroupsQuery { OwnedGroups = true }, RemoteSystem.Groups)
                     .AddQuery(new ProjectDetailsQuery { ProjectId = query.ProjectId }, RemoteSystem.Projects)

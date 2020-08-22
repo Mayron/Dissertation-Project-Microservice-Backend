@@ -28,13 +28,13 @@ namespace OpenSpark.ApiGateway.Handlers.Commands
         public class Handler : IRequestHandler<Command, ValidationResult>
         {
             private readonly IActorSystem _actorSystem;
-            private readonly IMessageContextBuilder _builder;
+            private readonly IMessageContextBuilderFactory _builderFactory;
             private readonly User _user;
 
-            public Handler(IActorSystem actorSystem, IHttpContextAccessor context, IMessageContextBuilder builder)
+            public Handler(IActorSystem actorSystem, IHttpContextAccessor context, IMessageContextBuilderFactory builder)
             {
                 _actorSystem = actorSystem;
-                _builder = builder;
+                _builderFactory = builder;
                 _user = context.GetFirebaseUser();
             }
 
@@ -54,7 +54,7 @@ namespace OpenSpark.ApiGateway.Handlers.Commands
                     ProjectId = command.Model.ProjectId
                 };
 
-                var context = _builder.CreateSagaContext<ConnectProjectSaga>(sagaExecutionCommand)
+                var context = _builderFactory.CreateSagaContext<ConnectProjectSaga>(sagaExecutionCommand)
                     .SetClientCallback(command.Model.ConnectionId, command.Model.Callback)
                     .Build();
 

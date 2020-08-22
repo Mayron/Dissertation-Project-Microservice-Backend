@@ -29,12 +29,12 @@ namespace OpenSpark.ApiGateway.Handlers.Queries
         public class Handler : IRequestHandler<Query, Unit>
         {
             private readonly IActorSystem _actorSystem;
-            private readonly IMessageContextBuilder _builder;
+            private readonly IMessageContextBuilderFactory _builderFactory;
 
-            public Handler(IActorSystem actorSystem, IMessageContextBuilder builder)
+            public Handler(IActorSystem actorSystem, IMessageContextBuilderFactory builder)
             {
                 _actorSystem = actorSystem;
-                _builder = builder;
+                _builderFactory = builder;
             }
 
             public Task<Unit> Handle(Query query, CancellationToken cancellationToken)
@@ -45,7 +45,7 @@ namespace OpenSpark.ApiGateway.Handlers.Queries
                     TakeAmount = query.Amount
                 };
 
-                var context = _builder.CreateQueryContext(remoteQuery)
+                var context = _builderFactory.CreateQueryContext(remoteQuery)
                     .SetClientCallback(query.Callback, query.ConnectionId)
                     .ForRemoteSystem(RemoteSystem.Projects)
                     .Build();

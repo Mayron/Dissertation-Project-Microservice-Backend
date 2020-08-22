@@ -7,7 +7,7 @@ using OpenSpark.Shared.Queries;
 
 namespace OpenSpark.ApiGateway.Builders
 {
-    public interface IMessageContextBuilder
+    public interface IMessageContextBuilderFactory
     {
         IQueryContextBuilder CreateQueryContext(IQuery query);
 
@@ -18,11 +18,11 @@ namespace OpenSpark.ApiGateway.Builders
         ICommandContextBuilder CreateCommandContext(ICommand command);
     }
 
-    public class MessageContextBuilder : IMessageContextBuilder
+    public class MessageContextBuilderFactory : IMessageContextBuilderFactory
     {
         private readonly User _user;
 
-        public MessageContextBuilder(IHttpContextAccessor contextAccessor) =>
+        public MessageContextBuilderFactory(IHttpContextAccessor contextAccessor) =>
             _user = contextAccessor.GetFirebaseUser();
 
         public IQueryContextBuilder CreateQueryContext(IQuery query) =>

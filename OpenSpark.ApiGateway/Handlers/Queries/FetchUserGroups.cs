@@ -32,13 +32,13 @@ namespace OpenSpark.ApiGateway.Handlers.Queries
         public class Handler : IRequestHandler<Query, Unit>
         {
             private readonly IActorSystem _actorSystem;
-            private readonly IMessageContextBuilder _builder;
+            private readonly IMessageContextBuilderFactory _builderFactory;
             private readonly User _user;
 
-            public Handler(IActorSystem actorSystem, IHttpContextAccessor context, IMessageContextBuilder builder)
+            public Handler(IActorSystem actorSystem, IHttpContextAccessor context, IMessageContextBuilderFactory builder)
             {
                 _actorSystem = actorSystem;
-                _builder = builder;
+                _builderFactory = builder;
                 _user = context.GetFirebaseUser();
             }
 
@@ -57,7 +57,7 @@ namespace OpenSpark.ApiGateway.Handlers.Queries
                     Memberships = query.Memberships
                 };
 
-                var context = _builder.CreateQueryContext(remoteQuery)
+                var context = _builderFactory.CreateQueryContext(remoteQuery)
                     .SetClientCallback(query.Callback, query.ConnectionId)
                     .ForRemoteSystem(RemoteSystem.Groups)
                     .Build();

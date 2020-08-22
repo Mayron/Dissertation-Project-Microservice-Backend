@@ -25,12 +25,12 @@ namespace OpenSpark.ApiGateway.Handlers.Commands
         public class Handler : IRequestHandler<Command, ValidationResult>
         {
             private readonly IActorSystem _actorSystem;
-            private readonly IMessageContextBuilder _builder;
+            private readonly IMessageContextBuilderFactory _builderFactory;
 
-            public Handler(IActorSystem actorSystem, IMessageContextBuilder builder)
+            public Handler(IActorSystem actorSystem, IMessageContextBuilderFactory builder)
             {
                 _actorSystem = actorSystem;
-                _builder = builder;
+                _builderFactory = builder;
             }
 
             public Task<ValidationResult> Handle(Command command, CancellationToken cancellationToken)
@@ -41,7 +41,7 @@ namespace OpenSpark.ApiGateway.Handlers.Commands
                     PostId = command.Model.PostId,
                 };
 
-                var context = _builder.CreateCommandContext(remoteCommand)
+                var context = _builderFactory.CreateCommandContext(remoteCommand)
                     .SetClientCallback(command.Model.ConnectionId, command.Model.Callback)
                     .ForRemoteSystem(RemoteSystem.Discussions)
                     .Build();

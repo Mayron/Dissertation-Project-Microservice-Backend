@@ -30,16 +30,16 @@ namespace OpenSpark.ApiGateway.Handlers.Queries
         public class Handler : IRequestHandler<Query, Unit>
         {
             private readonly IActorSystem _actorSystem;
-            private readonly IMessageContextBuilder _builder;
+            private readonly IMessageContextBuilderFactory _builderFactory;
             private readonly IFirestoreService _firestoreService;
 
             public Handler(
                 IActorSystem actorSystem,
-                IMessageContextBuilder builder,
+                IMessageContextBuilderFactory builder,
                 IFirestoreService firestoreService)
             {
                 _actorSystem = actorSystem;
-                _builder = builder;
+                _builderFactory = builder;
                 _firestoreService = firestoreService;
             }
 
@@ -51,7 +51,7 @@ namespace OpenSpark.ApiGateway.Handlers.Queries
                     Seen = new List<string>(0)
                 };
 
-                var context = _builder.CreateQueryContext(remoteQuery)
+                var context = _builderFactory.CreateQueryContext(remoteQuery)
                     .SetClientCallback(query.Callback, query.ConnectionId)
                     .OnPayloadReceived(OnPayloadReceived)
                     .ForRemoteSystem(RemoteSystem.Discussions)
