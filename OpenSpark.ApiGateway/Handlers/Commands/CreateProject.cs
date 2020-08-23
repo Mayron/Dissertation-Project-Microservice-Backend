@@ -43,9 +43,9 @@ namespace OpenSpark.ApiGateway.Handlers.Commands
                     Visibility = command.Model.Visibility
                 };
 
-                var context = _builderFactory.CreateSagaContext<CreateProjectSaga>(sagaExecutionCommand)
-                    .SetClientCallback(command.Model.ConnectionId, command.Model.Callback)
-                    .Build();
+var context = _builderFactory.CreateSagaContext<CreateProjectSaga>(sagaExecutionCommand)
+    .SetClientCallback(command.Model.ConnectionId, command.Model.Callback)
+    .Build();
 
                 _actorSystem.ExecuteSaga(context);
                 return Task.FromResult(ValidationResult.Success);
