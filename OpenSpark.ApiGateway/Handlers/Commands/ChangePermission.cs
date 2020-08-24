@@ -2,7 +2,6 @@
 using OpenSpark.ApiGateway.InputModels;
 using OpenSpark.ApiGateway.Services;
 using OpenSpark.Shared;
-using OpenSpark.Shared.Commands.Discussions;
 using OpenSpark.Shared.ViewModels;
 using System.Threading;
 using System.Threading.Tasks;

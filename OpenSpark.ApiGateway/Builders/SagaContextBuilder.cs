@@ -41,7 +41,7 @@ namespace OpenSpark.ApiGateway.Builders
                 CreatedAt = DateTime.Now,
                 Id = Guid.NewGuid(),
                 ConnectionId = _connectionId,
-                Callback = _clientCallbackMethod
+                Callback = _clientCallbackMethod,
             };
 
             _command.User = _user;

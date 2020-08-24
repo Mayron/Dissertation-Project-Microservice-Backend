@@ -85,6 +85,7 @@ namespace OpenSpark.ApiGateway.Actors.PayloadAggregators
                 {
                     ConnectionId = _context.ConnectionId,
                     Callback = _context.Callback,
+                    CreatedAt = _context.CreatedAt
                 },
                 Payload = results
             };

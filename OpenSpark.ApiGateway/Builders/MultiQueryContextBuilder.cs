@@ -75,7 +75,7 @@ namespace OpenSpark.ApiGateway.Builders
                     Callback = _clientCallbackMethod,
                     ParentId = _multiQueryId,
                     Id = Guid.NewGuid(),
-                    CreatedAt = createdAt
+                    CreatedAt = createdAt,
                 };
             }
 
@@ -89,7 +89,7 @@ namespace OpenSpark.ApiGateway.Builders
                 Queries = _queries,
                 Handler = _handler,
                 Aggregator = _aggregator,
-                TimeoutInSeconds = _timeout,
+                TimeoutInSeconds = _timeout
             };
         }
     }

@@ -65,7 +65,7 @@ namespace OpenSpark.ApiGateway.Builders
                 ConnectionId = _connectionId,
                 Callback = _clientCallbackMethod,
                 CreatedAt = DateTime.Now,
-                Id = Guid.NewGuid()
+                Id = Guid.NewGuid(),
             };
 
             return new QueryContext

@@ -2,16 +2,14 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.SignalR;
 using OpenSpark.Shared.Events.Payloads;
-using OpenSpark.Shared.Events.Sagas;
 
 namespace OpenSpark.ApiGateway.Services
 {
     public interface IEventEmitter
     {
         void BroadcastToClient(PayloadEvent @event);
-        void BroadcastToGroup(string groupId, string clientSideMethod, object eventData);
+//        void BroadcastToGroup(string groupId, string clientSideMethod, object eventData);
         void RegisterCallback(Guid metaDataQueryId, Action<PayloadEvent> contextOnPayloadReceived);
-        void BroadcastToClient(string connectionId, string clientSideMethod, SagaFinishedEvent message);
     }
 
     public class EventEmitter : IEventEmitter
@@ -29,7 +27,10 @@ namespace OpenSpark.ApiGateway.Services
 
         public void BroadcastToClient(PayloadEvent @event)
         {
-            var queryId = @event.MetaData.Id;
+            var duration = DateTime.Now - @event.MetaData.CreatedAt;
+            Console.WriteLine($"{@event.MetaData.Callback} finished in {duration.Milliseconds}ms");
+
+                var queryId = @event.MetaData.Id;
             if (_callbacks.ContainsKey(queryId))
             {
                 _callbacks[queryId](@event);
@@ -40,15 +41,10 @@ namespace OpenSpark.ApiGateway.Services
             _hubContext.Clients.Client(connectionId).SendAsync(clientSideMethod, eventData);
         }
 
-        public void BroadcastToClient(string connectionId, string clientSideMethod, SagaFinishedEvent message)
-        {
-            _hubContext.Clients.Client(connectionId).SendAsync(clientSideMethod, message);
-        }
-
-        public void BroadcastToGroup(string groupId, string clientSideMethod, object eventData)
-        {
-            _hubContext.Clients.Group(groupId).SendAsync(clientSideMethod, eventData);
-        }
+//        public void BroadcastToGroup(string groupId, string clientSideMethod, object eventData)
+//        {
+//            _hubContext.Clients.Group(groupId).SendAsync(clientSideMethod, eventData);
+//        }
 
         public void RegisterCallback(Guid queryId, Action<PayloadEvent> callback)
         {
