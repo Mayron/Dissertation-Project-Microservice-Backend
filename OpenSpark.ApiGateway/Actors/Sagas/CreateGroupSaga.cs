@@ -16,7 +16,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
 {
     public class CreateGroupSaga : FSM<CreateGroupSaga.SagaState, ISagaStateData>
     {
-        private readonly IActorSystem _actorSystem;
+        private readonly IActorSystemService _actorSystemService;
         private readonly IFirestoreService _firestoreService;
 
         public enum SagaState
@@ -37,9 +37,9 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             public ExecuteCreateGroupSagaCommand Command { get; set; }
         }
 
-        public CreateGroupSaga(IActorSystem actorSystem, IFirestoreService firestoreService)
+        public CreateGroupSaga(IActorSystemService actorSystem, IFirestoreService firestoreService)
         {
-            _actorSystem = actorSystem;
+            _actorSystemService = actorSystem;
             _firestoreService = firestoreService;
 
             StartWith(SagaState.Idle, IdleSagaStateData.Instance);
@@ -84,7 +84,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             var transactionId = command.MetaData.ParentId;
 
             // Send command to Groups context to create new group
-            _actorSystem.SendSagaMessage(nextCommand, RemoteSystem.Groups, transactionId, Self);
+            _actorSystemService.SendSagaMessage(nextCommand, RemoteSystem.Groups, transactionId, Self);
 
             // go to next state
             return GoTo(SagaState.CreatingGroup).Using(new ProcessingStateData
@@ -114,7 +114,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                     GroupVisibility = @event.GroupVisibility
                 };
 
-                _actorSystem.SendSagaMessage(command, RemoteSystem.Projects, data.TransactionId, Self);
+                _actorSystemService.SendSagaMessage(command, RemoteSystem.Projects, data.TransactionId, Self);
 
                 data.GroupId = @event.GroupId;
                 return GoTo(SagaState.UpdateConnectedProjects);
@@ -123,9 +123,9 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             Console.WriteLine($"Rolling back {nameof(CreateGroupSaga)}.");
 
             var deleteCommand = new DeleteGroupCommand { GroupId = @event.GroupId };
-            _actorSystem.SendSagaMessage(deleteCommand, RemoteSystem.Groups, data.TransactionId, Self);
+            _actorSystemService.SendSagaMessage(deleteCommand, RemoteSystem.Groups, data.TransactionId, Self);
 
-            _actorSystem.SendErrorToClient(data.MetaData,
+            _actorSystemService.SendErrorToClient(data.MetaData,
                 "Oops! Something went wrong while trying to create your group.");
 
             return GoTo(SagaState.RollingBack);
@@ -172,13 +172,13 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                 GroupId = groupId
             };
 
-            _actorSystem.SendPayloadToClient(data.MetaData, viewModel);
+            _actorSystemService.SendPayloadToClient(data.MetaData, viewModel);
             return Stop();
         }
 
         private State<SagaState, ISagaStateData> StopAndSendError(string errorMessage)
         {
-            _actorSystem.SendErrorToClient(StateData.MetaData, errorMessage);
+            _actorSystemService.SendErrorToClient(StateData.MetaData, errorMessage);
             return Stop();
         }
     }

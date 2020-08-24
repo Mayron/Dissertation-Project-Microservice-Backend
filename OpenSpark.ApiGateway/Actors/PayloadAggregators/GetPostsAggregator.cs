@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace OpenSpark.ApiGateway.Actors.PayloadAggregators
 {
-    public class GetPostsAggregator : BaseMultiPayloadAggregatorActor
+    public class GetPostsAggregator : BaseMultiQueryAggregatorActor
     {
         public GetPostsAggregator(MultiQueryContext context, IActorRef callback) : base(context, callback)
         {

@@ -13,7 +13,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
 {
     public class CreatePostSaga : FSM<CreatePostSaga.SagaState, ISagaStateData>
     {
-        private readonly IActorSystem _actorSystem;
+        private readonly IActorSystemService _actorSystemService;
 
         public enum SagaState
         {
@@ -32,9 +32,9 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             public string Body { get; set; }
         }
 
-        public CreatePostSaga(IActorSystem actorSystem)
+        public CreatePostSaga(IActorSystemService actorSystem)
         {
-            _actorSystem = actorSystem;
+            _actorSystemService = actorSystem;
 
             StartWith(SagaState.Idle, IdleSagaStateData.Instance);
 
@@ -71,7 +71,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             };
 
             var transactionId = command.MetaData.ParentId;
-            _actorSystem.SendSagaMessage(nextCommand, RemoteSystem.Groups, transactionId, Self);
+            _actorSystemService.SendSagaMessage(nextCommand, RemoteSystem.Groups, transactionId, Self);
 
             return GoTo(SagaState.VerifyingUser).Using(new ProcessingStateData
             {
@@ -99,7 +99,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                         GroupVisibility = @event.GroupVisibility
                     };
 
-                    _actorSystem.SendSagaMessage(nextCommand, RemoteSystem.Discussions, StateData.TransactionId, Self);
+                    _actorSystemService.SendSagaMessage(nextCommand, RemoteSystem.Discussions, StateData.TransactionId, Self);
 
                     return GoTo(SagaState.CreatingPost);
 
@@ -114,13 +114,13 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
         {
             if (!(fsmEvent.FsmEvent is PostCreatedEvent @event)) return null;
 
-            _actorSystem.SendPayloadToClient(StateData.MetaData, @event.PostId);
+            _actorSystemService.SendPayloadToClient(StateData.MetaData, @event.PostId);
             return Stop();
         }
 
         private State<SagaState, ISagaStateData> StopAndSendError(string errorMessage)
         {
-            _actorSystem.SendErrorToClient(StateData.MetaData, errorMessage);
+            _actorSystemService.SendErrorToClient(StateData.MetaData, errorMessage);
             return Stop();
         }
     }

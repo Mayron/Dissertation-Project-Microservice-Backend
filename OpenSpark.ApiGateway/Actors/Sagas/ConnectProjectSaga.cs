@@ -15,7 +15,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
 {
     public class ConnectProjectSaga : FSM<ConnectProjectSaga.SagaState, ISagaStateData>
     {
-        private readonly IActorSystem _actorSystem;
+        private readonly IActorSystemService _actorSystemService;
 
         public enum SagaState
         {
@@ -32,9 +32,9 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             public ExecuteConnectProjectSagaCommand Command { get; set; }
         }
 
-        public ConnectProjectSaga(IActorSystem actorSystem)
+        public ConnectProjectSaga(IActorSystemService actorSystem)
         {
-            _actorSystem = actorSystem;
+            _actorSystemService = actorSystem;
 
             StartWith(SagaState.Idle, IdleSagaStateData.Instance);
 
@@ -55,7 +55,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             };
 
             var transactionId = command.MetaData.ParentId;
-            _actorSystem.SendSagaMessage(remoteQuery, RemoteSystem.Groups, transactionId, Self);
+            _actorSystemService.SendSagaMessage(remoteQuery, RemoteSystem.Groups, transactionId, Self);
 
             // create processing state data
             return GoTo(SagaState.ValidatingTargetGroup).Using(
@@ -74,7 +74,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
 
             if (@event.Errors != null && @event.Errors.Length > 0)
             {
-                _actorSystem.SendErrorsToClient(data.MetaData, @event.Errors);
+                _actorSystemService.SendErrorsToClient(data.MetaData, @event.Errors);
                 return Stop();
             }
 
@@ -89,7 +89,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                 ProjectIds = new List<string> { data.Command.ProjectId }
             };
 
-            _actorSystem.SendSagaMessage(command, RemoteSystem.Projects, data.TransactionId, Self);
+            _actorSystemService.SendSagaMessage(command, RemoteSystem.Projects, data.TransactionId, Self);
 
             data.GroupName = groupDetails.Name;
             return GoTo(SagaState.ConnectingProject);
@@ -101,14 +101,14 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             {
                 case ProjectConnectedEvent _ when StateData is ProcessingStateData data:
 
-                    _actorSystem.SendPayloadToClient(data.MetaData,
+                    _actorSystemService.SendPayloadToClient(data.MetaData,
                         $"Your project has been connected to the {data.GroupName} group.");
 
                     return Stop();
 
                 case ProjectFailedToConnectEvent @event when StateData is ProcessingStateData data:
 
-                    _actorSystem.SendErrorToClient(data.MetaData, @event.Message);
+                    _actorSystemService.SendErrorToClient(data.MetaData, @event.Message);
                     return Stop();
             }
 

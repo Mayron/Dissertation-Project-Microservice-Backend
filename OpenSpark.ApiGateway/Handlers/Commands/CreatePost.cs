@@ -24,12 +24,12 @@ namespace OpenSpark.ApiGateway.Handlers.Commands
 
         public class Handler : IRequestHandler<Command, ValidationResult>
         {
-            private readonly IActorSystem _actorSystem;
+            private readonly IActorSystemService _actorSystemService;
             private readonly IMessageContextBuilderFactory _builderFactory;
 
-            public Handler(IActorSystem actorSystem, IMessageContextBuilderFactory builder)
+            public Handler(IActorSystemService actorSystem, IMessageContextBuilderFactory builder)
             {
-                _actorSystem = actorSystem;
+                _actorSystemService = actorSystem;
                 _builderFactory = builder;
             }
 
@@ -46,7 +46,7 @@ namespace OpenSpark.ApiGateway.Handlers.Commands
                     .SetClientCallback(command.Model.ConnectionId, command.Model.Callback)
                     .Build();
 
-                _actorSystem.ExecuteSaga(context);
+                _actorSystemService.ExecuteSaga(context);
                 return Task.FromResult(ValidationResult.Success);
             }
         }

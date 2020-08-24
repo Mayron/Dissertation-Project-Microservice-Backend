@@ -10,16 +10,16 @@ namespace OpenSpark.ApiGateway.Actors
 {
     public class MultiQueryManagerActor : ReceiveActor
     {
-        private readonly IActorSystem _actorSystem;
+        private readonly IActorSystemService _actorSystemService;
         private readonly IActorRef _callbackActor;
         private readonly IFirestoreService _firestoreService;
 
         public MultiQueryManagerActor(
-            IActorSystem actorSystem,
+            IActorSystemService actorSystem,
             IActorRef callbackActor,
             IFirestoreService firestoreService)
         {
-            _actorSystem = actorSystem;
+            _actorSystemService = actorSystem;
             _callbackActor = callbackActor;
             _firestoreService = firestoreService;
 
@@ -58,12 +58,12 @@ namespace OpenSpark.ApiGateway.Actors
             {
                 case nameof(MultiQueryParallelHandler):
                     Context.ActorOf(Props.Create(() =>
-                        new MultiQueryParallelHandler(context, aggregator, _actorSystem)), actorName);
+                        new MultiQueryParallelHandler(context, aggregator, _actorSystemService)), actorName);
                     break;
 
                 case nameof(GetPostsMultiQueryHandler):
                     Context.ActorOf(Props.Create(() =>
-                            new GetPostsMultiQueryHandler(context, aggregator, _actorSystem, _firestoreService)), actorName);
+                            new GetPostsMultiQueryHandler(context, aggregator, _actorSystemService, _firestoreService)), actorName);
                     break;
 
                 default:

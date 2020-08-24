@@ -22,13 +22,13 @@ namespace OpenSpark.ApiGateway.Handlers.Commands
 
         public class Handler : IRequestHandler<Command>
         {
-            private readonly IActorSystem _actorSystem;
+            private readonly IActorSystemService _actorSystemService;
             private readonly IHttpContextAccessor _httpContextAccessor;
             private readonly IFirestoreService _firestoreService;
 
-            public Handler(IActorSystem actorSystem, IHttpContextAccessor httpContextAccessor, IFirestoreService firestoreService)
+            public Handler(IActorSystemService actorSystem, IHttpContextAccessor httpContextAccessor, IFirestoreService firestoreService)
             {
-                _actorSystem = actorSystem;
+                _actorSystemService = actorSystem;
                 _httpContextAccessor = httpContextAccessor;
                 _firestoreService = firestoreService;
             }
@@ -47,7 +47,7 @@ namespace OpenSpark.ApiGateway.Handlers.Commands
                     await _firestoreService.UpdateUserField(user, "lastOnline", user.LastOnline, cancellationToken);
                 }
 
-                _actorSystem.PublishDisconnection(command.ConnectionId);
+                _actorSystemService.PublishDisconnection(command.ConnectionId);
                 return Unit.Value;
             }
         }

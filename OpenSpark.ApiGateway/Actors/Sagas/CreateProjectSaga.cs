@@ -16,7 +16,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
 {
     public class CreateProjectSaga : FSM<CreateProjectSaga.SagaState, CreateProjectSaga.CreateProjectStateData>
     {
-        private readonly IActorSystem _actorSystem;
+        private readonly IActorSystemService _actorSystemService;
         private readonly IFirestoreService _firestoreService;
 
         public enum SagaState
@@ -35,9 +35,9 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
             public string ProjectId { get; set; }
         }
 
-        public CreateProjectSaga(IActorSystem actorSystem, IFirestoreService firestoreService)
+        public CreateProjectSaga(IActorSystemService actorSystem, IFirestoreService firestoreService)
         {
-            _actorSystem = actorSystem;
+            _actorSystemService = actorSystem;
             _firestoreService = firestoreService;
 
             StartWith(SagaState.Idle, new CreateProjectStateData());
@@ -64,7 +64,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                 var transactionId = command.MetaData.ParentId;
 
                 // Send command to Groups context to create new group
-                _actorSystem.SendSagaMessage(nextCommand, RemoteSystem.Projects, transactionId, Self);
+                _actorSystemService.SendSagaMessage(nextCommand, RemoteSystem.Projects, transactionId, Self);
 
                 // go to next state
                 StateData.TransactionId = transactionId;
@@ -95,7 +95,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                     ProjectId = StateData.ProjectId
                 };
 
-                _actorSystem.SendSagaMessage(createDefaultTeamsCommand, RemoteSystem.Teams, StateData.TransactionId, Self);
+                _actorSystemService.SendSagaMessage(createDefaultTeamsCommand, RemoteSystem.Teams, StateData.TransactionId, Self);
                 return GoTo(SagaState.CreatingTeams);
             }
 
@@ -132,9 +132,9 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
                 ProjectId = StateData.ProjectId
             };
 
-            _actorSystem.SendSagaMessage(deleteProjectCommand, RemoteSystem.Projects, StateData.TransactionId, Self);
+            _actorSystemService.SendSagaMessage(deleteProjectCommand, RemoteSystem.Projects, StateData.TransactionId, Self);
 
-            _actorSystem.SendErrorToClient(StateData.MetaData,
+            _actorSystemService.SendErrorToClient(StateData.MetaData,
                 "Oops! Something went wrong while trying to create your project.");
 
             return GoTo(SagaState.RollingBack);
@@ -142,7 +142,7 @@ namespace OpenSpark.ApiGateway.Actors.Sagas
 
         private State<SagaState, CreateProjectStateData> FinishSuccessfully(string projectId)
         {
-            _actorSystem.SendPayloadToClient(StateData.MetaData, projectId);
+            _actorSystemService.SendPayloadToClient(StateData.MetaData, projectId);
             return Stop();
         }
     }

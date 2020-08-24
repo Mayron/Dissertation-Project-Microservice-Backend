@@ -31,13 +31,13 @@ namespace OpenSpark.ApiGateway.Handlers.Queries
 
         public class Handler : IRequestHandler<Query, Unit>
         {
-            private readonly IActorSystem _actorSystem;
+            private readonly IActorSystemService _actorSystemService;
             private readonly IMessageContextBuilderFactory _builderFactory;
             private readonly User _user;
 
-            public Handler(IActorSystem actorSystem, IHttpContextAccessor context, IMessageContextBuilderFactory builder)
+            public Handler(IActorSystemService actorSystem, IHttpContextAccessor context, IMessageContextBuilderFactory builder)
             {
-                _actorSystem = actorSystem;
+                _actorSystemService = actorSystem;
                 _builderFactory = builder;
                 _user = context.GetFirebaseUser();
             }
@@ -47,14 +47,14 @@ namespace OpenSpark.ApiGateway.Handlers.Queries
                 if (_user.Projects.Count == 0)
                 {
                     var metaData = new MetaData { ConnectionId = query.ConnectionId, Callback = query.Callback };
-                    _actorSystem.SendErrorToClient(metaData, "Unauthorized");
+                    _actorSystemService.SendErrorToClient(metaData, "Unauthorized");
                     return Unit.Task;
                 }
 
                 if (_user.Groups.Count == 0)
                 {
                     var metaData = new MetaData { ConnectionId = query.ConnectionId, Callback = query.Callback };
-                    _actorSystem.SendEmptyPayloadToClient(metaData);
+                    _actorSystemService.SendEmptyPayloadToClient(metaData);
                     return Unit.Task;
                 }
 
@@ -65,7 +65,7 @@ namespace OpenSpark.ApiGateway.Handlers.Queries
                     .AddQuery(new ProjectDetailsQuery { ProjectId = query.ProjectId }, RemoteSystem.Projects)
                     .Build();
 
-                _actorSystem.SendMultiQuery(context);
+                _actorSystemService.SendMultiQuery(context);
 
                 return Unit.Task;
             }

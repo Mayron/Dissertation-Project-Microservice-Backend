@@ -7,21 +7,22 @@ using System.Collections.Generic;
 
 namespace OpenSpark.ApiGateway.Actors.PayloadAggregators
 {
-    public abstract class BaseMultiPayloadAggregatorActor : ReceiveActor
+    public abstract class BaseMultiQueryAggregatorActor : ReceiveActor
     {
         private readonly MultiQueryContext _context;
 
-        protected BaseMultiPayloadAggregatorActor(MultiQueryContext context, IActorRef callback)
+        protected BaseMultiQueryAggregatorActor(MultiQueryContext context, IActorRef callback)
         {
             _context = context;
 
-            // SetReceiveTimeout(TimeSpan.FromSeconds(query.TimeOutInSeconds * 2));
+            SetReceiveTimeout(TimeSpan.FromSeconds(context.TimeoutInSeconds));
 
             Receive<MultiPayloadEvent>(@event =>
             {
                 if (@event.MultiQueryId != _context.Id)
                     throw new Exception($"Invalid multi query Id. Expected {_context.Id} but got {@event.MultiQueryId}");
 
+                // Call the abstract template method
                 var payload = AggregatePayload(@event.Payloads);
                 callback.Tell(payload);
 

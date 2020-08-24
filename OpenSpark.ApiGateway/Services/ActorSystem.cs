@@ -11,7 +11,7 @@ using System.IO;
 
 namespace OpenSpark.ApiGateway.Services
 {
-    public interface IActorSystem
+    public interface IActorSystemService
     {
         void ExecuteCommand(CommandContext context, IActorRef sender = null);
 
@@ -39,19 +39,19 @@ namespace OpenSpark.ApiGateway.Services
         void PublishDisconnection(string queryConnectionId);
     }
 
-    public class ActorSystem : IActorSystem
+    public class ActorSystemService : IActorSystemService
     {
         private readonly IActorRef _callbackHandler;
         private readonly string _discussionsRemotePath;
         private readonly string _teamsRemotePath;
         private readonly IEventEmitter _eventEmitter;
         private readonly string _groupsRemotePath;
-        private readonly Akka.Actor.ActorSystem _localSystem;
+        private readonly ActorSystem _localSystem;
         private readonly IActorRef _multiQueryManager;
         private readonly string _projectsRemotePath;
         private readonly IActorRef _sagaManager;
 
-        public ActorSystem(
+        public ActorSystemService(
             IConfiguration configuration,
             IEventEmitter eventEmitter,
             IFirestoreService firestoreService)
@@ -60,7 +60,7 @@ namespace OpenSpark.ApiGateway.Services
             var configString = File.ReadAllText("webapi-system.conf");
             var config = ConfigurationFactory.ParseString(configString);
 
-            _localSystem = Akka.Actor.ActorSystem.Create("WebApiSystem", config);
+            _localSystem = ActorSystem.Create("WebApiSystem", config);
             _eventEmitter = eventEmitter;
 
             // Create local actors for the system

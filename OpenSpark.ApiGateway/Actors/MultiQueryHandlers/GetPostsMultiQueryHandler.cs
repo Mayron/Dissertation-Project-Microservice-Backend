@@ -19,7 +19,7 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
         public GetPostsMultiQueryHandler(
             MultiQueryContext context,
             IActorRef aggregator,
-            IActorSystem actorSystem,
+            IActorSystemService actorSystem,
             IFirestoreService firestoreService) : base(context, aggregator, actorSystem)
         {
             _firestoreService = firestoreService;
@@ -81,7 +81,7 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
 
             // Execute group name queries
             foreach (var queryContext in nextQueries)
-                ActorSystem.SendQuery(queryContext, Self);
+                ActorSystemService.SendQuery(queryContext, Self);
 
             // Wait for payload events
             var pending = GetPendingQueries(nextQueries);

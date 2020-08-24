@@ -44,7 +44,7 @@ namespace OpenSpark.ApiGateway.Services
         {
             try
             {
-                var (_, snapShot) = await GetUserReference(authId, cancellationToken);
+                var (_, snapShot) = await GetUserReferenceAsync(authId, cancellationToken);
 
                 if (snapShot != null && snapShot.Exists)
                 {
@@ -96,7 +96,7 @@ namespace OpenSpark.ApiGateway.Services
         {
             try
             {
-                var (userRef, snapShot) = await GetUserReference(user.AuthUserId, cancellationToken);
+                var (userRef, snapShot) = await GetUserReferenceAsync(user.AuthUserId, cancellationToken);
 
                 if (snapShot != null && snapShot.Exists)
                 {
@@ -115,7 +115,7 @@ namespace OpenSpark.ApiGateway.Services
             return false;
         }
 
-        private static async Task<(DocumentReference userRef, DocumentSnapshot snapShot)> GetUserReference(
+        private static async Task<(DocumentReference userRef, DocumentSnapshot snapShot)> GetUserReferenceAsync(
             string authId, CancellationToken cancellationToken)
         {
             try

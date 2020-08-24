@@ -14,7 +14,7 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
 {
     public class MultiQueryParallelHandler : FSM<string, MultiQueryStateData>
     {
-        protected IActorSystem ActorSystem { get; }
+        protected IActorSystemService ActorSystemService { get; }
         protected Guid MultiQueryId { get; }
         protected User User { get; }
 
@@ -40,7 +40,7 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
         public MultiQueryParallelHandler(
             MultiQueryContext context, 
             IActorRef aggregator, 
-            IActorSystem actorSystem)
+            IActorSystemService actorSystem)
         {
             MultiQueryId = context.Id;
             User = context.User;
@@ -52,7 +52,7 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
 
             _preStartQueries = context.Queries.ToImmutableList();
             _aggregator = aggregator;
-            ActorSystem = actorSystem;
+            ActorSystemService = actorSystem;
 
             var pending = GetPendingQueries(context.Queries);
 
@@ -103,7 +103,7 @@ namespace OpenSpark.ApiGateway.Actors.MultiQueryHandlers
         protected override void PreStart()
         {
             foreach (var queryContext in _preStartQueries)
-                ActorSystem.SendQuery(queryContext, Self);
+                ActorSystemService.SendQuery(queryContext, Self);
 
             base.PreStart();
         }

@@ -26,12 +26,12 @@ namespace OpenSpark.ApiGateway.Handlers.Queries.Teams
 
         public class Handler : IRequestHandler<Query, Unit>
         {
-            private readonly IActorSystem _actorSystem;
+            private readonly IActorSystemService _actorSystemService;
             private readonly IMessageContextBuilderFactory _builderFactory;
 
-            public Handler(IActorSystem actorSystem, IMessageContextBuilderFactory builder)
+            public Handler(IActorSystemService actorSystem, IMessageContextBuilderFactory builder)
             {
-                _actorSystem = actorSystem;
+                _actorSystemService = actorSystem;
                 _builderFactory = builder;
             }
 
@@ -42,7 +42,7 @@ namespace OpenSpark.ApiGateway.Handlers.Queries.Teams
                     .ForRemoteSystem(RemoteSystem.Teams)
                     .Build();
 
-                _actorSystem.SendQuery(context);
+                _actorSystemService.SendQuery(context);
 
                 return Unit.Task;
             }
