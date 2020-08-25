@@ -24,12 +24,17 @@ namespace OpenSpark.Shared.RavenDb
             }
         }
 
+        /// <summary>
+        /// Must be a unique name that cannot be taken by another entity. "Admins" Team as a name is not unique
+        /// to the application because all projects come with an Admins team!
+        /// </summary>
         public static string GenerateRavenIdFromName<T>(this IDocumentSession session, string name) where T : INamedEntity
         {
             var slugHelper = new SlugHelper();
 
             while (true)
             {
+                // TODO: teams/admin is always taken!
                 var slug = slugHelper.GenerateSlug(name);
                 var newId = $"{typeof(T).Name.ToLower()}/{slug}";
                 var existingEntity = session.Load<T>(newId);

@@ -13,8 +13,8 @@ namespace OpenSpark.Teams.Actors
     internal class TeamCommandActor : ReceiveActor
     {
         public static Props Props { get; } = Props.Create<TeamCommandActor>()
-            .WithRouter(new RoundRobinPool(2,
-                new DefaultResizer(1, 5)));
+            .WithRouter(new RoundRobinPool(1,
+                new DefaultResizer(1, 10)));
 
         public TeamCommandActor()
         {
@@ -25,7 +25,7 @@ namespace OpenSpark.Teams.Actors
 
                 var team = new Team
                 {
-                    Id = session.GenerateRavenIdFromName<Team>(command.TeamName),
+                    Id = session.GenerateRavenId<Team>(),
                     Name = command.TeamName,
                     ProjectId = command.ProjectId,
                     Permissions = TeamPermissionsHelper.GetDefaultNewTeamPermissions(),
@@ -57,7 +57,7 @@ namespace OpenSpark.Teams.Actors
 
                 var adminsTeam = new Team
                 {
-                    Id = session.GenerateRavenIdFromName<Team>("Admins"),
+                    Id = session.GenerateRavenId<Team>(),
                     Name = "Admins",
                     ProjectId = command.ProjectId,
                     Permissions = TeamPermissionsHelper.GetDefaultAdminPermissions(),
@@ -68,7 +68,7 @@ namespace OpenSpark.Teams.Actors
 
                 var moderatorsTeam = new Team
                 {
-                    Id = session.GenerateRavenIdFromName<Team>("Moderators"),
+                    Id = session.GenerateRavenId<Team>(),
                     Name = "Moderators",
                     ProjectId = command.ProjectId,
                     Permissions = TeamPermissionsHelper.GetDefaultModeratorPermissions(),

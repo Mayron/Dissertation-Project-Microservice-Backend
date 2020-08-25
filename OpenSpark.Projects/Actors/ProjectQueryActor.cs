@@ -86,14 +86,16 @@ namespace OpenSpark.Projects.Actors
                 throw new ActorKilledException("Invalid query request");
             }
 
-            Sender.Tell(new PayloadEvent(query)
+            var @event = new PayloadEvent(query)
             {
                 Payload = projects.Select(p => new UserGroupsViewModel
                 {
                     Name = p.Name,
                     Id = p.Id.ConvertToClientId()
                 }).ToList()
-            });
+            };
+
+            Sender.Tell(@event);
         }
 
         // Used when the user lands on a Projects page

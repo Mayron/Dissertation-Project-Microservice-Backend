@@ -1,4 +1,5 @@
-﻿using Akka.Actor;
+﻿using System;
+using Akka.Actor;
 using OpenSpark.Shared.Commands;
 using OpenSpark.Shared.Queries;
 
@@ -13,7 +14,13 @@ namespace OpenSpark.Teams.Actors
 
             // Pools
             Receive<IQuery>(command => queryPool.Forward(command));
-            Receive<ICommand>(command => commandPool.Forward(command));
+//            Receive<ICommand>(command => commandPool.Forward(command));
+
+            Receive<ICommand>(command =>
+            {
+                Console.WriteLine("triggered");
+                commandPool.Forward(command);
+            });
         }
     }
 }
