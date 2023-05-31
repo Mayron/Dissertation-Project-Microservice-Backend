@@ -1,4 +1,4 @@
-# Dissertation Project Microservice/Akka.Net Actor System (Backend)
+# Dissertation Project: Microservice/Akka.Net Actor System (Backend)
 
 For the React-based frontend code, please refer to the other GitHub repository:
 https://github.com/Mayron/Dissertation-Project-React-Frontend/blob/master/README.md
